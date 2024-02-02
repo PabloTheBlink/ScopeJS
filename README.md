@@ -2,43 +2,74 @@
 
 Libreria sencilla para crear componentes reactivos en JavaScript vanilla.
 
-## ScopeJS
+## Componentes
 
-### `createComponent(Function function)`
+### `Component({ tagName, controller, render })``
 
-Este método permite crear componentes utilizando una función como controlador.
-A continuación, se muestra un ejemplo de uso:
+Crea un componente con capacidades de renderizado y control.
+
+Parámetros:
+
+- tagName (opcional): Nombre de la etiqueta HTML asociada al componente.
+- controller (opcional): Controlador del componente.
+- render: Función de renderizado del componente.
+
+Retorna: Instancia del componente con métodos de renderizado y control.
+
+Ejemplo de Uso:
 
 ```javascript
-ScopeJS.createComponent(function AppController({ render }) {
-  render(function () {
-    return "<h1>Hola</h1>";
-  });
+import { Component } from "https://cdn.devetty.es/ScopeJS/js";
+
+Component({
+  tagName: "counter",
+  controller: function () {
+    this.counter = 0;
+    setInterval(() => {
+      this.counter++;
+      this.apply();
+    }, 1000);
+  },
+  render: function () {
+    return `${this.counter}`;
+  },
+});
+
+Component({
+  render: () => `<counter></counter>`,
+}).render();
+```
+
+## Modales
+
+### `Modal({ controller, render, hideWhenClickOverlay }, params = {})`
+
+`
+Crea y muestra un modal en la interfaz de usuario.
+
+Parámetros:
+
+- controller: Controlador del modal.
+- render: Función de renderizado del modal.
+- hideWhenClickOverlay (opcional): Indica si el modal debe cerrarse al hacer clic en el fondo.
+- params (opcional): Parámetros adicionales para pasar a la función de renderizado del modal.
+
+Ejemplo de Uso:
+
+```javascript
+import { Modal } from "https://cdn.devetty.es/ScopeJS/js";
+
+Modal({
+  controller: function () {
+    this.counter = 0;
+    setInterval(() => {
+      this.counter++;
+      this.apply();
+      if (this.counter == 5) this.close();
+    }, 1000);
+  },
+  render: function () {
+    return `${this.counter}`;
+  },
 });
 ```
-
-### `$scope`
-
-La variable $scope es un objeto que actúa como un contenedor para el estado del componente. Permite almacenar y acceder a datos específicos del componente, facilitando así la manipulación y actualización del DOM de manera reactiva.
-
-```javascript
-ScopeJS.createComponent(function AppController({ render, $scope }) {
-  $scope.contador = 0;
-  setInterval(function () {
-    $scope.contador++;
-  });
-  render(function () {
-    return `<h1>${$scope.contador}</h1>`;
-  });
-});
-```
-
-### `render(String html, HTMLElement root = document.body)`
-
-Este método facilita la renderización de componentes en el DOM. Aquí hay un ejemplo de uso:
-
-```javascript
-ScopeJS.render(`<AppController></AppController>`);
-```
-
-¡Disfruta utilizando ScopeJS para desarrollar componentes reactivos de manera sencilla!
