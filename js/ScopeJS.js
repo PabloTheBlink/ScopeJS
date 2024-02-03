@@ -98,7 +98,7 @@ export function Modal({ controller, render, hideWhenClickOverlay }, params = {})
   modal.setAttribute("style", MODAL_STYLE.MODAL);
   modal.style.opacity = 0;
   modal.style.transform = "translate(-50%, 65%)";
-  modal.classList.add("scopejs-modal");
+  modal.classList.add("modal");
 
   // Función para cerrar el modal.
   const close = function () {
@@ -125,7 +125,7 @@ export function Modal({ controller, render, hideWhenClickOverlay }, params = {})
   // Crear el overlay y añadirlo al cuerpo del documento.
   const overlay = document.createElement("div");
   overlay.setAttribute("style", MODAL_STYLE.OVERLAY);
-  overlay.classList.add("scopejs-overlay");
+  overlay.classList.add("overlay");
   document.body.appendChild(overlay);
 
   // Añadir el modal al cuerpo del documento.
@@ -141,4 +141,99 @@ export function Modal({ controller, render, hideWhenClickOverlay }, params = {})
   if (hideWhenClickOverlay) {
     overlay.onclick = close;
   }
+}
+
+/**
+ * Router - Maneja la navegación y renderizado de rutas en una aplicación web.
+ * @param {Array} routes - Arreglo de objetos de ruta con propiedades 'path' y 'controller'.
+ * @returns {Object} - Instancia del enrutador con métodos para navegación y renderizado.
+ */
+export function Router(routes = []) {
+  /**
+   * matchDynamicRoute - Compara una ruta dinámica con una ruta dada y extrae parámetros si hay coincidencia.
+   * @param {string} routePattern - Patrón de la ruta dinámica.
+   * @param {string} path - Ruta a comparar.
+   * @returns {Object|null} - Objeto con parámetros si hay coincidencia, o null si no hay coincidencia.
+   */
+  const matchDynamicRoute = function (routePattern, path) {
+    const patternSegments = routePattern.split("/");
+    const pathSegments = path.split("/");
+    if (patternSegments.length !== pathSegments.length) return null;
+    let params = {};
+    for (let i = 0; i < patternSegments.length; i++) {
+      const pattern = patternSegments[i];
+      const value = pathSegments[i];
+      if (pattern.startsWith(":")) {
+        const paramName = pattern.slice(1);
+        params[paramName] = value;
+      } else if (pattern !== value) {
+        return null;
+      }
+    }
+    return { params };
+  };
+  return new (function Router() {
+    this.params = undefined;
+    this.path = undefined;
+
+    /**
+     * navigate - Navega a la ruta especificada actualizando la ubicación hash.
+     * @param {string} path - Ruta a la que se desea navegar.
+     */
+    this.navigate = (path) => (location.hash = `#${path}`);
+
+    /**
+     * render - Renderiza el controlador de la ruta actual en el contenedor proporcionado.
+     * @param {HTMLElement} container - Contenedor donde se renderizará el controlador.
+     * @param {boolean} first_time - Indica si es la primera vez que se renderiza.
+     */
+    this.render = function (container = document.body, first_time = true) {
+      if (!location.hash) location.hash = "#/";
+      this.path = location.hash.replace("#", "");
+      let route = routes.find((r) => r.path === this.path);
+      this.params = {};
+      if (!route) {
+        for (let r of routes) {
+          const match = matchDynamicRoute(r.path, this.path);
+          if (match) {
+            this.params = match.params;
+            route = r;
+            break;
+          }
+        }
+      }
+      if (route) {
+        const state = document.createElement("div");
+        state.classList.add("state");
+        state.style.transition = "0.1s";
+        if (container.querySelectorAll(".state").length > 0) state.style.display = "none";
+
+        Component(route.controller).render(container);
+
+        setTimeout(function () {
+          const states = container.querySelectorAll(".state");
+          if (states.length > 1) {
+            states.forEach(function (element, index) {
+              if (index < states.length - 1) {
+                element.style.opacity = "0";
+                setTimeout(function () {
+                  element.remove();
+                }, 100);
+              } else {
+                setTimeout(function () {
+                  element.style.display = "";
+                  window.dispatchEvent(new Event("route-changed"));
+                }, 100);
+              }
+            });
+          } else {
+            window.dispatchEvent(new Event("route-changed"));
+          }
+        }, 100);
+      }
+      if (first_time) {
+        window.onhashchange = () => this.render(container, false);
+      }
+    };
+  })();
 }
