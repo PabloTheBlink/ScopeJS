@@ -16,7 +16,7 @@ export function Component({ tagName, controller, render }) {
      * @param {HTMLElement} container - Contenedor donde se renderizará el componente.
      * @returns {Object} - Instancia del componente con métodos de renderizado y control.
      */
-    this.render = function (container = document.body) {
+    this.render = function (container = document.createElement("div")) {
       // Función interna para aplicar el renderizado.
       const apply = function () {
         // Renderizar el contenido en el contenedor.
@@ -50,6 +50,8 @@ export function Component({ tagName, controller, render }) {
             components[element.tagName.toUpperCase()].render(element);
           }
         });
+
+        return container.innerHTML;
       };
 
       // Crear una instancia del controlador, si se proporciona.
@@ -187,7 +189,7 @@ export function Router(routes = []) {
      * @param {HTMLElement} container - Contenedor donde se renderizará el controlador.
      * @param {boolean} first_time - Indica si es la primera vez que se renderiza.
      */
-    this.render = function (container = document.body, first_time = true) {
+    this.render = function (container = document.createElement("div"), first_time = true) {
       if (!location.hash) location.hash = "#/";
       this.path = location.hash.replace("#", "");
       let route = routes.find((r) => r.path === this.path);
