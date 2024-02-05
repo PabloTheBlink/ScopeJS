@@ -1,6 +1,7 @@
 // Diccionario de componentes
 const components = {};
 /**
+ * TEST PARA VER LOS PULL REQUEST
  * Crea un componente con capacidad de renderizado y control.
  * @param {Object} options - Opciones para configurar el componente.
  * @param {string} options.tagName - Nombre de la etiqueta HTML asociada al componente.
