@@ -9,6 +9,46 @@ const components = {};
  * @returns {Object} - Instancia del componente con métodos de renderizado y control.
  */
 export function Component({ tagName, controller, render }) {
+  /**
+   * Obtiene los hijos de un nodo sin incluir nodos de texto.
+   * @param {Node} node - El nodo del que se desean obtener los hijos.
+   * @returns {Array<Node>} - Un array de nodos hijos que no son nodos de texto.
+   */
+  function getChildrenWithoutTextNodes(node) {
+    const children = [];
+    for (let i = 0; i < node.childNodes.length; i++) {
+      const child = node.childNodes[i];
+      if (child.nodeType !== Node.TEXT_NODE) {
+        children.push(child);
+      }
+    }
+    return children;
+  }
+
+  /**
+   * Actualiza el contenido de un contenedor con el contenido de otro, manteniendo la estructura de los elementos.
+   * @param {Node} originalNode - El nodo original que se actualizará.
+   * @param {Node} cloneNode - El nodo clonado que se utilizará para la actualización.
+   */
+  function updateContainer(originalNode, cloneNode) {
+    if (originalNode.isEqualNode(cloneNode)) return;
+    if (getChildrenWithoutTextNodes(cloneNode).length != getChildrenWithoutTextNodes(originalNode).length) {
+      if (!!originalNode.parentElement && !!cloneNode.parentElement) {
+        originalNode.parentElement.innerHTML = cloneNode.parentElement.innerHTML;
+      } else {
+        originalNode.innerHTML = cloneNode.innerHTML;
+      }
+      return;
+    }
+    if (getChildrenWithoutTextNodes(cloneNode).length == 0) {
+      originalNode.parentElement.innerHTML = cloneNode.parentElement.innerHTML;
+      return;
+    }
+    for (let i = 0; i < getChildrenWithoutTextNodes(cloneNode).length; i++) {
+      updateContainer(getChildrenWithoutTextNodes(originalNode)[i], getChildrenWithoutTextNodes(cloneNode)[i]);
+    }
+  }
+
   // Crear una instancia del componente.
   const c = new (function Component() {
     /**
@@ -20,7 +60,15 @@ export function Component({ tagName, controller, render }) {
       // Función interna para aplicar el renderizado.
       const apply = function () {
         // Renderizar el contenido en el contenedor.
-        container.innerHTML = render.bind(c)();
+
+        const clone = container.cloneNode();
+        clone.innerHTML = render.bind(c)();
+
+        if (clone.isEqualNode(container)) return;
+
+        updateContainer(container, clone);
+
+        // container.innerHTML = render.bind(c)();
 
         // Asignar eventos HTML a funciones del controlador.
         for (const htmlEvent of ["onclick", "ondblclick", "onmousedown", "onmousemove", "onmouseout", "onmouseover", "onmouseup", "onkeydown", "onkeypress", "onkeyup", "onabort", "onbeforeunload", "onerror", "onload", "onresize", "onscroll", "onunload", "onblur", "onchange", "onfocus", "onreset", "onselect", "onsubmit", "oncontextmenu", "oninput", "oninvalid", "onsearch", "ondrag", "ondragend", "ondragenter", "ondragleave", "ondragover", "ondragstart", "ondrop", "oncopy", "oncut", "onpaste", "onwheel", "ontouchcancel", "ontouchend", "ontouchmove", "ontouchstart"]) {
