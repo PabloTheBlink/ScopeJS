@@ -74,19 +74,30 @@ export function Component({ tagName, controller, render }) {
         for (const htmlEvent of ["onclick", "ondblclick", "onmousedown", "onmousemove", "onmouseout", "onmouseover", "onmouseup", "onkeydown", "onkeypress", "onkeyup", "onabort", "onbeforeunload", "onerror", "onload", "onresize", "onscroll", "onunload", "onblur", "onchange", "onfocus", "onreset", "onselect", "onsubmit", "oncontextmenu", "oninput", "oninvalid", "onsearch", "ondrag", "ondragend", "ondragenter", "ondragleave", "ondragover", "ondragstart", "ondrop", "oncopy", "oncut", "onpaste", "onwheel", "ontouchcancel", "ontouchend", "ontouchmove", "ontouchstart"]) {
           container.querySelectorAll(`*[${htmlEvent}]`).forEach((el) => {
             const clickEventName = el.getAttribute(htmlEvent);
-            const parts = clickEventName.split(".");
-            let func = c;
-
-            // Obtener la función del controlador según la cadena de eventos.
-            for (const part of parts) {
-              func = func[part];
-            }
+            const function_name = clickEventName.split("(")[0];
+            const func = c[function_name];
 
             // Asignar el evento HTML a la función del controlador.
             if (typeof func === "function") {
               el[htmlEvent] = function (event) {
                 event.preventDefault();
-                setTimeout(func.bind(c), 0, event);
+                let params = { event };
+                if (clickEventName.split("(").length > 0) {
+                  if (clickEventName.split("(")[1]) {
+                    if (clickEventName.split("(")[1].split(")")[0]) {
+                      const p = clickEventName.split("(")[1].split(")")[0].split(",");
+                      params = {};
+                      for (let i = 0; i < p.length; i++) {
+                        if (c[p[i]]) {
+                          params[i] = c[p[i]];
+                        } else {
+                          params[i] = eval(p[i]);
+                        }
+                      }
+                    }
+                  }
+                }
+                setTimeout(() => func.apply(c, Object.values(params)), 0);
               };
             }
           });
