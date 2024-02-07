@@ -8,7 +8,7 @@ const components = {};
  * @param {Function} options.render - Función de renderizado del componente.
  * @returns {Object} - Instancia del componente con métodos de renderizado y control.
  */
-export function Component({ tagName, controller, render }) {
+export function Component({ tagName, controller, render, postRender }) {
   /**
    * Obtiene los hijos de un nodo sin incluir nodos de texto.
    * @param {Node} node - El nodo del que se desean obtener los hijos.
@@ -41,7 +41,11 @@ export function Component({ tagName, controller, render }) {
       return;
     }
     if (getChildrenWithoutTextNodes(cloneNode).length == 0) {
-      originalNode.parentElement.innerHTML = cloneNode.parentElement.innerHTML;
+      if (!!originalNode.parentElement && !!cloneNode.parentElement) {
+        originalNode.parentElement.innerHTML = cloneNode.parentElement.innerHTML;
+      } else {
+        originalNode.innerHTML = cloneNode.innerHTML;
+      }
       return;
     }
     for (let i = 0; i < getChildrenWithoutTextNodes(cloneNode).length; i++) {
@@ -66,9 +70,9 @@ export function Component({ tagName, controller, render }) {
 
         if (clone.isEqualNode(container)) return;
 
-        updateContainer(container, clone);
+        // updateContainer(container, clone);
 
-        // container.innerHTML = render.bind(c)();
+        container.innerHTML = clone.innerHTML; // OJO FIX
 
         // Asignar eventos HTML a funciones del controlador.
         for (const htmlEvent of ["onclick", "ondblclick", "onmousedown", "onmousemove", "onmouseout", "onmouseover", "onmouseup", "onkeydown", "onkeypress", "onkeyup", "onabort", "onbeforeunload", "onerror", "onload", "onresize", "onscroll", "onunload", "onblur", "onchange", "onfocus", "onreset", "onselect", "onsubmit", "oncontextmenu", "oninput", "oninvalid", "onsearch", "ondrag", "ondragend", "ondragenter", "ondragleave", "ondragover", "ondragstart", "ondrop", "oncopy", "oncut", "onpaste", "onwheel", "ontouchcancel", "ontouchend", "ontouchmove", "ontouchstart"]) {
@@ -110,6 +114,8 @@ export function Component({ tagName, controller, render }) {
           }
         });
 
+        if (postRender) setTimeout(postRender, 0);
+
         return container.innerHTML;
       };
 
@@ -147,8 +153,8 @@ export function Component({ tagName, controller, render }) {
 export function Modal({ controller, render, hideWhenClickOverlay }, params = {}) {
   // Estilos predefinidos para el overlay y el modal.
   const MODAL_STYLE = {
-    OVERLAY: "position: fixed; top: 0; left: 0; width: 100%; height: 100%",
-    MODAL: "position: fixed; top: 50%; left: 50%; border-radius: 0.25rem; min-width: 20rem; max-width: calc(100% - 2rem); transform: translate(-50%, -50%); background-color: white; color: black; transition: opacity 0.3s, transform 0.3s",
+    OVERLAY: "position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 999999999",
+    MODAL: "position: fixed; top: 50%; left: 50%; border-radius: 0.25rem; min-width: 20rem; max-width: calc(100% - 2rem); transform: translate(-50%, -50%); background-color: white; color: black; transition: opacity 0.3s, transform 0.3s; z-index: 999999999",
   };
 
   // Crear una instancia del componente modal.
@@ -235,13 +241,17 @@ export function Router(routes = []) {
   };
   return new (function Router() {
     this.params = undefined;
+    this.alias = undefined;
     this.path = undefined;
+    this.listeners = [];
 
     /**
      * navigate - Navega a la ruta especificada actualizando la ubicación hash.
      * @param {string} path - Ruta a la que se desea navegar.
      */
     this.navigate = (path) => (location.hash = `#${path}`);
+
+    this.listen = (callback) => this.listeners.push(callback);
 
     /**
      * render - Renderiza el controlador de la ruta actual en el contenedor proporcionado.
@@ -271,24 +281,26 @@ export function Router(routes = []) {
 
         Component(route.controller).render(container);
 
-        setTimeout(function () {
+        setTimeout(() => {
           const states = container.querySelectorAll(".state");
           if (states.length > 1) {
-            states.forEach(function (element, index) {
+            states.forEach((element, index) => {
               if (index < states.length - 1) {
                 element.style.opacity = "0";
-                setTimeout(function () {
+                setTimeout(() => {
                   element.remove();
                 }, 100);
               } else {
-                setTimeout(function () {
+                setTimeout(() => {
                   element.style.display = "";
-                  window.dispatchEvent(new Event("route-changed"));
+                  this.alias = route.alias;
+                  for (let listener of this.listeners) listener(this.params);
                 }, 100);
               }
             });
           } else {
-            window.dispatchEvent(new Event("route-changed"));
+            this.alias = route.alias;
+            for (let listener of this.listeners) listener(this.params);
           }
         }, 100);
       }

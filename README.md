@@ -95,10 +95,12 @@ const router = Router([
   {
     path: "/",
     controller: AppController,
+    alias: "home"
   },
   {
     path: "/:id",
     controller: AppController,
+    alias: "item"
   },
 ]);
 
@@ -108,8 +110,16 @@ router.render(document.body);
 // Acceder a los parámetros de la ruta actual
 const id = router.params.id;
 
+// Acceder al alias actual
+const alias = router.alias; 
+
 // Navegar a una ruta específica
 router.navigate("/1");
+
+// Escuchar
+router.listen((params) => {
+  // cada vez que cambia la ruta
+});
 ```
 
 Este módulo permite gestionar la navegación en una aplicación web mediante la definición de rutas y sus correspondientes controladores. Al crear una instancia de `Router` y proporcionar un arreglo de rutas, puedes controlar la navegación entre diferentes vistas de manera sencilla. Además, el método `render` se encarga de renderizar el controlador asociado a la ruta actual en el contenedor especificado.
