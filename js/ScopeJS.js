@@ -274,35 +274,9 @@ export function Router(routes = []) {
         }
       }
       if (route) {
-        const state = document.createElement("div");
-        state.classList.add("state");
-        state.style.transition = "0.1s";
-        if (container.querySelectorAll(".state").length > 0) state.style.display = "none";
-
+        this.alias = route.alias;
         Component(route.controller).render(container);
-
-        setTimeout(() => {
-          const states = container.querySelectorAll(".state");
-          if (states.length > 1) {
-            states.forEach((element, index) => {
-              if (index < states.length - 1) {
-                element.style.opacity = "0";
-                setTimeout(() => {
-                  element.remove();
-                }, 100);
-              } else {
-                setTimeout(() => {
-                  element.style.display = "";
-                  this.alias = route.alias;
-                  for (let listener of this.listeners) listener(this.params);
-                }, 100);
-              }
-            });
-          } else {
-            this.alias = route.alias;
-            for (let listener of this.listeners) listener(this.params);
-          }
-        }, 100);
+        for (let listener of this.listeners) listener(this.params);
       }
       if (first_time) {
         window.onhashchange = () => this.render(container, false);

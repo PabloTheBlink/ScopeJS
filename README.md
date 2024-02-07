@@ -116,7 +116,7 @@ const alias = router.alias;
 // Navegar a una ruta específica
 router.navigate("/1");
 
-// Escuchar
+// Escuchar cambios de ruta, no usar nunca dentro de un controlador de ruta, solo en componentes ajenos
 router.listen((params) => {
   // cada vez que cambia la ruta
 });
