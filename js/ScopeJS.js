@@ -114,7 +114,7 @@ export function Component({ tagName, controller, render, postRender }) {
           }
         });
 
-        if (postRender) setTimeout(postRender, 0);
+        if (postRender) setTimeout(postRender.bind(c), 0);
 
         return container.innerHTML;
       };
@@ -243,7 +243,7 @@ export function Router(routes = []) {
     this.params = undefined;
     this.alias = undefined;
     this.path = undefined;
-    this.listeners = [];
+    this.listeners = {};
 
     /**
      * navigate - Navega a la ruta especificada actualizando la ubicación hash.
@@ -251,7 +251,14 @@ export function Router(routes = []) {
      */
     this.navigate = (path) => (location.hash = `#${path}`);
 
-    this.listen = (callback) => this.listeners.push(callback);
+    this.listen = (callback) => {
+      const uuid = crypto.randomUUID();
+      this.listeners[uuid] = callback;
+    };
+
+    this.unlisten = (uuid) => {
+      delete this.listeners[uuid];
+    };
 
     /**
      * render - Renderiza el controlador de la ruta actual en el contenedor proporcionado.
@@ -274,9 +281,13 @@ export function Router(routes = []) {
         }
       }
       if (route) {
-        this.alias = route.alias;
+        if (route.alias.startsWith(":")) {
+          this.alias = this.params[route.alias.split(":")[1]];
+        } else {
+          this.alias = route.alias;
+        }
         Component(route.controller).render(container);
-        for (let listener of this.listeners) listener(this.params);
+        for (let listener in this.listeners) this.listeners[listener](this.params);
       }
       if (first_time) {
         window.onhashchange = () => this.render(container, false);
