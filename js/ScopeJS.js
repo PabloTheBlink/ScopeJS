@@ -150,7 +150,7 @@ export function Component({ tagName, controller, render, postRender }) {
  * @param {boolean} options.hideWhenClickOverlay - Indica si el modal debe cerrarse al hacer clic en el fondo.
  * @param {Object} params - Parámetros adicionales para pasar a la función de renderizado del modal.
  */
-export function Modal({ controller, render, hideWhenClickOverlay }, params = {}) {
+export function Modal({ controller, render, hideWhenClickOverlay, className }, params = {}, events = {}) {
   // Estilos predefinidos para el overlay y el modal.
   const MODAL_STYLE = {
     OVERLAY: "position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 999999999",
@@ -166,9 +166,11 @@ export function Modal({ controller, render, hideWhenClickOverlay }, params = {})
   modal.style.opacity = 0;
   modal.style.transform = "translate(-50%, 65%)";
   modal.classList.add("modal");
+  if (className) modal.classList.add(className);
 
   // Función para cerrar el modal.
-  const close = function () {
+  const close = function (...attr) {
+    if (events.onClose) events.onClose(...attr);
     modal.style.opacity = 0;
     modal.style.transform = "translate(-50%, 65%)";
     setTimeout(() => {
