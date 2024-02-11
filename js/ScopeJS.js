@@ -243,6 +243,7 @@ export function Router(routes = []) {
     this.params = undefined;
     this.alias = undefined;
     this.path = undefined;
+    this.current_component = undefined;
     this.listeners = {};
 
     /**
@@ -286,7 +287,8 @@ export function Router(routes = []) {
         } else {
           this.alias = route.alias;
         }
-        Component(route.controller).render(container);
+        if (this.current_component && this.current_component.onDestroy) this.current_component.onDestroy();
+        this.current_component = Component(route.controller).render(container);
         for (let listener in this.listeners) this.listeners[listener](this.params);
       }
       if (first_time) {
