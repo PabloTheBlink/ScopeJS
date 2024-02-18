@@ -299,3 +299,51 @@ export function Router(routes = []) {
     };
   })();
 }
+
+(function () {
+  let style = undefined;
+  const setLoading = function (is_loading) {
+    console.log("is_loading", is_loading, style);
+    if (style) {
+      style.remove();
+      style = undefined;
+    }
+    if (is_loading) {
+      style = document.createElement("style");
+      style.innerText = `
+        body::after {
+          content: "";
+          position: fixed;
+          top: 50%;
+          left: 50%;
+          width: 25px;
+          height: 25px;
+          border: 0.25rem solid #f3f3f3;
+          border-top: 4px solid #3498db;
+          border-radius: 50%;
+          animation: spin 1s linear infinite;
+          z-index: 999;
+        }
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `;
+      document.head.appendChild(style);
+    }
+  };
+  setLoading(true);
+  window.addEventListener("load", function () {
+    setLoading(false);
+  });
+  window.fetch = new Proxy(window.fetch, {
+    apply(actualFetch, that, args) {
+      const result = Reflect.apply(actualFetch, that, args);
+      setLoading(true);
+      result.then((response) => {
+        setLoading(false);
+      });
+      return result;
+    },
+  });
+})();
