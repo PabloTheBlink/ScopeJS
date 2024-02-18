@@ -303,7 +303,6 @@ export function Router(routes = []) {
 (function () {
   let style = undefined;
   const setLoading = function (is_loading) {
-    console.log("is_loading", is_loading, style);
     if (style) {
       style.remove();
       style = undefined;
