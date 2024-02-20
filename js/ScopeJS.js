@@ -31,7 +31,13 @@ export function Component({ tagName, controller, render, postRender }) {
    * @param {Node} cloneNode - El nodo clonado que se utilizará para la actualización.
    */
   function updateContainer(originalNode, cloneNode) {
-    if (originalNode.isEqualNode(cloneNode)) return;
+    if (originalNode.isEqualNode(cloneNode)) {
+      return;
+    }
+    if (Array.from(cloneNode.classList).join(" ") != Array.from(originalNode.classList).join(" ") && getChildrenWithoutTextNodes(cloneNode).length == getChildrenWithoutTextNodes(originalNode).length) {
+      originalNode.classList = cloneNode.classList;
+      return;
+    }
     if (getChildrenWithoutTextNodes(cloneNode).length != getChildrenWithoutTextNodes(originalNode).length) {
       if (!!originalNode.parentElement && !!cloneNode.parentElement) {
         originalNode.parentElement.innerHTML = cloneNode.parentElement.innerHTML;
@@ -70,9 +76,9 @@ export function Component({ tagName, controller, render, postRender }) {
 
         if (clone.isEqualNode(container)) return;
 
-        // updateContainer(container, clone);
+        updateContainer(container, clone);
 
-        container.innerHTML = clone.innerHTML; // OJO FIX
+        // container.innerHTML = clone.innerHTML; // OJO FIX
 
         // Asignar eventos HTML a funciones del controlador.
         for (const htmlEvent of ["onclick", "ondblclick", "onmousedown", "onmousemove", "onmouseout", "onmouseover", "onmouseup", "onkeydown", "onkeypress", "onkeyup", "onabort", "onbeforeunload", "onerror", "onload", "onresize", "onscroll", "onunload", "onblur", "onchange", "onfocus", "onreset", "onselect", "onsubmit", "oncontextmenu", "oninput", "oninvalid", "onsearch", "ondrag", "ondragend", "ondragenter", "ondragleave", "ondragover", "ondragstart", "ondrop", "oncopy", "oncut", "onpaste", "onwheel", "ontouchcancel", "ontouchend", "ontouchmove", "ontouchstart"]) {
