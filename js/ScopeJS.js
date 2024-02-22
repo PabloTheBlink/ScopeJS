@@ -80,6 +80,26 @@ export function Component({ tagName, controller, render, postRender }) {
 
         container.innerHTML = clone.innerHTML; // OJO FIX
 
+        // ngModel
+        container.querySelectorAll("*[model]").forEach((el) => {
+          const modelName = el.getAttribute("model");
+          const spl = modelName.split(".");
+          let value = c;
+          for (let item of spl) {
+            value = value[item];
+          }
+          el.value = value;
+
+          // Aquí se asigna el evento input para que actualice la propiedad correspondiente en tiempo real
+          el.addEventListener("input", () => {
+            let currentValue = c;
+            for (let i = 0; i < spl.length - 1; i++) {
+              currentValue = currentValue[spl[i]];
+            }
+            currentValue[spl[spl.length - 1]] = el.value;
+          });
+        });
+
         // Asignar eventos HTML a funciones del controlador.
         for (const htmlEvent of ["onclick", "ondblclick", "onmousedown", "onmousemove", "onmouseout", "onmouseover", "onmouseup", "onkeydown", "onkeypress", "onkeyup", "onabort", "onbeforeunload", "onerror", "onload", "onresize", "onscroll", "onunload", "onblur", "onchange", "onfocus", "onreset", "onselect", "onsubmit", "oncontextmenu", "oninput", "oninvalid", "onsearch", "ondrag", "ondragend", "ondragenter", "ondragleave", "ondragover", "ondragstart", "ondrop", "oncopy", "oncut", "onpaste", "onwheel", "ontouchcancel", "ontouchend", "ontouchmove", "ontouchstart"]) {
           container.querySelectorAll(`*[${htmlEvent}]`).forEach((el) => {
