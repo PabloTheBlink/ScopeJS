@@ -176,7 +176,7 @@ export function Component({ tagName, controller, render, postRender }) {
  * @param {boolean} options.hideWhenClickOverlay - Indica si el modal debe cerrarse al hacer clic en el fondo.
  * @param {Object} params - Parámetros adicionales para pasar a la función de renderizado del modal.
  */
-export function Modal({ controller, render, hideWhenClickOverlay, className }, params = {}, events = {}) {
+export function Modal({ controller, render, hideWhenClickOverlay, className, referrer }, params = {}, events = {}) {
   // Estilos predefinidos para el overlay y el modal.
   const MODAL_STYLE = {
     OVERLAY: "position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 999999999",
@@ -189,20 +189,33 @@ export function Modal({ controller, render, hideWhenClickOverlay, className }, p
   // Crear el elemento modal y aplicar estilos.
   const modal = document.createElement("div");
   modal.setAttribute("style", MODAL_STYLE.MODAL);
-  modal.style.opacity = 0;
-  modal.style.transform = "translate(-50%, 65%)";
+  if (referrer) {
+    const pos = referrer.getBoundingClientRect();
+    modal.style.top = `${pos.top + pos.height + 1}px`;
+    modal.style.left = `${pos.left + pos.width + 1}px`;
+    modal.style.transform = "";
+  } else {
+    modal.style.opacity = 0;
+    modal.style.transform = "translate(-50%, 65%)";
+  }
+
   modal.classList.add("modal");
   if (className) modal.classList.add(className);
 
   // Función para cerrar el modal.
   const close = function (...attr) {
     if (events.onClose) events.onClose(...attr);
-    modal.style.opacity = 0;
-    modal.style.transform = "translate(-50%, 65%)";
-    setTimeout(() => {
+    if (!referrer) {
+      modal.style.opacity = 0;
+      modal.style.transform = "translate(-50%, 65%)";
+      setTimeout(() => {
+        overlay.remove();
+        modal.remove();
+      }, 300);
+    } else {
       overlay.remove();
       modal.remove();
-    }, 300);
+    }
   };
 
   // Renderizar el contenido del modal.
@@ -227,10 +240,12 @@ export function Modal({ controller, render, hideWhenClickOverlay, className }, p
   document.body.appendChild(modal);
 
   // Mostrar gradualmente el modal.
-  setTimeout(() => {
-    modal.style.opacity = 1;
-    modal.style.transform = "translate(-50%, -50%)";
-  }, 50);
+  if (!referrer) {
+    setTimeout(() => {
+      modal.style.opacity = 1;
+      modal.style.transform = "translate(-50%, -50%)";
+    }, 50);
+  }
 
   // Cerrar el modal al hacer clic en el overlay si se especifica.
   if (hideWhenClickOverlay) {
