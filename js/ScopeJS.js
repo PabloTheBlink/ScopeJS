@@ -10,52 +10,52 @@ const components = {};
  */
 export function Component({ tagName, controller, render, postRender }) {
   /**
-   * Obtiene los hijos de un nodo sin incluir nodos de texto.
-   * @param {Node} node - El nodo del que se desean obtener los hijos.
-   * @returns {Array<Node>} - Un array de nodos hijos que no son nodos de texto.
+   * Actualiza los hijos de un contenedor DOM basándose en un clon proporcionado.
+   *
+   * @param {HTMLElement} container El contenedor cuyos hijos se actualizarán.
+   * @param {HTMLElement} clone El clon que contiene la estructura actualizada de los hijos.
    */
-  function getChildrenWithoutTextNodes(node) {
-    const children = [];
-    for (let i = 0; i < node.childNodes.length; i++) {
-      const child = node.childNodes[i];
-      if (child.nodeType !== Node.TEXT_NODE) {
-        children.push(child);
-      }
-    }
-    return children;
-  }
+  function updateDomChildren(container, clone) {
+    const originalChildren = container.childNodes;
+    const updatedChildren = clone.childNodes;
 
-  /**
-   * Actualiza el contenido de un contenedor con el contenido de otro, manteniendo la estructura de los elementos.
-   * @param {Node} originalNode - El nodo original que se actualizará.
-   * @param {Node} cloneNode - El nodo clonado que se utilizará para la actualización.
-   */
-  function updateContainer(originalNode, cloneNode) {
-    if (originalNode.isEqualNode(cloneNode)) {
-      return;
-    }
-    if (Array.from(cloneNode.classList).join(" ") != Array.from(originalNode.classList).join(" ") && getChildrenWithoutTextNodes(cloneNode).length == getChildrenWithoutTextNodes(originalNode).length) {
-      originalNode.classList = cloneNode.classList;
-      return;
-    }
-    if (getChildrenWithoutTextNodes(cloneNode).length != getChildrenWithoutTextNodes(originalNode).length) {
-      if (!!originalNode.parentElement && !!cloneNode.parentElement) {
-        originalNode.parentElement.innerHTML = cloneNode.parentElement.innerHTML;
-      } else {
-        originalNode.innerHTML = cloneNode.innerHTML;
+    const maxLength = Math.max(originalChildren.length, updatedChildren.length);
+
+    for (let i = 0; i < maxLength; i++) {
+      const originalChild = originalChildren[i];
+      const updatedChild = updatedChildren[i];
+
+      if (!originalChild && updatedChild) {
+        const newElement = updatedChild.cloneNode(true);
+        container.appendChild(newElement);
+      } else if (originalChild && !updatedChild) {
+        container.removeChild(originalChild);
+      } else if (originalChild && updatedChild) {
+        if (originalChild.nodeType === Node.TEXT_NODE && updatedChild.nodeType === Node.TEXT_NODE) {
+          if (originalChild.textContent !== updatedChild.textContent) {
+            originalChild.textContent = updatedChild.textContent;
+          }
+        } else {
+          if (originalChild.tagName === updatedChild.tagName) {
+            for (let attr of originalChild.attributes) {
+              if (updatedChild.hasAttribute(attr.name)) continue;
+              originalChild.removeAttribute(attr.name);
+            }
+            for (let attr of updatedChild.attributes) {
+              if (!originalChild.hasAttribute(attr.name)) {
+                originalChild.setAttribute(attr.name, attr.value);
+              } else {
+                if (originalChild.getAttribute(attr.name) != attr.value) {
+                  originalChild.setAttribute(attr.name, attr.value);
+                }
+              }
+            }
+            updateDomChildren(originalChild, updatedChild);
+          } else {
+            container.replaceChild(updatedChild.cloneNode(true), originalChild);
+          }
+        }
       }
-      return;
-    }
-    if (getChildrenWithoutTextNodes(cloneNode).length == 0) {
-      if (!!originalNode.parentElement && !!cloneNode.parentElement) {
-        originalNode.parentElement.innerHTML = cloneNode.parentElement.innerHTML;
-      } else {
-        originalNode.innerHTML = cloneNode.innerHTML;
-      }
-      return;
-    }
-    for (let i = 0; i < getChildrenWithoutTextNodes(cloneNode).length; i++) {
-      updateContainer(getChildrenWithoutTextNodes(originalNode)[i], getChildrenWithoutTextNodes(cloneNode)[i]);
     }
   }
 
@@ -71,14 +71,14 @@ export function Component({ tagName, controller, render, postRender }) {
       const apply = function () {
         // Renderizar el contenido en el contenedor.
 
-        const clone = container.cloneNode();
-        clone.innerHTML = render.bind(c)();
+        if (!container) return;
 
-        if (clone.isEqualNode(container)) return;
+        const clone = container.cloneNode(true);
+        clone.innerHTML = render.bind(c)();
 
         // updateContainer(container, clone);
 
-        container.innerHTML = clone.innerHTML; // OJO FIX
+        updateDomChildren(container, clone);
 
         // ngModel
         container.querySelectorAll("*[model]").forEach((el) => {
@@ -141,7 +141,7 @@ export function Component({ tagName, controller, render, postRender }) {
           }
         });
 
-        if (postRender) setTimeout(postRender.bind(c), 0);
+        if (postRender) setTimeout(postRender.bind(c), 500);
 
         return container.innerHTML;
       };
@@ -149,8 +149,10 @@ export function Component({ tagName, controller, render, postRender }) {
       // Crear una instancia del controlador, si se proporciona.
       const c = controller ? new controller() : new (function () {})();
 
-      for (let name of container.getAttributeNames()) {
-        c[name] = container.getAttribute(name);
+      if (container) {
+        for (let name of container.getAttributeNames()) {
+          c[name] = container.getAttribute(name);
+        }
       }
 
       // Agregar la función de renderizado al controlador.
@@ -311,6 +313,7 @@ export function Router(routes = []) {
      * @param {boolean} first_time - Indica si es la primera vez que se renderiza.
      */
     this.render = function (container = document.createElement("div"), first_time = true) {
+      // container.innerHTML = "";
       if (!location.hash) location.hash = "#/";
       this.path = location.hash.replace("#", "");
       let route = routes.find((r) => r.path === this.path);
