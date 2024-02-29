@@ -124,6 +124,7 @@ export function Component({ tagName, controller, render, postRender }) {
                           params[i] = eval(p[i]);
                         }
                       }
+                      params[p.length] = event;
                     }
                   }
                 }
