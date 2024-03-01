@@ -29,7 +29,16 @@ export function Component({ tagName, controller, render, postRender }) {
         const newElement = updatedChild.cloneNode(true);
         container.appendChild(newElement);
       } else if (originalChild && !updatedChild) {
-        container.removeChild(originalChild);
+        if (!originalChild.style) {
+          originalChild.remove();
+        } else {
+          originalChild.style.transition = "opacity 0.5s ease-in-out"; // Establece la transición de opacidad
+          originalChild.style.opacity = 0; // Reduce gradualmente la opacidad a cero
+
+          setTimeout(() => {
+            originalChild.remove(); // Elimina el elemento después de que la transición haya terminado
+          }, 500);
+        }
       } else if (originalChild && updatedChild) {
         if (originalChild.nodeType === Node.TEXT_NODE && updatedChild.nodeType === Node.TEXT_NODE) {
           if (originalChild.textContent !== updatedChild.textContent) {
@@ -52,7 +61,24 @@ export function Component({ tagName, controller, render, postRender }) {
             }
             updateDomChildren(originalChild, updatedChild);
           } else {
-            container.replaceChild(updatedChild.cloneNode(true), originalChild);
+            // Clona el nodo actualizado
+            const clonedNode = updatedChild.cloneNode(true);
+
+            if (!clonedNode.style) {
+              container.replaceChild(clonedNode, originalChild);
+            } else {
+              // Establece la transición de opacidad en el nuevo nodo clonado
+              clonedNode.style.transition = "opacity 0.5s ease-in-out";
+              clonedNode.style.opacity = 0; // Reduce gradualmente la opacidad a cero
+
+              // Reemplaza el nodo original con el nodo clonado
+              container.replaceChild(clonedNode, originalChild);
+
+              // Espera un breve tiempo antes de restablecer la opacidad a 1
+              setTimeout(() => {
+                clonedNode.style.opacity = 1; // Restablece gradualmente la opacidad a 1
+              }, 50); // Ajusta el tiempo según sea necesario para asegurarte de que la animación funcione correctamente
+            }
           }
         }
       }
@@ -344,7 +370,7 @@ export function Router(routes = []) {
     };
   })();
 }
-
+/*
 (function () {
   let style = undefined;
   const setLoading = function (is_loading) {
@@ -391,3 +417,4 @@ export function Router(routes = []) {
     },
   });
 })();
+*/
