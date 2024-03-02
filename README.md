@@ -91,18 +91,36 @@ Ejemplo de Uso:
 import { Router } from "https://cdn.devetty.es/ScopeJS/js";
 
 // Definir rutas y controladores
-const router = Router([
+const router = Router(
+  [
+    {
+      path: "/",
+      controller: AppController,
+      alias: "home",
+    },
+    {
+      path: "/:id",
+      controller: AppController,
+      alias: "item",
+    },
+  ],
   {
-    path: "/",
-    controller: AppController,
-    alias: "home"
-  },
-  {
-    path: "/:id",
-    controller: AppController,
-    alias: "item"
-  },
-]);
+    useHash: false,
+  }
+);
+
+// Si no usas Hash, debes incluir en el htaccess lo siguiente
+
+/*
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+  RewriteRule ^index\.html$ - [L]
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule . /index.html [L]
+</IfModule>
+*/
 
 // Renderizar la ruta actual en el contenedor proporcionado (en este caso, document.body)
 router.render(document.body);
@@ -111,7 +129,7 @@ router.render(document.body);
 const id = router.params.id;
 
 // Acceder al alias actual
-const alias = router.alias; 
+const alias = router.alias;
 
 // Navegar a una ruta específica
 router.navigate("/1");
