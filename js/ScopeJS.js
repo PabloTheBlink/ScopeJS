@@ -27,7 +27,19 @@ export function Component({ tagName, controller, render, postRender }) {
 
       if (!originalChild && updatedChild) {
         const newElement = updatedChild.cloneNode(true);
+
+        if (newElement.style) {
+          newElement.style.opacity = 0; // Reduce gradualmente la opacidad a cero
+        }
+
         container.appendChild(newElement);
+
+        if (newElement.style) {
+          setTimeout(() => {
+            newElement.style.transition = "opacity 0.5s ease-in-out"; // Establece la transición de opacidad
+            newElement.style.opacity = 1; // Reduce gradualmente la opacidad a cero
+          }, 100);
+        }
       } else if (originalChild && !updatedChild) {
         if (!originalChild.style) {
           originalChild.remove();
@@ -37,7 +49,7 @@ export function Component({ tagName, controller, render, postRender }) {
 
           setTimeout(() => {
             originalChild.remove(); // Elimina el elemento después de que la transición haya terminado
-          }, 500);
+          }, 100);
         }
       } else if (originalChild && updatedChild) {
         if (originalChild.nodeType === Node.TEXT_NODE && updatedChild.nodeType === Node.TEXT_NODE) {
@@ -77,7 +89,7 @@ export function Component({ tagName, controller, render, postRender }) {
               // Espera un breve tiempo antes de restablecer la opacidad a 1
               setTimeout(() => {
                 clonedNode.style.opacity = 1; // Restablece gradualmente la opacidad a 1
-              }, 50); // Ajusta el tiempo según sea necesario para asegurarte de que la animación funcione correctamente
+              }, 100); // Ajusta el tiempo según sea necesario para asegurarte de que la animación funcione correctamente
             }
           }
         }
@@ -163,11 +175,11 @@ export function Component({ tagName, controller, render, postRender }) {
         // Renderizar subcomponentes dentro del contenedor.
         container.querySelectorAll("*").forEach((element) => {
           if (components[element.tagName.toUpperCase()]) {
-            components[element.tagName.toUpperCase()].render(element);
+            c.children.push(components[element.tagName.toUpperCase()].render(element));
           }
         });
 
-        if (postRender) setTimeout(postRender.bind(c), 500);
+        if (postRender) setTimeout(postRender.bind(c), 100);
 
         return container.innerHTML;
       };
@@ -180,6 +192,8 @@ export function Component({ tagName, controller, render, postRender }) {
           c[name] = container.getAttribute(name);
         }
       }
+
+      c.children = [];
 
       // Agregar la función de renderizado al controlador.
       c.apply = apply;
@@ -287,7 +301,8 @@ export function Modal({ controller, render, hideWhenClickOverlay, className, ref
  * @param {Array} routes - Arreglo de objetos de ruta con propiedades 'path' y 'controller'.
  * @returns {Object} - Instancia del enrutador con métodos para navegación y renderizado.
  */
-export function Router(routes = []) {
+export function Router(routes = [], params = {}) {
+  if (params.useHash == undefined) params.useHash = true;
   /**
    * matchDynamicRoute - Compara una ruta dinámica con una ruta dada y extrae parámetros si hay coincidencia.
    * @param {string} routePattern - Patrón de la ruta dinámica.
@@ -311,6 +326,12 @@ export function Router(routes = []) {
     }
     return { params };
   };
+  const destroyRecursive = function (controller) {
+    if (controller.onDestroy) controller.onDestroy();
+    for (let child of controller.children) {
+      destroyRecursive(child);
+    }
+  };
   return new (function Router() {
     this.params = undefined;
     this.alias = undefined;
@@ -322,7 +343,14 @@ export function Router(routes = []) {
      * navigate - Navega a la ruta especificada actualizando la ubicación hash.
      * @param {string} path - Ruta a la que se desea navegar.
      */
-    this.navigate = (path) => (location.hash = `#${path}`);
+    this.navigate = (path) => {
+      if (params.useHash) {
+        location.hash = `#${path}`;
+      } else {
+        history.pushState({ urlPath: `${path}` }, "", `${path}`);
+      }
+      this.render();
+    };
 
     this.listen = (callback) => {
       const uuid = crypto.randomUUID();
@@ -338,10 +366,15 @@ export function Router(routes = []) {
      * @param {HTMLElement} container - Contenedor donde se renderizará el controlador.
      * @param {boolean} first_time - Indica si es la primera vez que se renderiza.
      */
-    this.render = function (container = document.createElement("div"), first_time = true) {
-      // container.innerHTML = "";
-      if (!location.hash) location.hash = "#/";
-      this.path = location.hash.replace("#", "");
+    this.render = function (container = null) {
+      if (container) this.container = container;
+      if (!this.container) return;
+      if (params.useHash) {
+        if (!location.hash) location.hash = "#/";
+        this.path = location.hash.replace("#", "");
+      } else {
+        this.path = location.pathname;
+      }
       let route = routes.find((r) => r.path === this.path);
       this.params = {};
       if (!route) {
@@ -360,12 +393,9 @@ export function Router(routes = []) {
         } else {
           this.alias = route.alias;
         }
-        if (this.current_component && this.current_component.onDestroy) this.current_component.onDestroy();
-        this.current_component = Component(route.controller).render(container);
+        if (this.current_component) destroyRecursive(this.current_component);
+        this.current_component = Component(route.controller).render(this.container);
         for (let listener in this.listeners) this.listeners[listener](this.params);
-      }
-      if (first_time) {
-        window.onhashchange = () => this.render(container, false);
       }
     };
   })();
