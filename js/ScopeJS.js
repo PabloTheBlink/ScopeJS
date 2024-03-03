@@ -27,30 +27,9 @@ export function Component({ tagName, controller, render, postRender }) {
 
       if (!originalChild && updatedChild) {
         const newElement = updatedChild.cloneNode(true);
-
-        if (newElement.style) {
-          newElement.style.opacity = 0; // Reduce gradualmente la opacidad a cero
-        }
-
         container.appendChild(newElement);
-
-        if (newElement.style) {
-          setTimeout(() => {
-            newElement.style.transition = "opacity 0.5s ease-in-out"; // Establece la transición de opacidad
-            newElement.style.opacity = 1; // Reduce gradualmente la opacidad a cero
-          }, 100);
-        }
       } else if (originalChild && !updatedChild) {
-        if (!originalChild.style) {
-          originalChild.remove();
-        } else {
-          originalChild.style.transition = "opacity 0.5s ease-in-out"; // Establece la transición de opacidad
-          originalChild.style.opacity = 0; // Reduce gradualmente la opacidad a cero
-
-          setTimeout(() => {
-            originalChild.remove(); // Elimina el elemento después de que la transición haya terminado
-          }, 100);
-        }
+        originalChild.remove();
       } else if (originalChild && updatedChild) {
         if (originalChild.nodeType === Node.TEXT_NODE && updatedChild.nodeType === Node.TEXT_NODE) {
           if (originalChild.textContent !== updatedChild.textContent) {
@@ -75,22 +54,7 @@ export function Component({ tagName, controller, render, postRender }) {
           } else {
             // Clona el nodo actualizado
             const clonedNode = updatedChild.cloneNode(true);
-
-            if (!clonedNode.style) {
-              container.replaceChild(clonedNode, originalChild);
-            } else {
-              // Establece la transición de opacidad en el nuevo nodo clonado
-              clonedNode.style.transition = "opacity 0.5s ease-in-out";
-              clonedNode.style.opacity = 0; // Reduce gradualmente la opacidad a cero
-
-              // Reemplaza el nodo original con el nodo clonado
-              container.replaceChild(clonedNode, originalChild);
-
-              // Espera un breve tiempo antes de restablecer la opacidad a 1
-              setTimeout(() => {
-                clonedNode.style.opacity = 1; // Restablece gradualmente la opacidad a 1
-              }, 100); // Ajusta el tiempo según sea necesario para asegurarte de que la animación funcione correctamente
-            }
+            container.replaceChild(clonedNode, originalChild);
           }
         }
       }
@@ -113,8 +77,6 @@ export function Component({ tagName, controller, render, postRender }) {
 
         const clone = container.cloneNode(true);
         clone.innerHTML = render.bind(c)();
-
-        // updateContainer(container, clone);
 
         updateDomChildren(container, clone);
 
@@ -387,64 +349,15 @@ export function Router(routes = [], params = {}) {
           }
         }
       }
-      if (route) {
-        if (route.alias.startsWith(":")) {
-          this.alias = this.params[route.alias.split(":")[1]];
-        } else {
-          this.alias = route.alias;
-        }
+      if (!route) {
+        this.alias = params.error ? (params.error.alias.startsWith(":") ? this.params[params.error.alias.split(":")[1]] : params.error.alias) : "404";
+        this.current_component = Component(params.error ? params.error.controller : { render: () => "404" }).render(this.container);
+      } else {
+        this.alias = route.alias.startsWith(":") ? this.params[route.alias.split(":")[1]] : route.alias;
         if (this.current_component) destroyRecursive(this.current_component);
         this.current_component = Component(route.controller).render(this.container);
-        for (let listener in this.listeners) this.listeners[listener](this.params);
       }
+      for (let listener in this.listeners) this.listeners[listener](this.params);
     };
   })();
 }
-/*
-(function () {
-  let style = undefined;
-  const setLoading = function (is_loading) {
-    if (style) {
-      style.remove();
-      style = undefined;
-    }
-    if (is_loading) {
-      style = document.createElement("style");
-      style.innerText = `
-        body::after {
-          content: "";
-          position: fixed;
-          top: 50%;
-          left: 50%;
-          width: 25px;
-          height: 25px;
-          border: 0.25rem solid #f3f3f3;
-          border-top: 4px solid #3498db;
-          border-radius: 50%;
-          animation: spin 1s linear infinite;
-          z-index: 999;
-        }
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-      `;
-      document.head.appendChild(style);
-    }
-  };
-  setLoading(true);
-  window.addEventListener("load", function () {
-    setLoading(false);
-  });
-  window.fetch = new Proxy(window.fetch, {
-    apply(actualFetch, that, args) {
-      const result = Reflect.apply(actualFetch, that, args);
-      setLoading(true);
-      result.then((response) => {
-        setLoading(false);
-      });
-      return result;
-    },
-  });
-})();
-*/
