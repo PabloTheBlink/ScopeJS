@@ -86,6 +86,7 @@ export function Component({ tagName, controller, render, postRender }) {
           const spl = modelName.split(".");
           let value = c;
           for (let item of spl) {
+            if (!value) continue;
             value = value[item];
           }
           el.value = value;
