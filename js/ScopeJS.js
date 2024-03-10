@@ -1,5 +1,20 @@
 // Diccionario de componentes
 const components = {};
+// Variables parametrizables
+// Variable global que indica si el debugger está habilitado o no.
+let ENABLE_DEBUGGER = false;
+// Función para habilitar o deshabilitar el debugger.
+export function enableDebugger(bool) {
+  // Actualiza el valor de la variable global ENABLE_DEBUGGER con el valor proporcionado.
+  ENABLE_DEBUGGER = bool;
+}
+// Función de registro de mensajes para debugging.
+function log(...attr) {
+  // Si el debugger no está habilitado, no se ejecuta nada.
+  if (!ENABLE_DEBUGGER) return;
+  // Imprime los atributos recibidos en la consola.
+  console.log(...attr);
+}
 /**
  * Crea un componente con capacidad de renderizado y control.
  * @param {Object} options - Opciones para configurar el componente.
@@ -27,12 +42,14 @@ export function Component({ tagName, controller, render, postRender }) {
 
       if (!originalChild && updatedChild) {
         const newElement = updatedChild.cloneNode(true);
+        log("Añadiendo nuevo elemento", container, newElement);
         container.appendChild(newElement);
       } else if (originalChild && !updatedChild) {
         originalChild.remove();
       } else if (originalChild && updatedChild) {
         if (originalChild.nodeType === Node.TEXT_NODE && updatedChild.nodeType === Node.TEXT_NODE) {
-          if (originalChild.textContent !== updatedChild.textContent) {
+          if (originalChild.textContent.trim() !== updatedChild.textContent.trim()) {
+            log("Reemplazando texto", originalChild.textContent, updatedChild.textContent);
             originalChild.textContent = updatedChild.textContent;
           }
         } else {
@@ -54,6 +71,7 @@ export function Component({ tagName, controller, render, postRender }) {
           } else {
             // Clona el nodo actualizado
             const clonedNode = updatedChild.cloneNode(true);
+            log("Reemplazando elemento", originalChild, clonedNode);
             container.replaceChild(clonedNode, originalChild);
           }
         }
