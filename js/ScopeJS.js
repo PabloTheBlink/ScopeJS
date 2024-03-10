@@ -176,6 +176,8 @@ export function Component({ tagName, controller, render, postRender }) {
 
       c.children = [];
 
+      c.DOM_element = container;
+
       // Agregar la función de renderizado al controlador.
       c.apply = apply;
       apply();
