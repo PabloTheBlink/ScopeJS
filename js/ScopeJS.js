@@ -30,7 +30,10 @@ export function Component({ tagName, controller, render, postRender }) {
    * @param {HTMLElement} container El contenedor cuyos hijos se actualizarán.
    * @param {HTMLElement} clone El clon que contiene la estructura actualizada de los hijos.
    */
-  function updateDomChildren(container, clone) {
+  function updateDomChildren(container, clone, first_loop = true) {
+    // Dentro del recursivo no se tratan componentes custom, a no ser que sea directamente el elemento a tratar
+    if (components[clone.tagName] && !first_loop) return;
+
     const originalChildren = container.childNodes;
     const updatedChildren = clone.childNodes;
 
@@ -67,7 +70,7 @@ export function Component({ tagName, controller, render, postRender }) {
                 }
               }
             }
-            updateDomChildren(originalChild, updatedChild);
+            updateDomChildren(originalChild, updatedChild, false);
           } else {
             // Clona el nodo actualizado
             const clonedNode = updatedChild.cloneNode(true);
