@@ -3,6 +3,7 @@ const components = {};
 // Variables parametrizables
 // Variable global que indica si el debugger está habilitado o no.
 let ENABLE_DEBUGGER = false;
+let UUID_ATTRIBUTE = "component-uuid";
 // Función para habilitar o deshabilitar el debugger.
 export function enableDebugger(bool) {
   // Actualiza el valor de la variable global ENABLE_DEBUGGER con el valor proporcionado.
@@ -24,64 +25,6 @@ function log(...attr) {
  * @returns {Object} - Instancia del componente con métodos de renderizado y control.
  */
 export function Component({ tagName, controller, render, postRender }) {
-  /**
-   * Actualiza los hijos de un contenedor DOM basándose en un clon proporcionado.
-   *
-   * @param {HTMLElement} container El contenedor cuyos hijos se actualizarán.
-   * @param {HTMLElement} clone El clon que contiene la estructura actualizada de los hijos.
-   */
-  function updateDomChildren(container, clone, first_loop = true) {
-    // Dentro del recursivo no se tratan componentes custom, a no ser que sea directamente el elemento a tratar
-    if (components[clone.tagName] && !first_loop) return;
-
-    const originalChildren = container.childNodes;
-    const updatedChildren = clone.childNodes;
-
-    const maxLength = Math.max(originalChildren.length, updatedChildren.length);
-
-    for (let i = 0; i < maxLength; i++) {
-      const originalChild = originalChildren[i];
-      const updatedChild = updatedChildren[i];
-
-      if (!originalChild && updatedChild) {
-        const newElement = updatedChild.cloneNode(true);
-        log("Añadiendo nuevo elemento", container, newElement);
-        container.appendChild(newElement);
-      } else if (originalChild && !updatedChild) {
-        originalChild.remove();
-      } else if (originalChild && updatedChild) {
-        if (originalChild.nodeType === Node.TEXT_NODE && updatedChild.nodeType === Node.TEXT_NODE) {
-          if (originalChild.textContent.trim() !== updatedChild.textContent.trim()) {
-            log("Reemplazando texto", originalChild.textContent, updatedChild.textContent);
-            originalChild.textContent = updatedChild.textContent;
-          }
-        } else {
-          if (originalChild.tagName === updatedChild.tagName) {
-            for (let attr of originalChild.attributes) {
-              if (updatedChild.hasAttribute(attr.name)) continue;
-              originalChild.removeAttribute(attr.name);
-            }
-            for (let attr of updatedChild.attributes) {
-              if (!originalChild.hasAttribute(attr.name)) {
-                originalChild.setAttribute(attr.name, attr.value);
-              } else {
-                if (originalChild.getAttribute(attr.name) != attr.value) {
-                  originalChild.setAttribute(attr.name, attr.value);
-                }
-              }
-            }
-            updateDomChildren(originalChild, updatedChild, false);
-          } else {
-            // Clona el nodo actualizado
-            const clonedNode = updatedChild.cloneNode(true);
-            log("Reemplazando elemento", originalChild, clonedNode);
-            container.replaceChild(clonedNode, originalChild);
-          }
-        }
-      }
-    }
-  }
-
   // Crear una instancia del componente.
   const c = new (function Component() {
     /**
@@ -90,6 +33,67 @@ export function Component({ tagName, controller, render, postRender }) {
      * @returns {Object} - Instancia del componente con métodos de renderizado y control.
      */
     this.render = function (container = document.createElement("div")) {
+      const uuid = container.getAttribute(UUID_ATTRIBUTE) ?? crypto.randomUUID();
+
+      /**
+       * Actualiza los hijos de un contenedor DOM basándose en un clon proporcionado.
+       *
+       * @param {HTMLElement} container El contenedor cuyos hijos se actualizarán.
+       * @param {HTMLElement} clone El clon que contiene la estructura actualizada de los hijos.
+       */
+      function updateDomChildren(container, clone) {
+        if (container.getAttribute(UUID_ATTRIBUTE) && container.getAttribute(UUID_ATTRIBUTE) != uuid) return;
+
+        const originalChildren = container.childNodes;
+        const updatedChildren = clone.childNodes;
+
+        const maxLength = Math.max(originalChildren.length, updatedChildren.length);
+
+        for (let i = 0; i < maxLength; i++) {
+          const originalChild = originalChildren[i];
+          const updatedChild = updatedChildren[i];
+
+          if (!originalChild && updatedChild) {
+            const newElement = updatedChild.cloneNode(true);
+            log("Añadiendo nuevo elemento", container, newElement);
+            container.appendChild(newElement);
+          } else if (originalChild && !updatedChild) {
+            originalChild.remove();
+          } else if (originalChild && updatedChild) {
+            if (originalChild.nodeType === Node.TEXT_NODE && updatedChild.nodeType === Node.TEXT_NODE) {
+              if (originalChild.textContent.replaceAll(/\s/g, "") !== updatedChild.textContent.replaceAll(/\s/g, "")) {
+                log("Reemplazando texto", originalChild.textContent, updatedChild.textContent);
+                originalChild.textContent = updatedChild.textContent;
+              }
+            } else {
+              if (originalChild.tagName === updatedChild.tagName) {
+                for (let attr of originalChild.attributes) {
+                  if (attr.name == UUID_ATTRIBUTE) continue;
+                  if (updatedChild.hasAttribute(attr.name)) continue;
+                  originalChild.removeAttribute(attr.name);
+                }
+                for (let attr of updatedChild.attributes) {
+                  if (attr.name == UUID_ATTRIBUTE) continue;
+                  if (!originalChild.hasAttribute(attr.name)) {
+                    originalChild.setAttribute(attr.name, attr.value);
+                  } else {
+                    if (originalChild.getAttribute(attr.name) != attr.value) {
+                      originalChild.setAttribute(attr.name, attr.value);
+                    }
+                  }
+                }
+                updateDomChildren(originalChild, updatedChild);
+              } else {
+                // Clona el nodo actualizado
+                const clonedNode = updatedChild.cloneNode(true);
+                log("Reemplazando elemento", originalChild, clonedNode);
+                container.replaceChild(clonedNode, originalChild);
+              }
+            }
+          }
+        }
+      }
+
       // Función interna para aplicar el renderizado.
       const apply = function () {
         // Renderizar el contenido en el contenedor.
@@ -158,9 +162,8 @@ export function Component({ tagName, controller, render, postRender }) {
 
         // Renderizar subcomponentes dentro del contenedor.
         container.querySelectorAll("*").forEach((element) => {
-          if (components[element.tagName.toUpperCase()]) {
-            c.children.push(components[element.tagName.toUpperCase()].render(element));
-          }
+          if (!components[element.tagName.toUpperCase()]) return;
+          c.children.push(components[element.tagName.toUpperCase()].render(element));
         });
 
         if (postRender) setTimeout(postRender.bind(c), 100);
@@ -171,15 +174,13 @@ export function Component({ tagName, controller, render, postRender }) {
       // Crear una instancia del controlador, si se proporciona.
       const c = controller ? new controller() : new (function () {})();
 
-      if (container) {
-        for (let name of container.getAttributeNames()) {
-          c[name] = container.getAttribute(name);
-        }
-      }
-
       c.children = [];
 
-      c.DOM_element = container;
+      for (let name of container.getAttributeNames()) {
+        c[name] = container.getAttribute(name);
+      }
+
+      container.setAttribute(UUID_ATTRIBUTE, uuid);
 
       // Agregar la función de renderizado al controlador.
       c.apply = apply;
