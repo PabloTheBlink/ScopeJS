@@ -32,7 +32,7 @@ export function Component({ tagName, controller, render, postRender }) {
      * @param {HTMLElement} container - Contenedor donde se renderizará el componente.
      * @returns {Object} - Instancia del componente con métodos de renderizado y control.
      */
-    this.render = function (container = document.createElement("div")) {
+    this.render = function (container = document.createElement("div"), children = []) {
       const uuid = container.getAttribute(UUID_ATTRIBUTE) ?? crypto.randomUUID();
 
       /**
@@ -102,6 +102,11 @@ export function Component({ tagName, controller, render, postRender }) {
 
         const clone = container.cloneNode(true);
         clone.innerHTML = render.bind(c)();
+        if (clone.querySelector("slot")) {
+          for (let child of children) {
+            clone.querySelector("slot").appendChild(child);
+          }
+        }
 
         updateDomChildren(container, clone);
 
@@ -163,7 +168,7 @@ export function Component({ tagName, controller, render, postRender }) {
         // Renderizar subcomponentes dentro del contenedor.
         container.querySelectorAll("*").forEach((element) => {
           if (!components[element.tagName.toUpperCase()]) return;
-          c.children.push(components[element.tagName.toUpperCase()].render(element));
+          c.children.push(components[element.tagName.toUpperCase()].render(element, element.children));
         });
 
         if (postRender) setTimeout(postRender.bind(c), 100);
@@ -264,6 +269,7 @@ export function Modal({ controller, render, hideWhenClickOverlay, className, ref
   const overlay = document.createElement("div");
   overlay.setAttribute("style", MODAL_STYLE.OVERLAY);
   overlay.classList.add("overlay");
+  if (referrer) overlay.style.opacity = 0;
   document.body.appendChild(overlay);
 
   // Añadir el modal al cuerpo del documento.
@@ -384,5 +390,10 @@ export function Router(routes = [], params = {}) {
       }
       for (let listener in this.listeners) this.listeners[listener](this.params);
     };
+
+    window.addEventListener("popstate", (e) => {
+      if (!e.state) return;
+      this.render();
+    });
   })();
 }
