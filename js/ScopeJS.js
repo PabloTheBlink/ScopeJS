@@ -337,11 +337,8 @@ export function Router(routes = [], params = {}) {
      * @param {string} path - Ruta a la que se desea navegar.
      */
     this.navigate = (path) => {
-      if (params.useHash) {
-        location.hash = `#${path}`;
-      } else {
-        history.pushState({ urlPath: `${path}` }, "", `${path}`);
-      }
+      if (params.useHash) path = `#${path}`;
+      history.pushState({ urlPath: `${path}` }, "", `${path}`);
       this.render();
     };
 
@@ -392,7 +389,6 @@ export function Router(routes = [], params = {}) {
     };
 
     window.addEventListener("popstate", (e) => {
-      if (!e.state) return;
       this.render();
     });
   })();
