@@ -363,6 +363,7 @@ export function Router(routes = [], params = {}) {
     this.params = undefined;
     this.alias = undefined;
     this.path = undefined;
+    this.body = undefined;
     this.current_component = undefined;
     this.listeners = {};
 
@@ -370,9 +371,10 @@ export function Router(routes = [], params = {}) {
      * navigate - Navega a la ruta especificada actualizando la ubicación hash.
      * @param {string} path - Ruta a la que se desea navegar.
      */
-    this.navigate = (path) => {
+    this.navigate = (path, body = null) => {
       if (params.useHash) path = `#${path}`;
       history.pushState({ urlPath: `${path}` }, "", `${path}`);
+      this.body = body;
       document.startViewTransition ? document.startViewTransition(this.render.bind(this)) : this.render();
     };
 
