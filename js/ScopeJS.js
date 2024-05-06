@@ -49,6 +49,40 @@ export function Component({ tagName, controller, render, postRender }) {
 
         const maxLength = Math.max(originalChildren.length, updatedChildren.length);
 
+        let style = document.querySelector("style[scopejs]");
+        if (!style) {
+          style = document.createElement("style");
+          style.setAttribute("scopejs", "1");
+          style.innerHTML = `
+            ::view-transition-old(*),
+            ::view-transition-new(*) {
+              animation-timing-function: ease-in-out;
+              animation-duration: 0.25s;
+            }
+          `;
+          document.head.appendChild(style);
+        }
+
+        for (let i = 0; i < maxLength; i++) {
+          const updatedChild = updatedChildren[i];
+          if (!updatedChild) continue;
+          if (!updatedChild.hasAttribute || !updatedChild.hasAttribute("id")) continue;
+          
+          const id = updatedChild.getAttribute("id");
+          // Verifica si la regla CSS ya existe en el estilo
+          if (style.innerHTML.includes(`#${id}`)) continue;
+          
+          style.innerHTML += `
+            #${id} {
+              view-transition-name: ${id};
+            }
+            ::view-transition-group(${id}) {
+              animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+              animation-duration: 0.5s;
+            }
+          `;
+        }
+
         for (let i = 0; i < maxLength; i++) {
           const originalChild = originalChildren[i];
           const updatedChild = updatedChildren[i];
@@ -339,7 +373,7 @@ export function Router(routes = [], params = {}) {
     this.navigate = (path) => {
       if (params.useHash) path = `#${path}`;
       history.pushState({ urlPath: `${path}` }, "", `${path}`);
-      this.render();
+      document.startViewTransition ? document.startViewTransition(this.render.bind(this)) : this.render();
     };
 
     this.listen = (callback) => {
