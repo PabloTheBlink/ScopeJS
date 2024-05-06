@@ -3,7 +3,7 @@ const components = {};
 // Variables parametrizables
 // Variable global que indica si el debugger está habilitado o no.
 let ENABLE_DEBUGGER = false;
-let UUID_ATTRIBUTE = "component-uuid";
+let UUID_ATTRIBUTE = "scopejs-component";
 // Función para habilitar o deshabilitar el debugger.
 export function enableDebugger(bool) {
   // Actualiza el valor de la variable global ENABLE_DEBUGGER con el valor proporcionado.
@@ -53,13 +53,7 @@ export function Component({ tagName, controller, render, postRender }) {
         if (!style) {
           style = document.createElement("style");
           style.setAttribute("scopejs", "1");
-          style.innerHTML = `
-            ::view-transition-old(*),
-            ::view-transition-new(*) {
-              animation-timing-function: ease-in-out;
-              animation-duration: 0.25s;
-            }
-          `;
+          style.innerHTML = `::view-transition-old(*), ::view-transition-new(*) { animation-timing-function: ease-in-out; animation-duration: 0.25s; }`;
           document.head.appendChild(style);
         }
 
@@ -72,15 +66,7 @@ export function Component({ tagName, controller, render, postRender }) {
           // Verifica si la regla CSS ya existe en el estilo
           if (style.innerHTML.includes(`#${id}`)) continue;
           
-          style.innerHTML += `
-            #${id} {
-              view-transition-name: ${id};
-            }
-            ::view-transition-group(${id}) {
-              animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
-              animation-duration: 0.5s;
-            }
-          `;
+          style.innerHTML += `#${id} { view-transition-name: ${id}; } ::view-transition-group(${id}) { animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1); animation-duration: 0.5s; }`;
         }
 
         for (let i = 0; i < maxLength; i++) {
