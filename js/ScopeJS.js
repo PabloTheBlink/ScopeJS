@@ -16,6 +16,14 @@ function log(...attr) {
   // Imprime los atributos recibidos en la consola.
   console.log(...attr);
 }
+function getChildren(element) {
+  if (element.tagName.toUpperCase() == "SLOT") return getChildren(element.querySelector("slot"));
+  const cloned_children = [];
+  for (let child of element.children) {
+    cloned_children.push(child.cloneNode(true));
+  }
+  return cloned_children;
+}
 /**
  * Crea un componente con capacidad de renderizado y control.
  * @param {Object} options - Opciones para configurar el componente.
@@ -61,11 +69,11 @@ export function Component({ tagName, controller, render, postRender }) {
           const updatedChild = updatedChildren[i];
           if (!updatedChild) continue;
           if (!updatedChild.hasAttribute || !updatedChild.hasAttribute("id")) continue;
-          
+
           const id = updatedChild.getAttribute("id");
           // Verifica si la regla CSS ya existe en el estilo
           if (style.innerHTML.includes(`#${id}`)) continue;
-          
+
           style.innerHTML += `#${id} { view-transition-name: ${id}; } ::view-transition-group(${id}) { animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1); animation-duration: 0.5s; }`;
         }
 
@@ -75,14 +83,14 @@ export function Component({ tagName, controller, render, postRender }) {
 
           if (!originalChild && updatedChild) {
             const newElement = updatedChild.cloneNode(true);
-            log("Añadiendo nuevo elemento", container, newElement);
+            log(uuid, "Añadiendo nuevo elemento", container, newElement);
             container.appendChild(newElement);
           } else if (originalChild && !updatedChild) {
             originalChild.remove();
           } else if (originalChild && updatedChild) {
             if (originalChild.nodeType === Node.TEXT_NODE && updatedChild.nodeType === Node.TEXT_NODE) {
               if (originalChild.textContent.replaceAll(/\s/g, "") !== updatedChild.textContent.replaceAll(/\s/g, "")) {
-                log("Reemplazando texto", originalChild.textContent, updatedChild.textContent);
+                log(uuid, "Reemplazando texto", originalChild.textContent, updatedChild.textContent);
                 originalChild.textContent = updatedChild.textContent;
               }
             } else {
@@ -106,7 +114,7 @@ export function Component({ tagName, controller, render, postRender }) {
               } else {
                 // Clona el nodo actualizado
                 const clonedNode = updatedChild.cloneNode(true);
-                log("Reemplazando elemento", originalChild, clonedNode);
+                log(uuid, "Reemplazando elemento", originalChild, clonedNode);
                 container.replaceChild(clonedNode, originalChild);
               }
             }
@@ -122,11 +130,6 @@ export function Component({ tagName, controller, render, postRender }) {
 
         const clone = container.cloneNode(true);
         clone.innerHTML = render.bind(c)();
-        if (clone.querySelector("slot")) {
-          for (let child of children) {
-            clone.querySelector("slot").appendChild(child);
-          }
-        }
 
         updateDomChildren(container, clone);
 
@@ -185,13 +188,21 @@ export function Component({ tagName, controller, render, postRender }) {
           });
         }
 
+        // Renderizar hijos dentro del slot.
+        container.querySelectorAll("slot").forEach((element) => {
+          for (let child of children) element.appendChild(child);
+        });
+
         // Renderizar subcomponentes dentro del contenedor.
         container.querySelectorAll("*").forEach((element) => {
           if (!components[element.tagName.toUpperCase()]) return;
-          c.children.push(components[element.tagName.toUpperCase()].render(element, element.children));
+          if (element.hasAttribute(UUID_ATTRIBUTE)) return;
+          c.children.push(components[element.tagName.toUpperCase()].render(element, getChildren(element)));
         });
 
         if (postRender) setTimeout(postRender.bind(c), 100);
+
+        container.dispatchEvent(new Event("change"));
 
         return container.innerHTML;
       };
@@ -210,6 +221,8 @@ export function Component({ tagName, controller, render, postRender }) {
       // Agregar la función de renderizado al controlador.
       c.apply = apply;
       apply();
+
+      container.dispatchEvent(new Event("load"));
 
       // Devolver la instancia del componente.
       return c;
@@ -415,3 +428,11 @@ export function Router(routes = [], params = {}) {
     });
   })();
 }
+
+window.addEventListener("load", function () {
+  document.querySelectorAll("*[autoload]").forEach((element) => {
+    if (element.hasAttribute(UUID_ATTRIBUTE)) return;
+    if (!components[element.tagName.toUpperCase()]) return;
+    components[element.tagName.toUpperCase()].render(element, getChildren(element));
+  });
+});
