@@ -142,7 +142,7 @@ export function Component({ tagName, controller, render, postRender }) {
             if (!value) continue;
             value = value[item];
           }
-          el.value = value;
+          if (value) el.value = value;
 
           // Aquí se asigna el evento input para que actualice la propiedad correspondiente en tiempo real
           el.addEventListener("input", () => {
