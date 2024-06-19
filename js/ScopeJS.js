@@ -128,6 +128,8 @@ export function Component({ tagName, controller, render, postRender }) {
 
         if (!container) return;
 
+        c._render_times++;
+
         const clone = container.cloneNode(true);
         clone.innerHTML = render.bind(c)();
 
@@ -211,6 +213,8 @@ export function Component({ tagName, controller, render, postRender }) {
       const c = controller ? new controller() : new (function () {})();
 
       c.children = [];
+
+      c._render_times = 0;
 
       for (let name of container.getAttributeNames()) {
         c[name] = container.getAttribute(name);
