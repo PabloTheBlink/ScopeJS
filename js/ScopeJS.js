@@ -61,7 +61,7 @@ export function Component({ tagName, controller, render, postRender }) {
         if (!style) {
           style = document.createElement("style");
           style.setAttribute("scopejs", "1");
-          style.innerHTML = `::view-transition-old(*), ::view-transition-new(*) { animation-timing-function: ease-in-out; animation-duration: 0.25s; }`;
+          style.innerHTML = `::view-transition-old(*), ::view-transition-new(*) { animation-timing-function: ease-in-out; animation-duration: 0.25s; } @keyframes fadeIn { from { opacity: 0; transform: translateY(2.5rem); } to { opacity: 1; transform: translateY(0); } } *[fadeIn] { opacity: 0; transform: translateY(2.5rem); transition: 0.5s; } *[fadeIn='1'] { opacity: 1; transform: translateY(0); }`;
           document.head.appendChild(style);
         }
 
@@ -425,6 +425,20 @@ export function Router(routes = [], params = {}) {
         this.current_component = Component(route.controller).render(this.container);
       }
       for (let listener in this.listeners) this.listeners[listener](this.params);
+      setTimeout(() => {
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.setAttribute("fadeIn", "1");
+            } else {
+              entry.target.setAttribute("fadeIn", "0");
+            }
+          });
+        });
+        document.querySelectorAll("*[fadeIn]").forEach((element) => {
+          observer.observe(element);
+        });
+      });
     };
 
     window.addEventListener("popstate", (e) => {
