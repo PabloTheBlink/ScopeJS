@@ -24,6 +24,16 @@ function getChildren(element) {
   }
   return cloned_children;
 }
+function initFadeIn() {
+  const e = new IntersectionObserver((e) => {
+    e.forEach((e) => {
+      e.isIntersecting ? e.target.setAttribute("fadeIn", "1") : e.target.setAttribute("fadeIn", "0");
+    });
+  });
+  document.querySelectorAll("*[fadeIn]").forEach((t) => {
+    e.observe(t);
+  });
+}
 /**
  * Crea un componente con capacidad de renderizado y control.
  * @param {Object} options - Opciones para configurar el componente.
@@ -205,6 +215,8 @@ export function Component({ tagName, controller, render, postRender }) {
         if (postRender) setTimeout(postRender.bind(c), 100);
 
         container.dispatchEvent(new Event("change"));
+
+        setTimeout(initFadeIn);
 
         return container.innerHTML;
       };
@@ -425,20 +437,7 @@ export function Router(routes = [], params = {}) {
         this.current_component = Component(route.controller).render(this.container);
       }
       for (let listener in this.listeners) this.listeners[listener](this.params);
-      setTimeout(() => {
-        const observer = new IntersectionObserver((entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              entry.target.setAttribute("fadeIn", "1");
-            } else {
-              entry.target.setAttribute("fadeIn", "0");
-            }
-          });
-        });
-        document.querySelectorAll("*[fadeIn]").forEach((element) => {
-          observer.observe(element);
-        });
-      });
+      setTimeout(initFadeIn);
     };
 
     window.addEventListener("popstate", (e) => {
