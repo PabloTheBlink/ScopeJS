@@ -432,9 +432,24 @@ export function Router(routes = [], params = {}) {
         this.alias = params.error ? (params.error.alias.startsWith(":") ? this.params[params.error.alias.split(":")[1]] : params.error.alias) : "404";
         this.current_component = Component(params.error ? params.error.controller : { render: () => "404" }).render(this.container);
       } else {
-        this.alias = route.alias.startsWith(":") ? this.params[route.alias.split(":")[1]] : route.alias;
         if (this.current_component) destroyRecursive(this.current_component);
-        this.current_component = Component(route.controller).render(this.container);
+        if (route.middleware) {
+          route.middleware(() => {
+            if (route.alias) {
+              this.alias = route.alias.startsWith(":") ? this.params[route.alias.split(":")[1]] : route.alias;
+            } else {
+              this.alias = undefined;
+            }
+            this.current_component = Component(route.controller).render(this.container);         
+          })
+        } else {
+          if (route.alias) {
+            this.alias = route.alias.startsWith(":") ? this.params[route.alias.split(":")[1]] : route.alias;
+          } else {
+            this.alias = undefined;
+          }
+          this.current_component = Component(route.controller).render(this.container);
+        }
       }
       for (let listener in this.listeners) this.listeners[listener](this.params);
       setTimeout(initFadeIn);
