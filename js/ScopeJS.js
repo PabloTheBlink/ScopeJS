@@ -100,7 +100,7 @@ export function Component({ tagName, controller, render, postRender }) {
               const src = newElement.getAttribute("src");
               newElement.removeAttribute("src");
 
-              requestIdleCallback(() => {
+              (() => {
                 const image = new Image();
                 image.src = src;
                 image.onload = () => {
