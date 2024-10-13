@@ -51,7 +51,7 @@ export function Component({ tagName, controller, render, postRender }) {
      * @returns {Object} - Instancia del componente con métodos de renderizado y control.
      */
     this.render = function (container = document.createElement("div"), children = []) {
-      const uuid = container.getAttribute(UUID_ATTRIBUTE) ?? crypto.randomUUID();
+      const uuid = container.getAttribute(UUID_ATTRIBUTE) ?? (crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2));
 
       /**
        * Actualiza los hijos de un contenedor DOM basándose en un clon proporcionado.
@@ -93,7 +93,21 @@ export function Component({ tagName, controller, render, postRender }) {
 
           if (!originalChild && updatedChild) {
             const newElement = updatedChild.cloneNode(true);
-            log(uuid, "Añadiendo nuevo elemento", container, newElement);
+            // Check if newElement is an image
+            if (newElement.tagName === "IMG") {
+              newElement.setAttribute("loading", "lazy");
+
+              const src = newElement.getAttribute("src");
+              newElement.removeAttribute("src");
+
+              requestIdleCallback(() => {
+                const image = new Image();
+                image.src = src;
+                image.onload = () => {
+                  newElement.setAttribute("src", src);
+                };
+              });
+            }
             container.appendChild(newElement);
           } else if (originalChild && !updatedChild) {
             originalChild.remove();
@@ -394,7 +408,7 @@ export function Router(routes = [], params = {}) {
     };
 
     this.listen = (callback) => {
-      const uuid = crypto.randomUUID();
+      const uuid = crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2);
       this.listeners[uuid] = callback;
     };
 
@@ -440,8 +454,8 @@ export function Router(routes = [], params = {}) {
             } else {
               this.alias = undefined;
             }
-            this.current_component = Component(route.controller).render(this.container);         
-          })
+            this.current_component = Component(route.controller).render(this.container);
+          });
         } else {
           if (route.alias) {
             this.alias = route.alias.startsWith(":") ? this.params[route.alias.split(":")[1]] : route.alias;
