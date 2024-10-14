@@ -93,21 +93,6 @@ export function Component({ tagName, controller, render, postRender }) {
 
           if (!originalChild && updatedChild) {
             const newElement = updatedChild.cloneNode(true);
-            // Check if newElement is an image
-            if (newElement.tagName === "IMG") {
-              newElement.setAttribute("loading", "lazy");
-
-              const src = newElement.getAttribute("src");
-              newElement.removeAttribute("src");
-
-              (() => {
-                const image = new Image();
-                image.src = src;
-                image.onload = () => {
-                  newElement.setAttribute("src", src);
-                };
-              });
-            }
             container.appendChild(newElement);
           } else if (originalChild && !updatedChild) {
             originalChild.remove();
