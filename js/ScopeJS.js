@@ -71,7 +71,7 @@ export function Component({ tagName, controller, render, postRender }) {
         if (!style) {
           style = document.createElement("style");
           style.setAttribute("scopejs", "1");
-          style.innerHTML = `::view-transition-old(*), ::view-transition-new(*) { animation-timing-function: ease-in-out; animation-duration: 0.25s; } @keyframes fadeIn { from { opacity: 0; transform: translateY(2.5rem); } to { opacity: 1; transform: translateY(0); } } *[fadeIn] { opacity: 0; transform: translateY(2.5rem); transition: 0.5s; } *[fadeIn='1'] { opacity: 1; transform: translateY(0); }`;
+          style.innerHTML = `@keyframes lazy-loading { 0% { background-position: 100% 50%; } 100% { background-position: 0 50%; } } img[lazy] { position: relative; } img[lazy]::after { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(90deg, #eee 25%, #e3e3e3 50%, #eee 75%); background-size: 400% 400%; animation: lazy-loading 0.5s ease infinite; } ::view-transition-old(*), ::view-transition-new(*) { animation-timing-function: ease-in-out; animation-duration: 0.25s; } @keyframes fadeIn { from { opacity: 0; transform: translateY(2.5rem); } to { opacity: 1; transform: translateY(0); } } *[fadeIn] { opacity: 0; transform: translateY(2.5rem); transition: 0.5s; } *[fadeIn='1'] { opacity: 1; transform: translateY(0); }`;
           document.head.appendChild(style);
         }
 
@@ -93,6 +93,19 @@ export function Component({ tagName, controller, render, postRender }) {
 
           if (!originalChild && updatedChild) {
             const newElement = updatedChild.cloneNode(true);
+            if (newElement.tagName === "IMG" && newElement.hasAttribute("lazy")) {
+              // Image lazy load
+              (function () {
+                const src = newElement.getAttribute("src");
+                newElement.removeAttribute("src");
+                const image = new Image();
+                image.src = src;
+                image.onload = function () {
+                  newElement.setAttribute("src", src);
+                  newElement.removeAttribute("lazy");
+                };
+              })();
+            }
             container.appendChild(newElement);
           } else if (originalChild && !updatedChild) {
             originalChild.remove();
