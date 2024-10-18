@@ -53,6 +53,24 @@ export function Component({ tagName, controller, render, postRender }) {
     this.render = function (container = document.createElement("div"), children = []) {
       const uuid = container.getAttribute(UUID_ATTRIBUTE) ?? (crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2));
 
+      function loadLazyImgs(element) {
+        if (!element) return;
+        if (element.tagName === "IMG" && element.hasAttribute("lazy")) {
+          // Image lazy load
+          (function () {
+            const src = element.getAttribute("src");
+            element.removeAttribute("src");
+            const image = new Image();
+            image.src = src;
+            image.onload = function () {
+              element.setAttribute("src", src);
+              element.removeAttribute("lazy");
+            };
+          })();
+        }
+        if (element.querySelectorAll) element.querySelectorAll("img[lazy]").forEach(loadLazyImgs);
+      }
+
       /**
        * Actualiza los hijos de un contenedor DOM basándose en un clon proporcionado.
        *
@@ -93,19 +111,7 @@ export function Component({ tagName, controller, render, postRender }) {
 
           if (!originalChild && updatedChild) {
             const newElement = updatedChild.cloneNode(true);
-            if (newElement.tagName === "IMG" && newElement.hasAttribute("lazy")) {
-              // Image lazy load
-              (function () {
-                const src = newElement.getAttribute("src");
-                newElement.removeAttribute("src");
-                const image = new Image();
-                image.src = src;
-                image.onload = function () {
-                  newElement.setAttribute("src", src);
-                  newElement.removeAttribute("lazy");
-                };
-              })();
-            }
+            loadLazyImgs(newElement);
             container.appendChild(newElement);
           } else if (originalChild && !updatedChild) {
             originalChild.remove();
