@@ -164,6 +164,7 @@ Existen dos métodos para renderizar elementos:
    const component = Component({
      tagName: "my-component",
      controller: function () {
+      console.log(this.x, this.y); // Accede directamente a los atributos del DOM
        // Lógica aquí
      },
      render: function () {
@@ -175,11 +176,34 @@ Existen dos métodos para renderizar elementos:
    });
 
     <!-- Si lo llamas desde otro componente de Scope no es necesario el autoload !>
-   <my-component autoload></my-component>;
+   <my-component autoload x='1' y='2'></my-component>;
    ```
 
-````
+## Funciones Adicionales
 
+### Fade In
+
+Es posible implementar una animación de entrada para los elementos que aparecen en el viewport al hacer scroll, simplemente añadiendo el atributo `fadeIn` a los elementos:
+
+```html
+<img fadeIn src="" />
+```
+
+### Carga Diferida de Imágenes (Lazy Load)
+
+Se puede evitar que las imágenes bloqueen la ejecución de la página, permitiendo que se carguen de manera paralela al hilo principal. Las imágenes se pintarán únicamente cuando hayan sido completamente cargadas, agregando el atributo `lazy`:
+
+```html
+<img lazy src="" />
+```
+
+### Transiciones de Vista (View Transitions)
+
+Actualmente, las transiciones de vista se aplican de manera predeterminada utilizando únicamente el ID de los elementos. Si en dos páginas se tienen elementos con el mismo ID, la transición se ejecutará automáticamente:
+
+```html
+Page1 Page2 <img id="image_1" /> -> <img id="image_1" />
+```
 
 # Router
 
@@ -205,7 +229,7 @@ const router = Router(
     useHash: true, // Valor por defecto es true
   }
 );
-````
+```
 
 Si deseas desactivar el uso del hash en la URL (`useHash: false`), es necesario añadir el siguiente archivo `.htaccess` para gestionar las rutas a nivel del servidor:
 
