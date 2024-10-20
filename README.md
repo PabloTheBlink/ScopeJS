@@ -7,18 +7,17 @@ import { Component, Router, Modal } from "https://cdn.devetty.es/ScopeJS/js";
 import { Component, Router, Modal } from "https://cdn.jsdelivr.net/gh/pablotheblink/ScopeJS/js/ScopeJS.min.js";
 ```
 
-# Componentes
+# Component
 
 Crea un componente con capacidad de renderizado y control.
 
-## Parámetros
-
-| Parámetro     | Descripción                                                                                                                                               |
-| ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `controller*` | Controlador lógico del componente, donde se define la lógica que manejará las interacciones y el estado del mismo.                                        |
-| `render*`     | Función de renderizado del componente, responsable de retornar el HTML que representa visualmente el componente.                                          |
-| `postRender`  | Función que se ejecuta inmediatamente después de que el componente ha sido renderizado en el DOM, útil para realizar ajustes finales o registrar eventos. |
-| `tagName`     | Etiqueta HTML asociada al componente, que define cómo se representa el componente en el HTML.                                                             |
+| Parámetro    | Descripción                                                                                                                                               | Tipo    | Opcional |
+| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- | -------- |
+| `controller` | Controlador lógico del componente, donde se define la lógica que manejará las interacciones y el estado del mismo.                                        | Función | No       |
+| `render`     | Función de renderizado del componente, responsable de retornar el HTML que representa visualmente el componente.                                          | Función | No       |
+| `postRender` | Función que se ejecuta inmediatamente después de que el componente ha sido renderizado en el DOM, útil para realizar ajustes finales o registrar eventos. | Función | Sí       |
+| `tagName`    | Etiqueta HTML asociada al componente, que define cómo se representa el componente en el HTML.                                                             | Cadena  | Sí       |
+|              |
 
 ```javascript
 Component({
@@ -137,6 +136,162 @@ Component({
 });
 ```
 
+## Renderizado
+
+Existen dos métodos para renderizar elementos:
+
+1. **A través de JavaScript**
+
+   ```javascript
+   const component = Component({
+     controller: function () {
+       // Lógica aquí
+     },
+     render: function () {
+       return "Hola Mundo";
+     },
+     postRender: function () {
+       // Lógica aquí
+     },
+   });
+
+   component.render(document.body);
+   ```
+
+2. **Desde el HTML directamente**
+
+   ```javascript
+   const component = Component({
+     tagName: "my-component",
+     controller: function () {
+       // Lógica aquí
+     },
+     render: function () {
+       return "Hola Mundo";
+     },
+     postRender: function () {
+       // Lógica aquí
+     },
+   });
+
+   <my-component></my-component>;
+   ```
+
+````
+
+
+# Router
+
+Este componente facilita la gestión de rutas del navegador, permitiendo enlazarlas a componentes previamente definidos.
+
+Este módulo permite gestionar la navegación en una aplicación web mediante la definición de rutas y sus correspondientes controladores. Al crear una instancia de `Router` y proporcionar un arreglo de rutas, puedes controlar la navegación entre diferentes vistas de manera sencilla. Además, el método `render` se encarga de renderizar el controlador asociado a la ruta actual en el contenedor especificado.
+
+```javascript
+const router = Router(
+  [
+    {
+      path: "/",
+      controller: AppController,
+      alias: "home",
+    },
+    {
+      path: "/:id",
+      controller: AppController,
+      alias: "item",
+    },
+  ],
+  {
+    useHash: true, // Valor por defecto es true
+  }
+);
+````
+
+Si deseas desactivar el uso del hash en la URL (`useHash: false`), es necesario añadir el siguiente archivo `.htaccess` para gestionar las rutas a nivel del servidor:
+
+```apache
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+  RewriteRule ^index\.html$ - [L]
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule . /index.html [L]
+</IfModule>
+```
+
+## Métodos
+
+### Renderizar la ruta actual
+
+Renderiza la ruta actual en el contenedor proporcionado (en este caso, `document.body`).
+
+```javascript
+router.render(document.body);
+```
+
+### Acceder a los parámetros de la ruta
+
+Permite acceder a los parámetros de la ruta actual.
+
+```javascript
+const id = router.params.id;
+```
+
+### Acceder al alias actual
+
+Accede al alias de la ruta actual.
+
+```javascript
+const alias = router.alias;
+```
+
+### Navegar a una ruta específica
+
+Permite navegar a una ruta determinada.
+
+```javascript
+router.navigate("/1");
+```
+
+### Escuchar cambios de ruta
+
+Escucha los cambios de ruta. **Nota**: no debe usarse dentro de un controlador de ruta, solo en componentes independientes.
+
+```javascript
+router.listen((params) => {
+  // Se ejecuta cada vez que cambia la ruta
+});
+```
+
+# Modal
+
+Esta función crea y muestra un modal en la interfaz de usuario.
+
+| Parámetro              | Descripción                                                                          | Tipo     | Opcional |
+| ---------------------- | ------------------------------------------------------------------------------------ | -------- | -------- |
+| `controller`           | Controlador del modal, donde se define la lógica y el comportamiento del mismo.      | Función  | No       |
+| `render`               | Función de renderizado que define cómo se mostrará el contenido del modal.           | Función  | No       |
+| `hideWhenClickOverlay` | Indica si el modal debe cerrarse al hacer clic en el fondo de la pantalla (overlay). | Booleano | Sí       |
+| `params`               | Parámetros adicionales que se pueden pasar a la función de renderizado del modal.    | Objeto   | Sí       |
+
+```javascript
+Modal({
+  controller: function () {
+    this.counter = 0;
+    setInterval(() => {
+      this.counter++;
+      this.apply();
+      if (this.counter === 5) this.close();
+    }, 1000);
+  },
+  render: function () {
+    return `${this.counter}`;
+  },
+});
+```
+
+Este código crea un modal con un contador que se incrementa cada segundo. El modal se cierra automáticamente cuando el contador alcanza 5.
+
 # Licencia
 
 Esta biblioteca de código abierto ha sido desarrollada por **Pablo Martínez**, y se distribuye bajo los términos de la licencia Apache. El código es proporcionado "tal cual", sin garantía alguna de su funcionamiento, uso o adecuación a un propósito específico. Se permite la redistribución y modificación, siempre que se mantenga la atribución original al autor.
@@ -149,3 +304,7 @@ Para consultas o colaboraciones, puedes contactarme en:
 - [Instagram](https://www.instagram.com/PabloTheBlink)
 
 El uso de esta biblioteca implica la aceptación de los términos de la licencia.
+
+```
+
+```
