@@ -305,7 +305,3 @@ Para consultas o colaboraciones, puedes contactarme en:
 - [Instagram](https://www.instagram.com/PabloTheBlink)
 
 El uso de esta biblioteca implica la aceptación de los términos de la licencia.
-
-```
-
-```
