@@ -1,3 +1,6 @@
+/**
+ * ScopeJS V2.0.1
+ */
 // Diccionario de componentes
 const components = {};
 // Variables parametrizables
@@ -79,7 +82,6 @@ export function Component({ tagName, controller, render, postRender }) {
        */
       function updateDomChildren(container, clone) {
         if (container.getAttribute(UUID_ATTRIBUTE) && container.getAttribute(UUID_ATTRIBUTE) != uuid) return;
-
         const originalChildren = container.childNodes;
         const updatedChildren = clone.childNodes;
 
@@ -89,7 +91,61 @@ export function Component({ tagName, controller, render, postRender }) {
         if (!style) {
           style = document.createElement("style");
           style.setAttribute("scopejs", "1");
-          style.innerHTML = `@keyframes lazy-loading { 0% { background-position: 100% 50%; } 100% { background-position: 0 50%; } } img[lazy] { position: relative; } img[lazy]::after { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(90deg, #eee 25%, #e3e3e3 50%, #eee 75%); background-size: 400% 400%; animation: lazy-loading 0.5s ease infinite; } ::view-transition-old(*), ::view-transition-new(*) { animation-timing-function: ease-in-out; animation-duration: 0.25s; } @keyframes fadeIn { from { opacity: 0; transform: translateY(2.5rem); } to { opacity: 1; transform: translateY(0); } } *[fadeIn] { opacity: 0; transform: translateY(2.5rem); transition: 0.5s; } *[fadeIn='1'] { opacity: 1; transform: translateY(0); }`;
+          style.innerHTML = /* CSS */ `
+            @keyframes lazy-loading {
+              0% {
+                background-position: 100% 50%;
+              }
+              100% {
+                background-position: 0 50%;
+              }
+            }
+
+            img[lazy] {
+              position: relative;
+            }
+
+            img[lazy]::after {
+              content: '';
+              position: absolute;
+              top: 0;
+              left: 0;
+              width: 100%;
+              height: 100%;
+              background: linear-gradient(90deg, #ccc 25%, #eee 50%, #ccc 75%);
+              background-size: 400% 400%;
+              animation: lazy-loading 0.5s ease infinite;
+            }
+
+            ::view-transition-old(*),
+            ::view-transition-new(*) {
+              animation-timing-function: ease-in-out;
+              animation-duration: 0.25s;
+            }
+
+            @keyframes fadeIn {
+              from {
+                opacity: 0;
+                transform: translateY(2.5rem);
+              }
+              to {
+                opacity: 1;
+                transform: translateY(0);
+              }
+            }
+
+            *[fadeIn] {
+              opacity: 0;
+              transform: translateY(2.5rem);
+              transition: 0.5s;
+            }
+
+            *[fadeIn='1'] {
+              opacity: 1;
+              transform: translateY(0);
+            }
+
+          `;
           document.head.appendChild(style);
         }
 
@@ -156,10 +212,14 @@ export function Component({ tagName, controller, render, postRender }) {
 
         if (!container) return;
 
+        const rendered = render.bind(c)();
+
+        if (!rendered) return;
+
         c._render_times++;
 
         const clone = container.cloneNode(true);
-        clone.innerHTML = render.bind(c)();
+        clone.innerHTML = rendered;
 
         updateDomChildren(container, clone);
 
