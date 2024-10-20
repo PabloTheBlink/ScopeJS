@@ -174,7 +174,8 @@ Existen dos métodos para renderizar elementos:
      },
    });
 
-   <my-component></my-component>;
+    <!-- Si lo llamas desde otro componente de Scope no es necesario el autoload !>
+   <my-component autoload></my-component>;
    ```
 
 ````
