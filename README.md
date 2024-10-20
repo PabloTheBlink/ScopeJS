@@ -1,143 +1,151 @@
-# ScopeJS
+# Instalación
 
-Libreria sencilla para crear componentes reactivos en JavaScript vanilla.
-
-## Componentes
-
-### `Component({ tagName, controller, render })``
-
-Crea un componente con capacidades de renderizado y control.
-
-Parámetros:
-
-- `tagName` (opcional): Nombre de la etiqueta HTML asociada al componente.
-- `controller` (opcional): Controlador del componente.
-- `render` Función de renderizado del componente.
-
-Retorna: Instancia del componente con métodos de renderizado y control.
-
-Ejemplo de Uso:
+Esta librería ha sido desarrollada utilizando módulos ES (ES Modules) y puede ser usada directamente desde uno de los siguientes CDN:
 
 ```javascript
-import { Component } from "https://cdn.devetty.es/ScopeJS/js";
+import { Component, Router, Modal } from "https://cdn.devetty.es/ScopeJS/js";
+import { Component, Router, Modal } from "https://cdn.jsdelivr.net/gh/pablotheblink/ScopeJS/js/ScopeJS.min.js";
+```
 
+# Componentes
+
+Crea un componente con capacidad de renderizado y control.
+
+## Parámetros
+
+| Parámetro     | Descripción                                                                                                                                               |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `controller*` | Controlador lógico del componente, donde se define la lógica que manejará las interacciones y el estado del mismo.                                        |
+| `render*`     | Función de renderizado del componente, responsable de retornar el HTML que representa visualmente el componente.                                          |
+| `postRender`  | Función que se ejecuta inmediatamente después de que el componente ha sido renderizado en el DOM, útil para realizar ajustes finales o registrar eventos. |
+| `tagName`     | Etiqueta HTML asociada al componente, que define cómo se representa el componente en el HTML.                                                             |
+
+```javascript
 Component({
-  tagName: "counter",
+  tagName: "my-component",
   controller: function () {
-    this.counter = 0;
-    setInterval(() => {
-      this.counter++;
-      this.apply();
-    }, 1000);
+    // Lógica aquí
   },
   render: function () {
-    return `${this.counter}`;
+    return "Hola Mundo";
+  },
+  postRender: function () {
+    // Lógica aquí
   },
 });
-
-Component({
-  render: () => `<counter></counter>`,
-}).render();
 ```
 
-## Modales
+## Eventos
 
-### `Modal({ controller, render, hideWhenClickOverlay }, params = {})`
-
-`
-Crea y muestra un modal en la interfaz de usuario.
-
-Parámetros:
-
-- `controller`: Controlador del modal.
-- `render`: Función de renderizado del modal.
-- `hideWhenClickOverlay` (opcional): Indica si el modal debe cerrarse al hacer clic en el fondo.
-- `params` (opcional): Parámetros adicionales para pasar a la función de renderizado del modal.
-
-Ejemplo de Uso:
+Utiliza los eventos nativos de los elementos dentro del contexto del componente. Aquí se muestra un ejemplo de cómo manejar clics en botones.
 
 ```javascript
-import { Modal } from "https://cdn.devetty.es/ScopeJS/js";
-
-Modal({
+Component({
+  tagName: "my-component",
   controller: function () {
-    this.counter = 0;
-    setInterval(() => {
-      this.counter++;
-      this.apply();
-      if (this.counter == 5) this.close();
-    }, 1000);
+    this.handleClic = function (e) {
+      // Por defecto, si no se pasan argumentos, se recibe el evento
+      console.log(e.target);
+    };
   },
   render: function () {
-    return `${this.counter}`;
+    return '<button onclick="handleClic()">click aquí</button>';
+  },
+  postRender: function () {
+    // Lógica aquí
   },
 });
 ```
 
-## Router
-
-### `Router(routes)`
-
-`
-Crea y gestiona la navegación y renderizado de rutas en una aplicación web.
-
-Parámetros:
-
-- `routes`: (Array): Arreglo de objetos de ruta con propiedades 'path' y 'controller'.
-
-Ejemplo de Uso:
+Aquí hay otro ejemplo que muestra cómo pasar parámetros a la función del controlador.
 
 ```javascript
-import { Router } from "https://cdn.devetty.es/ScopeJS/js";
-
-// Definir rutas y controladores
-const router = Router(
-  [
-    {
-      path: "/",
-      controller: AppController,
-      alias: "home",
-    },
-    {
-      path: "/:id",
-      controller: AppController,
-      alias: "item",
-    },
-  ],
-  {
-    useHash: false,
-  }
-);
-
-// Si no usas Hash, debes incluir en el htaccess lo siguiente
-
-/*
-<IfModule mod_rewrite.c>
-  RewriteEngine On
-  RewriteBase /
-  RewriteRule ^index\.html$ - [L]
-  RewriteCond %{REQUEST_FILENAME} !-f
-  RewriteCond %{REQUEST_FILENAME} !-d
-  RewriteRule . /index.html [L]
-</IfModule>
-*/
-
-// Renderizar la ruta actual en el contenedor proporcionado (en este caso, document.body)
-router.render(document.body);
-
-// Acceder a los parámetros de la ruta actual
-const id = router.params.id;
-
-// Acceder al alias actual
-const alias = router.alias;
-
-// Navegar a una ruta específica
-router.navigate("/1");
-
-// Escuchar cambios de ruta, no usar nunca dentro de un controlador de ruta, solo en componentes ajenos
-router.listen((params) => {
-  // cada vez que cambia la ruta
+Component({
+  tagName: "my-component",
+  controller: function () {
+    this.handleClic = function (opcion) {
+      console.log(opcion); // 1 / 0
+    };
+  },
+  render: function () {
+    return `
+      <button onclick="this.handleClic(1)">Aceptar</button>
+      <button onclick="this.handleClic(0)">Cancelar</button>
+    `;
+  },
+  postRender: function () {
+    // Lógica aquí
+  },
 });
 ```
 
-Este módulo permite gestionar la navegación en una aplicación web mediante la definición de rutas y sus correspondientes controladores. Al crear una instancia de `Router` y proporcionar un arreglo de rutas, puedes controlar la navegación entre diferentes vistas de manera sencilla. Además, el método `render` se encarga de renderizar el controlador asociado a la ruta actual en el contenedor especificado.
+## Actualizar vista
+
+Al actualizar el estado de una variable del contexto, se puede actualizar la vista con `apply()`. Esta acción solo actualizará lo que ha sido modificado dentro del DOM, es decir, no recargará todo el componente. Se actualizará a nivel atómico, afectando solo elementos específicos como un texto, un atributo, una clase, etc.
+
+```javascript
+Component({
+  tagName: "my-component",
+  controller: function () {
+    this.count = 1;
+    this.handleClic = function (cantidad) {
+      this.count += cantidad;
+      this.apply(); // Renderiza de nuevo SOLO EL TEXTO DEL SPAN
+    };
+  },
+  render: function () {
+    return `
+      <span>${this.count}</span>
+      <button onclick="this.handleClic(1)">Sumar</button>
+      <button onclick="this.handleClic(-1)">Restar</button>
+    `;
+  },
+  postRender: function () {
+    // Lógica aquí
+  },
+});
+```
+
+## Formularios
+
+Con el atributo model, podemos asignar una variable del contexto a un campo de un formulario, la cual se actualizará en tiempo real con el valor del campo.
+
+```javascript
+Component({
+  tagName: "my-component",
+  controller: function () {
+    this.name = "";
+    this.onSubmit = function (e) {
+      e.preventDefault();
+      console.log(this.name); // al ejecutar el formulario
+    };
+    this.onInput = function (e) {
+      console.log(this.name); // se ira mostrando en tiempo real
+    };
+  },
+  render: function () {
+    return `
+      <form onsubmit="onSubmit()">
+        <input type="text" oninput="onInput()" model="name" />
+        <button>Guardar</button>
+      </form>
+    `;
+  },
+  postRender: function () {
+    // Lógica aquí
+  },
+});
+```
+
+# Licencia
+
+Esta biblioteca de código abierto ha sido desarrollada por **Pablo Martínez**, y se distribuye bajo los términos de la licencia Apache. El código es proporcionado "tal cual", sin garantía alguna de su funcionamiento, uso o adecuación a un propósito específico. Se permite la redistribución y modificación, siempre que se mantenga la atribución original al autor.
+
+Para consultas o colaboraciones, puedes contactarme en:
+
+- [Github ScopeJS](https://github.com/PabloTheBlink/ScopeJS)
+- [Github autor](https://github.com/PabloTheBlink)
+- [LinkedIn](https://www.linkedin.com/in/pablo-mart%C3%ADnez-san-jos%C3%A9-9bb24215a)
+- [Instagram](https://www.instagram.com/PabloTheBlink)
+
+El uso de esta biblioteca implica la aceptación de los términos de la licencia.
