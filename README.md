@@ -21,6 +21,18 @@ Crea un componente con capacidad de renderizado y control.
 
 ```javascript
 Component({
+  title: "Titulo", // Titulo de la pagina dentro del head
+  meta: [
+    {
+      name: "description",
+      content: "Mi componente",
+    },
+  ],
+  style: `
+    p {
+      color: red;
+    }
+  `,
   tagName: "my-component",
   controller: function () {
     // Lógica aquí

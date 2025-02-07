@@ -1,5 +1,5 @@
 /**
- * ScopeJS V2.0.1
+ * ScopeJS V2.0.2
  */
 // Diccionario de componentes
 const components = {};
@@ -45,7 +45,7 @@ function initFadeIn() {
  * @param {Function} options.render - Función de renderizado del componente.
  * @returns {Object} - Instancia del componente con métodos de renderizado y control.
  */
-export function Component({ tagName, controller, render, postRender }) {
+export function Component({ tagName, controller, render, postRender, style, meta, title }) {
   // Crear una instancia del componente.
   const c = new (function Component() {
     /**
@@ -56,6 +56,11 @@ export function Component({ tagName, controller, render, postRender }) {
     this.render = function (container = document.createElement("div"), children = []) {
       const uuid = container.getAttribute(UUID_ATTRIBUTE) ?? (crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2));
 
+      /**
+       * Loads lazy images (img[lazy]) within the given element. This function will
+       * traverse the entire DOM tree of the element and load all lazy images.
+       * @param {HTMLElement} element - The element to look for lazy images within.
+       */
       function loadLazyImgs(element) {
         if (!element) return;
         if (element.tagName === "IMG" && element.hasAttribute("lazy")) {
@@ -87,10 +92,10 @@ export function Component({ tagName, controller, render, postRender }) {
 
         const maxLength = Math.max(originalChildren.length, updatedChildren.length);
 
-        let style = document.querySelector("style[scopejs]");
+        let style = document.querySelector("style[scopejs='']");
         if (!style) {
           style = document.createElement("style");
-          style.setAttribute("scopejs", "1");
+          style.setAttribute("scopejs", "");
           style.innerHTML = /* CSS */ `
             @keyframes lazy-loading {
               0% {
@@ -299,6 +304,38 @@ export function Component({ tagName, controller, render, postRender }) {
         return container.innerHTML;
       };
 
+      /**
+       * renderStyle - Renderiza el estilo CSS proporcionado en el scope del
+       * componente actual.
+       *
+       * @returns {void}
+       */
+      function renderStyle() {
+        if (!style) return;
+        let style_element = document.querySelector(`style[scopejs="${uuid}"]`);
+        if (style_element) return;
+        style_element = document.createElement("style");
+        style_element.setAttribute("scopejs", uuid);
+        style_element.innerHTML = /* CSS */ `
+            *[${UUID_ATTRIBUTE}="${uuid}"] {
+              ${style}
+            }
+          `;
+        document.head.appendChild(style_element);
+      }
+
+      function renderMeta() {
+        if (!meta) return;
+        for (let item of meta) {
+          let meta_element = document.querySelector(`meta[name="${item.name}"]`);
+          if (meta_element) continue;
+          meta_element = document.createElement("meta");
+          meta_element.setAttribute("name", item.name);
+          meta_element.setAttribute("content", item.content);
+          document.head.appendChild(meta_element);
+        }
+      }
+
       // Crear una instancia del controlador, si se proporciona.
       const c = controller ? new controller() : new (function () {})();
 
@@ -311,6 +348,13 @@ export function Component({ tagName, controller, render, postRender }) {
       }
 
       container.setAttribute(UUID_ATTRIBUTE, uuid);
+
+      renderStyle();
+      renderMeta();
+
+      if (title) {
+        document.title = title;
+      }
 
       // Agregar la función de renderizado al controlador.
       c.apply = apply;
@@ -423,6 +467,7 @@ export function Modal({ controller, render, hideWhenClickOverlay, className, ref
  */
 export function Router(routes = [], params = {}) {
   if (params.useHash == undefined) params.useHash = true;
+
   /**
    * matchDynamicRoute - Compara una ruta dinámica con una ruta dada y extrae parámetros si hay coincidencia.
    * @param {string} routePattern - Patrón de la ruta dinámica.
@@ -488,6 +533,14 @@ export function Router(routes = [], params = {}) {
     this.render = function (container = null) {
       if (container) this.container = container;
       if (!this.container) return;
+
+      // Remove styles from the last rendered component.
+      document.querySelectorAll("style[scopejs]").forEach((style) => {
+        if (style.getAttribute("scopejs") === "") return;
+        if (style.getAttribute("scopejs") === "global") return;
+        style.remove();
+      });
+
       if (params.useHash) {
         if (!location.hash) location.hash = "#/";
         this.path = location.hash.replace("#", "");
@@ -507,7 +560,7 @@ export function Router(routes = [], params = {}) {
         }
       }
       if (!route) {
-        this.alias = params.error ? (params.error.alias.startsWith(":") ? this.params[params.error.alias.split(":")[1]] : params.error.alias) : "404";
+        this.alias = params.error && params.error.alias ? (params.error.alias.startsWith(":") ? this.params[params.error.alias.split(":")[1]] : params.error.alias) : "404";
         this.current_component = Component(params.error ? params.error.controller : { render: () => "404" }).render(this.container);
       } else {
         if (this.current_component) destroyRecursive(this.current_component);
