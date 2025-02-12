@@ -547,6 +547,9 @@ export function Router(routes = [], params = {}) {
       } else {
         this.path = location.pathname;
       }
+      if (this.path.endsWith('/') && this.path != "/") {
+          this.path = this.path.slice(0, -1);
+      }
       let route = routes.find((r) => r.path === this.path);
       this.params = {};
       if (!route) {
