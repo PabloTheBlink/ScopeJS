@@ -45,7 +45,7 @@ function initFadeIn() {
  * @param {Function} options.render - Función de renderizado del componente.
  * @returns {Object} - Instancia del componente con métodos de renderizado y control.
  */
-export function Component({ tagName, controller, render, postRender, style, meta, title }) {
+export function Component({ tagName, controller, render, attributes, postRender, style, meta, title, router }) {
   // Crear una instancia del componente.
   const c = new (function Component() {
     /**
@@ -283,6 +283,18 @@ export function Component({ tagName, controller, render, postRender, style, meta
           });
         }
 
+        if (router) {
+          document.querySelectorAll("a[href]").forEach((element) => {
+            if (!element.dataset.listenerAdded) {
+              element.dataset.listenerAdded = "true";
+              element.addEventListener("click", (event) => {
+                event.preventDefault();
+                router.navigate(element.getAttribute("href"));
+              });
+            }
+          });
+        }
+
         // Renderizar hijos dentro del slot.
         container.querySelectorAll("slot").forEach((element) => {
           for (let child of children) element.appendChild(child);
@@ -296,6 +308,17 @@ export function Component({ tagName, controller, render, postRender, style, meta
         });
 
         if (postRender) setTimeout(postRender.bind(c), 100);
+
+        const allAttributes = new Set([...container.getAttributeNames(), ...(attributes || [])]);
+
+        for (const name of allAttributes) {
+          const attrValue = container.getAttribute(name);
+          const value = container.hasAttribute(name) ? attrValue : undefined;
+          if (c[name] !== value) {
+            c[name] = value;
+            c.onChangeAttribute?.(name);
+          }
+        }
 
         container.dispatchEvent(new Event("change"));
 
@@ -343,10 +366,6 @@ export function Component({ tagName, controller, render, postRender, style, meta
 
       c._render_times = 0;
 
-      for (let name of container.getAttributeNames()) {
-        c[name] = container.getAttribute(name);
-      }
-
       container.setAttribute(UUID_ATTRIBUTE, uuid);
 
       renderStyle();
@@ -359,6 +378,16 @@ export function Component({ tagName, controller, render, postRender, style, meta
       // Agregar la función de renderizado al controlador.
       c.apply = apply;
       apply();
+
+      const allAttributes = new Set([...container.getAttributeNames(), ...(attributes || [])]);
+
+      for (const name of allAttributes) {
+        const attrValue = container.getAttribute(name);
+        const value = container.hasAttribute(name) ? attrValue : undefined;
+        if (c[name] !== value) {
+          c[name] = value;
+        }
+      }
 
       container.dispatchEvent(new Event("load"));
 
@@ -511,6 +540,7 @@ export function Router(routes = [], params = {}) {
      */
     this.navigate = (path, body = null) => {
       if (params.useHash) path = `#${path}`;
+      if (path === window.location.hash || path === window.location.pathname) return;
       history.pushState({ urlPath: `${path}` }, "", `${path}`);
       this.body = body;
       document.startViewTransition ? document.startViewTransition(this.render.bind(this)) : this.render();
@@ -547,8 +577,8 @@ export function Router(routes = [], params = {}) {
       } else {
         this.path = location.pathname;
       }
-      if (this.path.endsWith('/') && this.path != "/") {
-          this.path = this.path.slice(0, -1);
+      if (this.path.endsWith("/") && this.path != "/") {
+        this.path = this.path.slice(0, -1);
       }
       let route = routes.find((r) => r.path === this.path);
       this.params = {};
@@ -564,7 +594,7 @@ export function Router(routes = [], params = {}) {
       }
       if (!route) {
         this.alias = params.error && params.error.alias ? (params.error.alias.startsWith(":") ? this.params[params.error.alias.split(":")[1]] : params.error.alias) : "404";
-        this.current_component = Component(params.error ? params.error.controller : { render: () => "404" }).render(this.container);
+        this.current_component = Component(params.error ? { ...params.error.controller, router: this } : { render: () => "404" }).render(this.container);
       } else {
         if (this.current_component) destroyRecursive(this.current_component);
         if (route.middleware) {
@@ -574,7 +604,7 @@ export function Router(routes = [], params = {}) {
             } else {
               this.alias = undefined;
             }
-            this.current_component = Component(route.controller).render(this.container);
+            this.current_component = Component({ ...route.controller, router: this }).render(this.container);
           });
         } else {
           if (route.alias) {
@@ -582,7 +612,7 @@ export function Router(routes = [], params = {}) {
           } else {
             this.alias = undefined;
           }
-          this.current_component = Component(route.controller).render(this.container);
+          this.current_component = Component({ ...route.controller, router: this }).render(this.container);
         }
       }
       for (let listener in this.listeners) this.listeners[listener](this.params);
