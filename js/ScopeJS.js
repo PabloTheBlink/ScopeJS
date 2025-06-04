@@ -86,6 +86,7 @@ export function Component({ tagName, controller, render, attributes, postRender,
        * @param {HTMLElement} clone El clon que contiene la estructura actualizada de los hijos.
        */
       function updateDomChildren(container, clone) {
+        if (!container.getAttribute) return;
         if (container.getAttribute(UUID_ATTRIBUTE) && container.getAttribute(UUID_ATTRIBUTE) != uuid) return;
         const originalChildren = container.childNodes;
         const updatedChildren = clone.childNodes;
@@ -184,11 +185,13 @@ export function Component({ tagName, controller, render, attributes, postRender,
               }
             } else {
               if (originalChild.tagName === updatedChild.tagName) {
+                if (!originalChild.attributes) originalChild.attributes = [];
                 for (let attr of originalChild.attributes) {
                   if (attr.name == UUID_ATTRIBUTE) continue;
                   if (updatedChild.hasAttribute(attr.name)) continue;
                   originalChild.removeAttribute(attr.name);
                 }
+                if (!updatedChild.attributes) updatedChild.attributes = [];
                 for (let attr of updatedChild.attributes) {
                   if (attr.name == UUID_ATTRIBUTE) continue;
                   if (!originalChild.hasAttribute(attr.name)) {
