@@ -7,6 +7,17 @@ import { Component, Router, Modal } from "https://cdn.devetty.es/ScopeJS/js";
 import { Component, Router, Modal } from "https://cdn.jsdelivr.net/gh/pablotheblink/ScopeJS/js/ScopeJS.min.js";
 ```
 
+## Novedades V2.0.3
+
+### Optimizaciones y Refactorización
+
+- **Arquitectura modular**: El código ha sido refactorizado en clases especializadas para mejor mantenimiento
+- **Mejores prácticas**: Uso de Map en lugar de objetos planos para mejor rendimiento
+- **Optimización DOM**: Reducción significativa de manipulaciones DOM innecesarias
+- **Gestión de memoria**: Mejor limpieza de estilos y componentes destruidos
+- **Manejo de eventos optimizado**: Sistema más eficiente para binding de eventos HTML
+- **Compatibilidad mantenida**: Todas las APIs públicas mantienen compatibilidad total
+
 # Component
 
 Crea un componente con capacidad de renderizado y control.

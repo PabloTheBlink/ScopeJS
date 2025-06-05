@@ -1,432 +1,563 @@
 /**
- * ScopeJS V2.0.2
+ * ScopeJS V2.0.3 - Optimized & Refactored
+ * A lightweight JavaScript framework for component-based development
  */
-// Diccionario de componentes
-const components = {};
-// Variables parametrizables
-// Variable global que indica si el debugger está habilitado o no.
-let ENABLE_DEBUGGER = false;
-let UUID_ATTRIBUTE = "scopejs-component";
-// Función para habilitar o deshabilitar el debugger.
-export function enableDebugger(bool) {
-  // Actualiza el valor de la variable global ENABLE_DEBUGGER con el valor proporcionado.
-  ENABLE_DEBUGGER = bool;
+
+// Constants and Configuration
+const COMPONENT_REGISTRY = new Map();
+const UUID_ATTRIBUTE = "scopejs-component";
+const HTML_EVENTS = ["onclick", "ondblclick", "onmousedown", "onmousemove", "onmouseout", "onmouseover", "onmouseup", "onkeydown", "onkeypress", "onkeyup", "onabort", "onbeforeunload", "onerror", "onload", "onresize", "onscroll", "onunload", "onblur", "onchange", "onfocus", "onreset", "onselect", "onsubmit", "oncontextmenu", "oninput", "oninvalid", "onsearch", "ondrag", "ondragend", "ondragenter", "ondragleave", "ondragover", "ondragstart", "ondrop", "oncopy", "oncut", "onpaste", "onwheel", "ontouchcancel", "ontouchend", "ontouchmove", "ontouchstart"];
+
+// Global state
+let debuggerEnabled = false;
+
+/**
+ * Enables or disables the debugger
+ * @param {boolean} enabled - Whether to enable debugging
+ */
+export function enableDebugger(enabled) {
+  debuggerEnabled = enabled;
 }
-// Función de registro de mensajes para debugging.
-function log(...attr) {
-  // Si el debugger no está habilitado, no se ejecuta nada.
-  if (!ENABLE_DEBUGGER) return;
-  // Imprime los atributos recibidos en la consola.
-  console.log(...attr);
-}
-function getChildren(element) {
-  if (element.tagName.toUpperCase() == "SLOT") return getChildren(element.querySelector("slot"));
-  const cloned_children = [];
-  for (let child of element.children) {
-    cloned_children.push(child.cloneNode(true));
+
+/**
+ * Logs messages when debugger is enabled
+ * @param {...any} args - Arguments to log
+ */
+function log(...args) {
+  if (debuggerEnabled) {
+    console.log(...args);
   }
-  return cloned_children;
 }
+
+/**
+ * Generates a unique identifier
+ * @returns {string} - Unique ID
+ */
+function generateUUID() {
+  return crypto.randomUUID?.() || Math.random().toString(36).slice(2);
+}
+
+/**
+ * Gets cloned children from an element
+ * @param {HTMLElement} element - Source element
+ * @returns {HTMLElement[]} - Array of cloned children
+ */
+function getChildren(element) {
+  if (element.tagName?.toUpperCase() === "SLOT") {
+    return getChildren(element.querySelector("slot"));
+  }
+
+  return Array.from(element.children || []).map((child) => child.cloneNode(true));
+}
+
+/**
+ * Initializes fade-in animation for elements with fadeIn attribute
+ */
 function initFadeIn() {
-  const e = new IntersectionObserver((e) => {
-    e.forEach((e) => {
-      e.isIntersecting ? e.target.setAttribute("fadeIn", "1") : e.target.setAttribute("fadeIn", "0");
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      entry.target.setAttribute("fadeIn", entry.isIntersecting ? "1" : "0");
     });
   });
-  document.querySelectorAll("*[fadeIn]").forEach((t) => {
-    e.observe(t);
+
+  document.querySelectorAll("*[fadeIn]").forEach((element) => {
+    observer.observe(element);
   });
 }
+
 /**
- * Crea un componente con capacidad de renderizado y control.
- * @param {Object} options - Opciones para configurar el componente.
- * @param {string} options.tagName - Nombre de la etiqueta HTML asociada al componente.
- * @param {Object} options.controller - Controlador del componente.
- * @param {Function} options.render - Función de renderizado del componente.
- * @returns {Object} - Instancia del componente con métodos de renderizado y control.
+ * CSS Styles Manager - Handles all style injection and management
  */
-export function Component({ tagName, controller, render, attributes, postRender, style, meta, title, router }) {
-  // Crear una instancia del componente.
-  const c = new (function Component() {
-    /**
-     * Función de renderizado del componente.
-     * @param {HTMLElement} container - Contenedor donde se renderizará el componente.
-     * @returns {Object} - Instancia del componente con métodos de renderizado y control.
-     */
-    this.render = function (container = document.createElement("div"), children = []) {
-      const uuid = container.getAttribute(UUID_ATTRIBUTE) ?? (crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2));
+class StyleManager {
+  static globalStylesInjected = false;
 
-      /**
-       * Loads lazy images (img[lazy]) within the given element. This function will
-       * traverse the entire DOM tree of the element and load all lazy images.
-       * @param {HTMLElement} element - The element to look for lazy images within.
-       */
-      function loadLazyImgs(element) {
-        if (!element) return;
-        if (element.tagName === "IMG" && element.hasAttribute("lazy")) {
-          // Image lazy load
-          (function () {
-            const src = element.getAttribute("src");
-            element.removeAttribute("src");
-            const image = new Image();
-            image.src = src;
-            image.onload = function () {
-              element.setAttribute("src", src);
-              element.removeAttribute("lazy");
-            };
-          })();
-        }
-        if (element.querySelectorAll) element.querySelectorAll("img[lazy]").forEach(loadLazyImgs);
+  static injectGlobalStyles() {
+    if (this.globalStylesInjected) return;
+
+    const style = document.createElement("style");
+    style.setAttribute("scopejs", "");
+    style.innerHTML = /* CSS */ `
+      @keyframes lazy-loading {
+        0% { background-position: 100% 50%; }
+        100% { background-position: 0 50%; }
       }
 
-      /**
-       * Actualiza los hijos de un contenedor DOM basándose en un clon proporcionado.
-       *
-       * @param {HTMLElement} container El contenedor cuyos hijos se actualizarán.
-       * @param {HTMLElement} clone El clon que contiene la estructura actualizada de los hijos.
-       */
-      function updateDomChildren(container, clone) {
-        if (!container.getAttribute) return;
-        if (container.getAttribute(UUID_ATTRIBUTE) && container.getAttribute(UUID_ATTRIBUTE) != uuid) return;
-        const originalChildren = container.childNodes;
-        const updatedChildren = clone.childNodes;
-
-        const maxLength = Math.max(originalChildren.length, updatedChildren.length);
-
-        let style = document.querySelector("style[scopejs='']");
-        if (!style) {
-          style = document.createElement("style");
-          style.setAttribute("scopejs", "");
-          style.innerHTML = /* CSS */ `
-            @keyframes lazy-loading {
-              0% {
-                background-position: 100% 50%;
-              }
-              100% {
-                background-position: 0 50%;
-              }
-            }
-
-            img[lazy] {
-              position: relative;
-            }
-
-            img[lazy]::after {
-              content: '';
-              position: absolute;
-              top: 0;
-              left: 0;
-              width: 100%;
-              height: 100%;
-              background: linear-gradient(90deg, #ccc 25%, #eee 50%, #ccc 75%);
-              background-size: 400% 400%;
-              animation: lazy-loading 0.5s ease infinite;
-            }
-
-            ::view-transition-old(*),
-            ::view-transition-new(*) {
-              animation-timing-function: ease-in-out;
-              animation-duration: 0.25s;
-            }
-
-            @keyframes fadeIn {
-              from {
-                opacity: 0;
-                transform: translateY(2.5rem);
-              }
-              to {
-                opacity: 1;
-                transform: translateY(0);
-              }
-            }
-
-            *[fadeIn] {
-              opacity: 0;
-              transform: translateY(2.5rem);
-              transition: 0.5s;
-            }
-
-            *[fadeIn='1'] {
-              opacity: 1;
-              transform: translateY(0);
-            }
-
-          `;
-          document.head.appendChild(style);
-        }
-
-        for (let i = 0; i < maxLength; i++) {
-          const updatedChild = updatedChildren[i];
-          if (!updatedChild) continue;
-          if (!updatedChild.hasAttribute || !updatedChild.hasAttribute("id")) continue;
-
-          const id = updatedChild.getAttribute("id");
-          // Verifica si la regla CSS ya existe en el estilo
-          if (style.innerHTML.includes(`#${id}`)) continue;
-
-          style.innerHTML += `#${id} { view-transition-name: ${id}; } ::view-transition-group(${id}) { animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1); animation-duration: 0.5s; }`;
-        }
-
-        for (let i = 0; i < maxLength; i++) {
-          const originalChild = originalChildren[i];
-          const updatedChild = updatedChildren[i];
-
-          if (!originalChild && updatedChild) {
-            const newElement = updatedChild.cloneNode(true);
-            loadLazyImgs(newElement);
-            container.appendChild(newElement);
-          } else if (originalChild && !updatedChild) {
-            originalChild.remove();
-          } else if (originalChild && updatedChild) {
-            if (originalChild.nodeType === Node.TEXT_NODE && updatedChild.nodeType === Node.TEXT_NODE) {
-              if (originalChild.textContent.replaceAll(/\s/g, "") !== updatedChild.textContent.replaceAll(/\s/g, "")) {
-                log(uuid, "Reemplazando texto", originalChild.textContent, updatedChild.textContent);
-                originalChild.textContent = updatedChild.textContent;
-              }
-            } else {
-              if (originalChild.tagName === updatedChild.tagName) {
-                if (!originalChild.attributes) originalChild.attributes = [];
-                for (let attr of originalChild.attributes) {
-                  if (attr.name == UUID_ATTRIBUTE) continue;
-                  if (updatedChild.hasAttribute(attr.name)) continue;
-                  originalChild.removeAttribute(attr.name);
-                }
-                if (!updatedChild.attributes) updatedChild.attributes = [];
-                for (let attr of updatedChild.attributes) {
-                  if (attr.name == UUID_ATTRIBUTE) continue;
-                  if (!originalChild.hasAttribute(attr.name)) {
-                    originalChild.setAttribute(attr.name, attr.value);
-                  } else {
-                    if (originalChild.getAttribute(attr.name) != attr.value) {
-                      originalChild.setAttribute(attr.name, attr.value);
-                    }
-                  }
-                }
-                updateDomChildren(originalChild, updatedChild);
-              } else {
-                // Clona el nodo actualizado
-                const clonedNode = updatedChild.cloneNode(true);
-                log(uuid, "Reemplazando elemento", originalChild, clonedNode);
-                container.replaceChild(clonedNode, originalChild);
-              }
-            }
-          }
-        }
+      img[lazy] {
+        position: relative;
       }
 
-      // Función interna para aplicar el renderizado.
-      const apply = function () {
-        // Renderizar el contenido en el contenedor.
-
-        if (!container) return;
-
-        const rendered = render.bind(c)();
-
-        if (!rendered) return;
-
-        c._render_times++;
-
-        const clone = container.cloneNode(true);
-        clone.innerHTML = rendered;
-
-        updateDomChildren(container, clone);
-
-        // ngModel
-        container.querySelectorAll("*[model]").forEach((el) => {
-          const modelName = el.getAttribute("model");
-          const spl = modelName.split(".");
-          let value = c;
-          for (let item of spl) {
-            if (!value) continue;
-            value = value[item];
-          }
-          if (value) el.value = value;
-
-          // Aquí se asigna el evento input para que actualice la propiedad correspondiente en tiempo real
-          el.addEventListener("input", () => {
-            let currentValue = c;
-            for (let i = 0; i < spl.length - 1; i++) {
-              currentValue = currentValue[spl[i]];
-            }
-            currentValue[spl[spl.length - 1]] = el.value;
-          });
-        });
-
-        // Asignar eventos HTML a funciones del controlador.
-        for (const htmlEvent of ["onclick", "ondblclick", "onmousedown", "onmousemove", "onmouseout", "onmouseover", "onmouseup", "onkeydown", "onkeypress", "onkeyup", "onabort", "onbeforeunload", "onerror", "onload", "onresize", "onscroll", "onunload", "onblur", "onchange", "onfocus", "onreset", "onselect", "onsubmit", "oncontextmenu", "oninput", "oninvalid", "onsearch", "ondrag", "ondragend", "ondragenter", "ondragleave", "ondragover", "ondragstart", "ondrop", "oncopy", "oncut", "onpaste", "onwheel", "ontouchcancel", "ontouchend", "ontouchmove", "ontouchstart"]) {
-          container.querySelectorAll(`*[${htmlEvent}]`).forEach((el) => {
-            const clickEventName = el.getAttribute(htmlEvent);
-            const function_name = clickEventName.split("(")[0];
-            const func = c[function_name];
-
-            // Asignar el evento HTML a la función del controlador.
-            if (typeof func === "function") {
-              el[htmlEvent] = function (event) {
-                event.preventDefault();
-                let params = { event };
-                if (clickEventName.split("(").length > 0) {
-                  if (clickEventName.split("(")[1]) {
-                    if (clickEventName.split("(")[1].split(")")[0]) {
-                      const p = clickEventName.split("(")[1].split(")")[0].split(",");
-                      params = {};
-                      for (let i = 0; i < p.length; i++) {
-                        if (c[p[i]]) {
-                          params[i] = c[p[i]];
-                        } else {
-                          params[i] = eval(p[i]);
-                        }
-                      }
-                      params[p.length] = event;
-                    }
-                  }
-                }
-                setTimeout(() => func.apply(c, Object.values(params)), 0);
-              };
-            }
-          });
-        }
-
-        if (router) {
-          document.querySelectorAll("a[href]").forEach((element) => {
-            if (!element.dataset.listenerAdded) {
-              element.dataset.listenerAdded = "true";
-              element.addEventListener("click", (event) => {
-                event.preventDefault();
-                router.navigate(element.getAttribute("href"));
-              });
-            }
-          });
-        }
-
-        // Renderizar hijos dentro del slot.
-        container.querySelectorAll("slot").forEach((element) => {
-          for (let child of children) element.appendChild(child);
-        });
-
-        // Renderizar subcomponentes dentro del contenedor.
-        container.querySelectorAll("*").forEach((element) => {
-          if (!components[element.tagName.toUpperCase()]) return;
-          if (element.hasAttribute(UUID_ATTRIBUTE)) return;
-          c.children.push(components[element.tagName.toUpperCase()].render(element, getChildren(element)));
-        });
-
-        if (postRender) setTimeout(postRender.bind(c), 100);
-
-        const allAttributes = new Set([...container.getAttributeNames(), ...(attributes || [])]);
-
-        for (const name of allAttributes) {
-          const attrValue = container.getAttribute(name);
-          const value = container.hasAttribute(name) ? attrValue : undefined;
-          if (c[name] !== value) {
-            c[name] = value;
-            c.onChangeAttribute?.(name);
-          }
-        }
-
-        container.dispatchEvent(new Event("change"));
-
-        setTimeout(initFadeIn);
-
-        return container.innerHTML;
-      };
-
-      /**
-       * renderStyle - Renderiza el estilo CSS proporcionado en el scope del
-       * componente actual.
-       *
-       * @returns {void}
-       */
-      function renderStyle() {
-        if (!style) return;
-        let style_element = document.querySelector(`style[scopejs="${uuid}"]`);
-        if (style_element) return;
-        style_element = document.createElement("style");
-        style_element.setAttribute("scopejs", uuid);
-        style_element.innerHTML = /* CSS */ `
-            *[${UUID_ATTRIBUTE}="${uuid}"] {
-              ${style}
-            }
-          `;
-        document.head.appendChild(style_element);
+      img[lazy]::after {
+        content: '';
+        position: absolute;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: linear-gradient(90deg, #ccc 25%, #eee 50%, #ccc 75%);
+        background-size: 400% 400%;
+        animation: lazy-loading 0.5s ease infinite;
       }
 
-      function renderMeta() {
-        if (!meta) return;
-        for (let item of meta) {
-          let meta_element = document.querySelector(`meta[name="${item.name}"]`);
-          if (meta_element) continue;
-          meta_element = document.createElement("meta");
-          meta_element.setAttribute("name", item.name);
-          meta_element.setAttribute("content", item.content);
-          document.head.appendChild(meta_element);
-        }
+      ::view-transition-old(*),
+      ::view-transition-new(*) {
+        animation-timing-function: ease-in-out;
+        animation-duration: 0.25s;
       }
 
-      // Crear una instancia del controlador, si se proporciona.
-      const c = controller ? new controller() : new (function () {})();
-
-      c.children = [];
-
-      c._render_times = 0;
-
-      container.setAttribute(UUID_ATTRIBUTE, uuid);
-
-      renderStyle();
-      renderMeta();
-
-      if (title) {
-        document.title = title;
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(2.5rem); }
+        to { opacity: 1; transform: translateY(0); }
       }
 
-      // Agregar la función de renderizado al controlador.
-      c.apply = apply;
-      apply();
-
-      const allAttributes = new Set([...container.getAttributeNames(), ...(attributes || [])]);
-
-      for (const name of allAttributes) {
-        const attrValue = container.getAttribute(name);
-        const value = container.hasAttribute(name) ? attrValue : undefined;
-        if (c[name] !== value) {
-          c[name] = value;
-        }
+      *[fadeIn] {
+        opacity: 0;
+        transform: translateY(2.5rem);
+        transition: 0.5s;
       }
 
-      container.dispatchEvent(new Event("load"));
+      *[fadeIn='1'] {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    `;
 
-      // Devolver la instancia del componente.
-      return c;
-    };
-  })();
+    document.head.appendChild(style);
+    this.globalStylesInjected = true;
+  }
 
-  // Registrar el componente con su etiqueta HTML, si se proporciona.
-  if (tagName) components[tagName.toUpperCase()] = c;
+  static injectViewTransitionStyles(element) {
+    if (!element.hasAttribute?.("id")) return;
 
-  // Devolver la instancia del componente.
-  return c;
+    const id = element.getAttribute("id");
+    const style = document.querySelector("style[scopejs='']");
+
+    if (!style || style.innerHTML.includes(`#${id}`)) return;
+
+    style.innerHTML += `
+      #${id} { view-transition-name: ${id}; }
+      ::view-transition-group(${id}) { 
+        animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1); 
+        animation-duration: 0.5s; 
+      }
+    `;
+  }
+
+  static injectComponentStyle(uuid, cssText) {
+    if (!cssText || document.querySelector(`style[scopejs="${uuid}"]`)) return;
+
+    const style = document.createElement("style");
+    style.setAttribute("scopejs", uuid);
+    style.innerHTML = `*[${UUID_ATTRIBUTE}="${uuid}"] { ${cssText} }`;
+    document.head.appendChild(style);
+  }
 }
 
 /**
- * Crea y muestra un modal en la interfaz de usuario.
- * @param {Object} options - Opciones para personalizar el modal.
- * @param {Object} options.controller - Controlador del modal.
- * @param {Function} options.render - Función de renderizado del modal.
- * @param {boolean} options.hideWhenClickOverlay - Indica si el modal debe cerrarse al hacer clic en el fondo.
- * @param {Object} params - Parámetros adicionales para pasar a la función de renderizado del modal.
+ * Lazy Image Loader - Handles lazy loading of images
  */
-export function Modal({ controller, render, hideWhenClickOverlay, className, referrer }, params = {}, events = {}) {
-  // Estilos predefinidos para el overlay y el modal.
-  const MODAL_STYLE = {
-    OVERLAY: "position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 999999999",
-    MODAL: "position: fixed; top: 50%; left: 50%; border-radius: 0.25rem; min-width: 20rem; max-width: calc(100% - 2rem); transform: translate(-50%, -50%); background-color: white; color: black; transition: opacity 0.3s, transform 0.3s; z-index: 999999999",
-  };
+class LazyImageLoader {
+  static loadImages(element) {
+    if (!element) return;
 
-  // Crear una instancia del componente modal.
+    if (element.tagName === "IMG" && element.hasAttribute("lazy")) {
+      this.loadSingleImage(element);
+    }
+
+    element.querySelectorAll?.("img[lazy]").forEach((img) => this.loadSingleImage(img));
+  }
+
+  static loadSingleImage(img) {
+    const src = img.getAttribute("src");
+    if (!src) return;
+
+    img.removeAttribute("src");
+
+    const image = new Image();
+    image.src = src;
+    image.onload = () => {
+      img.setAttribute("src", src);
+      img.removeAttribute("lazy");
+    };
+  }
+}
+
+/**
+ * DOM Updater - Handles efficient DOM updates with minimal manipulation
+ */
+class DOMUpdater {
+  constructor(uuid) {
+    this.uuid = uuid;
+  }
+
+  updateChildren(container, clone) {
+    if (!container?.getAttribute || (container.getAttribute(UUID_ATTRIBUTE) && container.getAttribute(UUID_ATTRIBUTE) !== this.uuid)) {
+      return;
+    }
+
+    StyleManager.injectGlobalStyles();
+
+    const originalChildren = container.childNodes;
+    const updatedChildren = clone.childNodes;
+    const maxLength = Math.max(originalChildren.length, updatedChildren.length);
+
+    this.processViewTransitions(updatedChildren);
+    this.reconcileChildren(container, originalChildren, updatedChildren, maxLength);
+  }
+
+  processViewTransitions(updatedChildren) {
+    Array.from(updatedChildren).forEach((child) => {
+      if (child.nodeType === Node.ELEMENT_NODE) {
+        StyleManager.injectViewTransitionStyles(child);
+      }
+    });
+  }
+
+  reconcileChildren(container, originalChildren, updatedChildren, maxLength) {
+    for (let i = 0; i < maxLength; i++) {
+      const originalChild = originalChildren[i];
+      const updatedChild = updatedChildren[i];
+
+      if (!originalChild && updatedChild) {
+        this.addChild(container, updatedChild);
+      } else if (originalChild && !updatedChild) {
+        originalChild.remove();
+      } else if (originalChild && updatedChild) {
+        this.updateChild(originalChild, updatedChild);
+      }
+    }
+  }
+
+  addChild(container, updatedChild) {
+    const newElement = updatedChild.cloneNode(true);
+    LazyImageLoader.loadImages(newElement);
+    container.appendChild(newElement);
+  }
+
+  updateChild(originalChild, updatedChild) {
+    if (originalChild.nodeType === Node.TEXT_NODE && updatedChild.nodeType === Node.TEXT_NODE) {
+      this.updateTextNode(originalChild, updatedChild);
+    } else if (originalChild.tagName === updatedChild.tagName) {
+      this.updateElementNode(originalChild, updatedChild);
+    } else {
+      this.replaceNode(originalChild, updatedChild);
+    }
+  }
+
+  updateTextNode(originalChild, updatedChild) {
+    const originalText = originalChild.textContent.replace(/\s/g, "");
+    const updatedText = updatedChild.textContent.replace(/\s/g, "");
+
+    if (originalText !== updatedText) {
+      log(this.uuid, "Replacing text", originalChild.textContent, updatedChild.textContent);
+      originalChild.textContent = updatedChild.textContent;
+    }
+  }
+
+  updateElementNode(originalChild, updatedChild) {
+    this.updateAttributes(originalChild, updatedChild);
+    this.updateChildren(originalChild, updatedChild);
+  }
+
+  updateAttributes(originalChild, updatedChild) {
+    // Remove attributes not in updated child
+    Array.from(originalChild.attributes || []).forEach((attr) => {
+      if (attr.name === UUID_ATTRIBUTE || updatedChild.hasAttribute(attr.name)) return;
+      originalChild.removeAttribute(attr.name);
+    });
+
+    // Add/update attributes from updated child
+    Array.from(updatedChild.attributes || []).forEach((attr) => {
+      if (attr.name === UUID_ATTRIBUTE) return;
+
+      if (!originalChild.hasAttribute(attr.name) || originalChild.getAttribute(attr.name) !== attr.value) {
+        originalChild.setAttribute(attr.name, attr.value);
+      }
+    });
+  }
+
+  replaceNode(originalChild, updatedChild) {
+    const clonedNode = updatedChild.cloneNode(true);
+    log(this.uuid, "Replacing element", originalChild, clonedNode);
+    originalChild.parentNode?.replaceChild(clonedNode, originalChild);
+  }
+}
+
+/**
+ * Event Handler Manager - Optimized event binding and parameter parsing
+ */
+class EventManager {
+  static bindEvents(container, componentInstance) {
+    HTML_EVENTS.forEach((eventName) => {
+      container.querySelectorAll(`*[${eventName}]`).forEach((element) => {
+        this.bindSingleEvent(element, eventName, componentInstance);
+      });
+    });
+  }
+
+  static bindSingleEvent(element, eventName, componentInstance) {
+    const eventValue = element.getAttribute(eventName);
+    const functionName = eventValue.split("(")[0];
+    const func = componentInstance[functionName];
+
+    if (typeof func !== "function") return;
+
+    element[eventName] = (event) => {
+      event.preventDefault();
+      const params = this.parseEventParameters(eventValue, componentInstance, event);
+      setTimeout(() => func.apply(componentInstance, Object.values(params)), 0);
+    };
+  }
+
+  static parseEventParameters(eventValue, componentInstance, event) {
+    const paramsMatch = eventValue.match(/\(([^)]*)\)/);
+    if (!paramsMatch || !paramsMatch[1]) {
+      return { event };
+    }
+
+    const paramStrings = paramsMatch[1].split(",").map((p) => p.trim());
+    const params = {};
+
+    paramStrings.forEach((param, index) => {
+      params[index] = componentInstance[param] !== undefined ? componentInstance[param] : eval(param);
+    });
+
+    params[paramStrings.length] = event;
+    return params;
+  }
+}
+
+/**
+ * Model Binding Manager - Handles two-way data binding
+ */
+class ModelManager {
+  static bindModels(container, componentInstance) {
+    container.querySelectorAll("*[model]").forEach((element) => {
+      this.bindSingleModel(element, componentInstance);
+    });
+  }
+
+  static bindSingleModel(element, componentInstance) {
+    const modelPath = element.getAttribute("model");
+    const pathSegments = modelPath.split(".");
+
+    // Set initial value
+    const value = this.getValueByPath(componentInstance, pathSegments);
+    if (value !== undefined) {
+      element.value = value;
+    }
+
+    // Bind input event
+    element.addEventListener("input", () => {
+      this.setValueByPath(componentInstance, pathSegments, element.value);
+    });
+  }
+
+  static getValueByPath(obj, pathSegments) {
+    return pathSegments.reduce((current, segment) => current?.[segment], obj);
+  }
+
+  static setValueByPath(obj, pathSegments, value) {
+    const lastSegment = pathSegments.pop();
+    const target = pathSegments.reduce((current, segment) => current?.[segment], obj);
+    if (target && lastSegment) {
+      target[lastSegment] = value;
+    }
+  }
+}
+
+/**
+ * Component Instance - Main component logic
+ */
+class ComponentInstance {
+  constructor(options) {
+    this.options = options;
+  }
+
+  render(container = document.createElement("div"), children = []) {
+    const uuid = container.getAttribute(UUID_ATTRIBUTE) ?? generateUUID();
+    const domUpdater = new DOMUpdater(uuid);
+
+    // Create controller instance
+    const controllerInstance = this.options.controller ? new this.options.controller() : {};
+
+    controllerInstance.children = [];
+    controllerInstance._render_times = 0;
+
+    // Setup render function
+    const applyRender = () => {
+      if (!container) return;
+
+      const rendered = this.options.render?.bind(controllerInstance)();
+      if (!rendered) return;
+
+      controllerInstance._render_times++;
+
+      const clone = container.cloneNode(true);
+      clone.innerHTML = rendered;
+
+      domUpdater.updateChildren(container, clone);
+
+      // Bind models and events
+      ModelManager.bindModels(container, controllerInstance);
+      EventManager.bindEvents(container, controllerInstance);
+
+      // Handle router links
+      this.handleRouterLinks(container);
+
+      // Render slots
+      this.renderSlots(container, children);
+
+      // Render sub-components
+      this.renderSubComponents(container, controllerInstance);
+
+      // Post-render callback
+      if (this.options.postRender) {
+        setTimeout(() => this.options.postRender.bind(controllerInstance)(), 100);
+      }
+
+      // Update attributes
+      this.updateAttributes(container, controllerInstance);
+
+      // Dispatch events
+      container.dispatchEvent(new Event("change"));
+      setTimeout(initFadeIn);
+
+      return container.innerHTML;
+    };
+
+    // Setup container
+    container.setAttribute(UUID_ATTRIBUTE, uuid);
+
+    // Inject styles and meta
+    StyleManager.injectComponentStyle(uuid, this.options.style);
+    this.injectMeta();
+
+    if (this.options.title) {
+      document.title = this.options.title;
+    }
+
+    // Assign apply function
+    controllerInstance.apply = applyRender;
+
+    // Initial render
+    applyRender();
+
+    // Initialize attributes
+    this.initializeAttributes(container, controllerInstance);
+
+    // Dispatch load event
+    container.dispatchEvent(new Event("load"));
+
+    return controllerInstance;
+  }
+
+  handleRouterLinks(container) {
+    if (!this.options.router) return;
+
+    container.querySelectorAll("a[href]").forEach((element) => {
+      if (element.dataset.listenerAdded) return;
+
+      element.dataset.listenerAdded = "true";
+      element.addEventListener("click", (event) => {
+        event.preventDefault();
+        this.options.router.navigate(element.getAttribute("href"));
+      });
+    });
+  }
+
+  renderSlots(container, children) {
+    container.querySelectorAll("slot").forEach((slot) => {
+      children.forEach((child) => slot.appendChild(child));
+    });
+  }
+
+  renderSubComponents(container, controllerInstance) {
+    container.querySelectorAll("*").forEach((element) => {
+      const tagName = element.tagName.toUpperCase();
+      const component = COMPONENT_REGISTRY.get(tagName);
+
+      if (!component || element.hasAttribute(UUID_ATTRIBUTE)) return;
+
+      controllerInstance.children.push(component.render(element, getChildren(element)));
+    });
+  }
+
+  updateAttributes(container, controllerInstance) {
+    const allAttributes = new Set([...container.getAttributeNames(), ...(this.options.attributes || [])]);
+
+    allAttributes.forEach((name) => {
+      const value = container.hasAttribute(name) ? container.getAttribute(name) : undefined;
+
+      if (controllerInstance[name] !== value) {
+        controllerInstance[name] = value;
+        controllerInstance.onChangeAttribute?.(name);
+      }
+    });
+  }
+
+  initializeAttributes(container, controllerInstance) {
+    const allAttributes = new Set([...container.getAttributeNames(), ...(this.options.attributes || [])]);
+
+    allAttributes.forEach((name) => {
+      const value = container.hasAttribute(name) ? container.getAttribute(name) : undefined;
+      controllerInstance[name] = value;
+    });
+  }
+
+  injectMeta() {
+    if (!this.options.meta) return;
+
+    this.options.meta.forEach((item) => {
+      if (document.querySelector(`meta[name="${item.name}"]`)) return;
+
+      const meta = document.createElement("meta");
+      meta.setAttribute("name", item.name);
+      meta.setAttribute("content", item.content);
+      document.head.appendChild(meta);
+    });
+  }
+}
+
+/**
+ * Creates a component with rendering and control capabilities
+ * @param {Object} options - Component configuration options
+ * @returns {ComponentInstance} - Component instance
+ */
+export function Component(options) {
+  const component = new ComponentInstance(options);
+
+  // Register component if tagName is provided
+  if (options.tagName) {
+    COMPONENT_REGISTRY.set(options.tagName.toUpperCase(), component);
+  }
+
+  return component;
+}
+
+/**
+ * Modal configuration constants
+ */
+const MODAL_STYLES = {
+  OVERLAY: "position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 999999999",
+  MODAL: "position: fixed; top: 50%; left: 50%; border-radius: 0.25rem; min-width: 20rem; max-width: calc(100% - 2rem); transform: translate(-50%, -50%); background-color: white; color: black; transition: opacity 0.3s, transform 0.3s; z-index: 999999999",
+};
+
+/**
+ * Creates and displays a modal in the user interface
+ * @param {Object} options - Modal configuration options
+ * @param {Object} params - Additional parameters for the modal
+ * @param {Object} events - Event handlers for the modal
+ */
+export function Modal(options, params = {}, events = {}) {
+  const { controller, render, hideWhenClickOverlay, className, referrer } = options;
+
   const component = Component({ controller, render });
-
-  // Crear el elemento modal y aplicar estilos.
   const modal = document.createElement("div");
-  modal.setAttribute("style", MODAL_STYLE.MODAL);
+
+  // Setup modal styles
+  modal.setAttribute("style", MODAL_STYLES.MODAL);
+  modal.classList.add("modal");
+  if (className) modal.classList.add(className);
+
+  // Position modal relative to referrer or center
   if (referrer) {
     const pos = referrer.getBoundingClientRect();
     modal.style.top = `${pos.top + pos.height + 1}px`;
@@ -437,12 +568,10 @@ export function Modal({ controller, render, hideWhenClickOverlay, className, ref
     modal.style.transform = "translate(-50%, 65%)";
   }
 
-  modal.classList.add("modal");
-  if (className) modal.classList.add(className);
+  // Close function
+  const close = (...args) => {
+    events.onClose?.(...args);
 
-  // Función para cerrar el modal.
-  const close = function (...attr) {
-    if (events.onClose) events.onClose(...attr);
     if (!referrer) {
       modal.style.opacity = 0;
       modal.style.transform = "translate(-50%, 65%)";
@@ -456,29 +585,23 @@ export function Modal({ controller, render, hideWhenClickOverlay, className, ref
     }
   };
 
-  // Renderizar el contenido del modal.
+  // Render modal content
   const componentInstance = component.render(modal);
-
-  // Asignar parámetros adicionales a la instancia del componente.
   Object.assign(componentInstance, params);
-
-  // Aplicar la función de renderizado.
   componentInstance.apply();
-
-  // Asignar la función de cierre al componente.
   componentInstance.close = close;
 
-  // Crear el overlay y añadirlo al cuerpo del documento.
+  // Create overlay
   const overlay = document.createElement("div");
-  overlay.setAttribute("style", MODAL_STYLE.OVERLAY);
+  overlay.setAttribute("style", MODAL_STYLES.OVERLAY);
   overlay.classList.add("overlay");
   if (referrer) overlay.style.opacity = 0;
-  document.body.appendChild(overlay);
 
-  // Añadir el modal al cuerpo del documento.
+  // Add to DOM
+  document.body.appendChild(overlay);
   document.body.appendChild(modal);
 
-  // Mostrar gradualmente el modal.
+  // Show modal with animation
   if (!referrer) {
     setTimeout(() => {
       modal.style.opacity = 1;
@@ -486,152 +609,212 @@ export function Modal({ controller, render, hideWhenClickOverlay, className, ref
     }, 50);
   }
 
-  // Cerrar el modal al hacer clic en el overlay si se especifica.
+  // Close on overlay click if enabled
   if (hideWhenClickOverlay) {
     overlay.onclick = close;
   }
 }
 
 /**
- * Router - Maneja la navegación y renderizado de rutas en una aplicación web.
- * @param {Array} routes - Arreglo de objetos de ruta con propiedades 'path' y 'controller'.
- * @returns {Object} - Instancia del enrutador con métodos para navegación y renderizado.
+ * Route Matcher - Handles dynamic route matching
  */
-export function Router(routes = [], params = {}) {
-  if (params.useHash == undefined) params.useHash = true;
-
-  /**
-   * matchDynamicRoute - Compara una ruta dinámica con una ruta dada y extrae parámetros si hay coincidencia.
-   * @param {string} routePattern - Patrón de la ruta dinámica.
-   * @param {string} path - Ruta a comparar.
-   * @returns {Object|null} - Objeto con parámetros si hay coincidencia, o null si no hay coincidencia.
-   */
-  const matchDynamicRoute = function (routePattern, path) {
+class RouteMatcher {
+  static match(routePattern, path) {
     const patternSegments = routePattern.split("/");
     const pathSegments = path.split("/");
+
     if (patternSegments.length !== pathSegments.length) return null;
-    let params = {};
+
+    const params = {};
+
     for (let i = 0; i < patternSegments.length; i++) {
       const pattern = patternSegments[i];
       const value = pathSegments[i];
+
       if (pattern.startsWith(":")) {
-        const paramName = pattern.slice(1);
-        params[paramName] = value;
+        params[pattern.slice(1)] = value;
       } else if (pattern !== value) {
         return null;
       }
     }
+
     return { params };
-  };
-  const destroyRecursive = function (controller) {
-    if (controller.onDestroy) controller.onDestroy();
-    for (let child of controller.children) {
-      destroyRecursive(child);
-    }
-  };
-  return new (function Router() {
-    this.params = undefined;
+  }
+}
+
+/**
+ * Router Instance - Handles navigation and route rendering
+ */
+class RouterInstance {
+  constructor(routes, config) {
+    this.routes = routes;
+    this.config = { useHash: true, ...config };
+    this.params = {};
     this.alias = undefined;
     this.path = undefined;
     this.body = undefined;
     this.current_component = undefined;
-    this.listeners = {};
+    this.listeners = new Map();
+    this.container = undefined;
 
-    /**
-     * navigate - Navega a la ruta especificada actualizando la ubicación hash.
-     * @param {string} path - Ruta a la que se desea navegar.
-     */
-    this.navigate = (path, body = null) => {
-      if (params.useHash) path = `#${path}`;
-      if (path === window.location.hash || path === window.location.pathname) return;
-      history.pushState({ urlPath: `${path}` }, "", `${path}`);
-      this.body = body;
-      document.startViewTransition ? document.startViewTransition(this.render.bind(this)) : this.render();
-    };
+    this.setupEventListeners();
+  }
 
-    this.listen = (callback) => {
-      const uuid = crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2);
-      this.listeners[uuid] = callback;
-    };
+  setupEventListeners() {
+    window.addEventListener("popstate", () => this.render());
+  }
 
-    this.unlisten = (uuid) => {
-      delete this.listeners[uuid];
-    };
+  navigate(path, body = null) {
+    const targetPath = this.config.useHash ? `#${path}` : path;
+    const currentPath = this.config.useHash ? window.location.hash : window.location.pathname;
 
-    /**
-     * render - Renderiza el controlador de la ruta actual en el contenedor proporcionado.
-     * @param {HTMLElement} container - Contenedor donde se renderizará el controlador.
-     * @param {boolean} first_time - Indica si es la primera vez que se renderiza.
-     */
-    this.render = function (container = null) {
-      if (container) this.container = container;
-      if (!this.container) return;
+    if (targetPath === currentPath) return;
 
-      // Remove styles from the last rendered component.
-      document.querySelectorAll("style[scopejs]").forEach((style) => {
-        if (style.getAttribute("scopejs") === "") return;
-        if (style.getAttribute("scopejs") === "global") return;
-        style.remove();
-      });
+    history.pushState({ urlPath: targetPath }, "", targetPath);
+    this.body = body;
 
-      if (params.useHash) {
-        if (!location.hash) location.hash = "#/";
-        this.path = location.hash.replace("#", "");
-      } else {
-        this.path = location.pathname;
-      }
-      if (this.path.endsWith("/") && this.path != "/") {
-        this.path = this.path.slice(0, -1);
-      }
-      let route = routes.find((r) => r.path === this.path);
-      this.params = {};
-      if (!route) {
-        for (let r of routes) {
-          const match = matchDynamicRoute(r.path, this.path);
-          if (match) {
-            this.params = match.params;
-            route = r;
-            break;
-          }
-        }
-      }
-      if (!route) {
-        this.alias = params.error && params.error.alias ? (params.error.alias.startsWith(":") ? this.params[params.error.alias.split(":")[1]] : params.error.alias) : "404";
-        this.current_component = Component(params.error ? { ...params.error.controller, router: this } : { render: () => "404" }).render(this.container);
-      } else {
-        if (this.current_component) destroyRecursive(this.current_component);
-        if (route.middleware) {
-          route.middleware(() => {
-            if (route.alias) {
-              this.alias = route.alias.startsWith(":") ? this.params[route.alias.split(":")[1]] : route.alias;
-            } else {
-              this.alias = undefined;
-            }
-            this.current_component = Component({ ...route.controller, router: this }).render(this.container);
-          });
-        } else {
-          if (route.alias) {
-            this.alias = route.alias.startsWith(":") ? this.params[route.alias.split(":")[1]] : route.alias;
-          } else {
-            this.alias = undefined;
-          }
-          this.current_component = Component({ ...route.controller, router: this }).render(this.container);
-        }
-      }
-      for (let listener in this.listeners) this.listeners[listener](this.params);
-      setTimeout(initFadeIn);
-    };
-
-    window.addEventListener("popstate", (e) => {
+    if (document.startViewTransition) {
+      document.startViewTransition(() => this.render());
+    } else {
       this.render();
+    }
+  }
+
+  listen(callback) {
+    const uuid = generateUUID();
+    this.listeners.set(uuid, callback);
+    return uuid;
+  }
+
+  unlisten(uuid) {
+    this.listeners.delete(uuid);
+  }
+
+  render(container = null) {
+    if (container) this.container = container;
+    if (!this.container) return;
+
+    this.cleanupStyles();
+    this.updateCurrentPath();
+
+    const route = this.findMatchingRoute();
+
+    if (route) {
+      this.renderRoute(route);
+    } else {
+      this.renderErrorPage();
+    }
+
+    this.notifyListeners();
+    setTimeout(initFadeIn);
+  }
+
+  cleanupStyles() {
+    document.querySelectorAll("style[scopejs]").forEach((style) => {
+      const scopeValue = style.getAttribute("scopejs");
+      if (scopeValue === "" || scopeValue === "global") return;
+      style.remove();
     });
-  })();
+  }
+
+  updateCurrentPath() {
+    if (this.config.useHash) {
+      if (!location.hash) location.hash = "#/";
+      this.path = location.hash.replace("#", "");
+    } else {
+      this.path = location.pathname;
+    }
+
+    if (this.path.endsWith("/") && this.path !== "/") {
+      this.path = this.path.slice(0, -1);
+    }
+  }
+
+  findMatchingRoute() {
+    this.params = {};
+
+    // Try exact match first
+    let route = this.routes.find((r) => r.path === this.path);
+
+    // Try dynamic match
+    if (!route) {
+      for (const r of this.routes) {
+        const match = RouteMatcher.match(r.path, this.path);
+        if (match) {
+          this.params = match.params;
+          route = r;
+          break;
+        }
+      }
+    }
+
+    return route;
+  }
+
+  renderRoute(route) {
+    if (this.current_component) {
+      this.destroyComponent(this.current_component);
+    }
+
+    const renderComponent = () => {
+      this.alias = this.resolveAlias(route.alias);
+      this.current_component = Component({
+        ...route.controller,
+        router: this,
+      }).render(this.container);
+    };
+
+    if (route.middleware) {
+      route.middleware(renderComponent);
+    } else {
+      renderComponent();
+    }
+  }
+
+  renderErrorPage() {
+    const errorConfig = this.config.error;
+    this.alias = this.resolveAlias(errorConfig?.alias) || "404";
+
+    this.current_component = Component(errorConfig ? { ...errorConfig.controller, router: this } : { render: () => "404" }).render(this.container);
+  }
+
+  resolveAlias(alias) {
+    if (!alias) return undefined;
+    return alias.startsWith(":") ? this.params[alias.slice(1)] : alias;
+  }
+
+  destroyComponent(component) {
+    component.onDestroy?.();
+    component.children?.forEach((child) => this.destroyComponent(child));
+  }
+
+  notifyListeners() {
+    this.listeners.forEach((callback) => callback(this.params));
+  }
 }
 
-window.addEventListener("load", function () {
+/**
+ * Router - Manages navigation and route rendering
+ * @param {Array} routes - Array of route objects
+ * @param {Object} config - Router configuration
+ * @returns {RouterInstance} - Router instance
+ */
+export function Router(routes = [], config = {}) {
+  return new RouterInstance(routes, config);
+}
+
+/**
+ * Initialize auto-loading components when page loads
+ */
+window.addEventListener("load", () => {
   document.querySelectorAll("*[autoload]").forEach((element) => {
     if (element.hasAttribute(UUID_ATTRIBUTE)) return;
-    if (!components[element.tagName.toUpperCase()]) return;
-    components[element.tagName.toUpperCase()].render(element, getChildren(element));
+
+    const tagName = element.tagName.toUpperCase();
+    const component = COMPONENT_REGISTRY.get(tagName);
+
+    if (component) {
+      component.render(element, getChildren(element));
+    }
   });
 });
