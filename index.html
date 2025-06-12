@@ -1,0 +1,1437 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ScopeJS - Framework JavaScript Minimalista</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <style>
+      /* Existing styles remain unchanged */
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap");
+
+      * {
+        font-family: "Inter", sans-serif;
+      }
+
+      .gradient-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+      }
+
+      .gradient-secondary {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+      }
+
+      .gradient-accent {
+        background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+      }
+
+      .glassmorphism {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+
+      .glassmorphism-dark {
+        background: rgba(0, 0, 0, 0.2);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .floating {
+        animation: float 6s ease-in-out infinite;
+      }
+
+      .floating-delayed {
+        animation: float 6s ease-in-out infinite;
+        animation-delay: -2s;
+      }
+
+      @keyframes float {
+        0%,
+        100% {
+          transform: translateY(0px) rotate(0deg);
+        }
+        33% {
+          transform: translateY(-20px) rotate(1deg);
+        }
+        66% {
+          transform: translateY(-10px) rotate(-1deg);
+        }
+      }
+
+      .pulse-glow {
+        animation: pulse-glow 2s infinite;
+      }
+
+      @keyframes pulse-glow {
+        0%,
+        100% {
+          box-shadow: 0 0 20px rgba(102, 126, 234, 0.4);
+        }
+        50% {
+          box-shadow: 0 0 40px rgba(102, 126, 234, 0.8);
+        }
+      }
+
+      .slide-in-up {
+        animation: slideInUp 0.8s ease-out;
+      }
+
+      @keyframes slideInUp {
+        from {
+          opacity: 0;
+          transform: translateY(50px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .hover-lift {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .hover-lift:hover {
+        transform: translateY(-8px) scale(1.02);
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+      }
+
+      .nav-item {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .nav-item::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+        transition: left 0.5s;
+      }
+
+      .nav-item:hover::before {
+        left: 100%;
+      }
+
+      .nav-item:hover {
+        background: rgba(102, 126, 234, 0.1);
+        transform: translateX(8px);
+        border-left: 4px solid #667eea;
+      }
+
+      .code-window {
+        background: linear-gradient(145deg, #1a1a2e, #16213e);
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+      }
+
+      .code-header {
+        background: linear-gradient(90deg, #ff5f56, #ffbd2e, #27ca3f);
+        height: 30px;
+        display: flex;
+        align-items: center;
+        padding: 0 15px;
+      }
+
+      .code-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        margin-right: 8px;
+      }
+
+      .typing-animation {
+        border-right: 2px solid #667eea;
+        animation: typing 3s infinite;
+      }
+
+      @keyframes typing {
+        0%,
+        50% {
+          border-color: transparent;
+        }
+        51%,
+        100% {
+          border-color: #667eea;
+        }
+      }
+
+      .particle {
+        position: absolute;
+        width: 4px;
+        height: 4px;
+        background: #667eea;
+        border-radius: 50%;
+        animation: particle-float 4s infinite ease-in-out;
+      }
+
+      @keyframes particle-float {
+        0%,
+        100% {
+          transform: translateY(0px) translateX(0px);
+          opacity: 0;
+        }
+        10%,
+        90% {
+          opacity: 1;
+        }
+        50% {
+          transform: translateY(-100px) translateX(50px);
+        }
+      }
+
+      .feature-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+      }
+
+      .demo-terminal {
+        background: #0d1117;
+        border-radius: 8px;
+        padding: 1rem;
+        font-family: "JetBrains Mono", monospace;
+        color: #58a6ff;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .terminal-line {
+        opacity: 0;
+        animation: terminal-type 0.5s ease-out forwards;
+      }
+
+      .terminal-line:nth-child(1) {
+        animation-delay: 0.5s;
+      }
+      .terminal-line:nth-child(2) {
+        animation-delay: 1s;
+      }
+      .terminal-line:nth-child(3) {
+        animation-delay: 1.5s;
+      }
+
+      @keyframes terminal-type {
+        to {
+          opacity: 1;
+        }
+      }
+
+      .scrollbar-thin {
+        scrollbar-width: thin;
+        scrollbar-color: rgba(102, 126, 234, 0.3) transparent;
+      }
+
+      .scrollbar-thin::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      .scrollbar-thin::-webkit-scrollbar-track {
+        background: transparent;
+      }
+
+      .scrollbar-thin::-webkit-scrollbar-thumb {
+        background: rgba(102, 126, 234, 0.3);
+        border-radius: 3px;
+      }
+
+      .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+        background: rgba(102, 126, 234, 0.5);
+      }
+
+      .mobile-nav {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease-in-out;
+      }
+
+      .mobile-nav.open {
+        transform: translateX(0);
+      }
+
+      @media (max-width: 1024px) {
+        .desktop-nav {
+          display: none;
+        }
+      }
+
+      @media (min-width: 1025px) {
+        .mobile-nav-toggle {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body class="bg-gray-900 text-white overflow-x-hidden">
+    <!-- Mobile Navigation Toggle -->
+    <button class="mobile-nav-toggle fixed top-4 left-4 z-50 lg:hidden glassmorphism p-3 rounded-lg" onclick="toggleMobileNav()">
+      <div class="w-6 h-0.5 bg-white mb-1 transition-all duration-300" id="burger-1"></div>
+      <div class="w-6 h-0.5 bg-white mb-1 transition-all duration-300" id="burger-2"></div>
+      <div class="w-6 h-0.5 bg-white transition-all duration-300" id="burger-3"></div>
+    </button>
+
+    <!-- Navigation -->
+    <nav class="desktop-nav fixed top-0 left-0 h-full w-80 glassmorphism-dark z-40 overflow-y-auto scrollbar-thin">
+      <div class="p-6">
+        <div class="flex items-center space-x-4 mb-8">
+          <div class="w-12 h-12 gradient-primary rounded-xl flex items-center justify-center pulse-glow">
+            <span class="text-white font-bold text-2xl">S</span>
+          </div>
+          <div>
+            <h1 class="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">ScopeJS</h1>
+            <p class="text-sm text-gray-400">v2.1.0 • Framework Reactivo</p>
+          </div>
+        </div>
+
+        <div class="space-y-1">
+          <a href="#inicio" class="nav-item block px-4 py-3 rounded-lg text-gray-300 hover:text-white"> <span class="text-xl mr-3">🚀</span> Inicio </a>
+          <a href="#instalacion" class="nav-item block px-4 py-3 rounded-lg text-gray-300 hover:text-white"> <span class="text-xl mr-3">📦</span> Instalación </a>
+          <a href="#componentes" class="nav-item block px-4 py-3 rounded-lg text-gray-300 hover:text-white"> <span class="text-xl mr-3">🧩</span> Componentes </a>
+          <a href="#router" class="nav-item block px-4 py-3 rounded-lg text-gray-300 hover:text-white"> <span class="text-xl mr-3">🛤️</span> Router </a>
+          <a href="#modal" class="nav-item block px-4 py-3 rounded-lg text-gray-300 hover:text-white"> <span class="text-xl mr-3">🎭</span> Modal </a>
+          <a href="#casos-uso" class="nav-item block px-4 py-3 rounded-lg text-gray-300 hover:text-white"> <span class="text-xl mr-3">💼</span> Casos de Uso </a>
+          <a href="#ejemplos" class="nav-item block px-4 py-3 rounded-lg text-gray-300 hover:text-white"> <span class="text-xl mr-3">💡</span> Ejemplos </a>
+          <a href="#generador" class="nav-item block px-4 py-3 rounded-lg text-gray-300 hover:text-white"> <span class="text-xl mr-3">⚡</span> Generador </a>
+          <a href="#playground" class="nav-item block px-4 py-3 rounded-lg text-gray-300 hover:text-white"> <span class="text-xl mr-3">🎮</span> Playground </a>
+        </div>
+
+        <div class="mt-8 p-4 glassmorphism rounded-lg">
+          <h3 class="text-sm font-semibold text-gray-400 mb-2">ESTADÍSTICAS</h3>
+          <div class="space-y-2 text-sm">
+            <div class="flex justify-between">
+              <span>Tamaño</span>
+              <span class="text-green-400">~8KB</span>
+            </div>
+            <div class="flex justify-between">
+              <span>Dependencias</span>
+              <span class="text-green-400">0</span>
+            </div>
+            <div class="flex justify-between">
+              <span>Soporte</span>
+              <span class="text-green-400">ES6+</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Mobile Navigation -->
+    <nav class="mobile-nav fixed top-0 left-0 h-full w-80 bg-gray-900 bg-opacity-95 backdrop-blur-lg z-40 overflow-y-auto lg:hidden">
+      <div class="p-6 pt-20">
+        <div class="flex items-center space-x-4 mb-8">
+          <div class="w-12 h-12 gradient-primary rounded-xl flex items-center justify-center">
+            <span class="text-white font-bold text-2xl">S</span>
+          </div>
+          <div>
+            <h1 class="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">ScopeJS</h1>
+            <p class="text-sm text-gray-400">v2.1.0</p>
+          </div>
+        </div>
+        <div class="space-y-1">
+          <a href="#inicio" class="nav-item block px-4 py-3 rounded-lg text-gray-300 hover:text-white" onclick="closeMobileNav()"> <span class="text-xl mr-3">🚀</span> Inicio </a>
+          <a href="#instalacion" class="nav-item block px-4 py-3 rounded-lg text-gray-300 hover:text-white" onclick="closeMobileNav()"> <span class="text-xl mr-3">📦</span> Instalación </a>
+          <a href="#componentes" class="nav-item block px-4 py-3 rounded-lg text-gray-300 hover:text-white" onclick="closeMobileNav()"> <span class="text-xl mr-3">🧩</span> Componentes </a>
+          <a href="#router" class="nav-item block px-4 py-3 rounded-lg text-gray-300 hover:text-white" onclick="closeMobileNav()"> <span class="text-xl mr-3">🛤️</span> Router </a>
+          <a href="#modal" class="nav-item block px-4 py-3 rounded-lg text-gray-300 hover:text-white" onclick="closeMobileNav()"> <span class="text-xl mr-3">🎭</span> Modal </a>
+          <a href="#casos-uso" class="nav-item block px-4 py-3 rounded-lg text-gray-300 hover:text-white" onclick="closeMobileNav()"> <span class="text-xl mr-3">💼</span> Casos de Uso </a>
+          <a href="#ejemplos" class="nav-item block px-4 py-3 rounded-lg text-gray-300 hover:text-white" onclick="closeMobileNav()"> <span class="text-xl mr-3">💡</span> Ejemplos </a>
+          <a href="#generador" class="nav-item block px-4 py-3 rounded-lg text-gray-300 hover:text-white" onclick="closeMobileNav()"> <span class="text-xl mr-3">⚡</span> Generador </a>
+          <a href="#playground" class="nav-item block px-4 py-3 rounded-lg text-gray-300 hover:text-white" onclick="closeMobileNav()"> <span class="text-xl mr-3">🎮</span> Playground </a>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Particles Background -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none z-0">
+      <div class="particle" style="top: 10%; left: 10%; animation-delay: 0s"></div>
+      <div class="particle" style="top: 20%; left: 80%; animation-delay: 1s"></div>
+      <div class="particle" style="top: 60%; left: 20%; animation-delay: 2s"></div>
+      <div class="particle" style="top: 80%; left: 70%; animation-delay: 3s"></div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="lg:ml-80 min-h-screen relative z-10">
+      <!-- Hero Section -->
+      <section id="inicio" class="relative min-h-screen flex items-center justify-center overflow-hidden">
+        <div class="absolute inset-0 gradient-primary opacity-90"></div>
+        <div class="absolute inset-0">
+          <div class="floating absolute top-20 left-20 w-32 h-32 bg-white bg-opacity-10 rounded-full"></div>
+          <div class="floating-delayed absolute top-40 right-32 w-24 h-24 bg-white bg-opacity-5 rounded-full"></div>
+          <div class="floating absolute bottom-32 left-1/3 w-40 h-40 bg-white bg-opacity-5 rounded-full"></div>
+        </div>
+
+        <div class="container mx-auto px-8 relative z-10 text-center">
+          <div class="max-w-4xl mx-auto slide-in-up">
+            <h1 class="text-6xl lg:text-8xl font-black mb-6 bg-gradient-to-r from-white via-purple-100 to-pink-100 bg-clip-text text-transparent">ScopeJS</h1>
+            <p class="text-xl lg:text-2xl mb-8 text-purple-100 max-w-2xl mx-auto leading-relaxed">
+              Framework JavaScript <span class="font-semibold text-white">minimalista</span> y <span class="font-semibold text-white">reactivo</span>
+              para crear aplicaciones web modernas sin complejidad innecesaria.
+            </p>
+
+            <div class="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-6 mb-12">
+              <button onclick="scrollToSection('instalacion')" class="glassmorphism text-white px-8 py-4 rounded-xl font-semibold hover:bg-white hover:bg-opacity-20 transition-all duration-300 transform hover:scale-105">🚀 Comenzar Ahora</button>
+              <button onclick="scrollToSection('playground')" class="bg-white text-purple-600 px-8 py-4 rounded-xl font-semibold hover:bg-gray-100 transition-all duration-300 transform hover:scale-105">🎮 Playground</button>
+              <a href="https://github.com/pablotheblink/ScopeJS" target="_blank" class="glassmorphism text-white px-8 py-4 rounded-xl font-semibold hover:bg-white hover:bg-opacity-20 transition-all duration-300 transform hover:scale-105"> <span class="mr-2">⭐</span> GitHub </a>
+            </div>
+
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-8 text-center">
+              <div class="glassmorphism p-6 rounded-xl hover-lift">
+                <div class="text-3xl font-bold text-white">~8KB</div>
+                <div class="text-purple-200">Ultra ligero</div>
+              </div>
+              <div class="glassmorphism p-6 rounded-xl hover-lift">
+                <div class="text-3xl font-bold text-white">0</div>
+                <div class="text-purple-200">Dependencias</div>
+              </div>
+              <div class="glassmorphism p-6 rounded-xl hover-lift">
+                <div class="text-3xl font-bold text-white">ES6+</div>
+                <div class="text-purple-200">Moderno</div>
+              </div>
+              <div class="glassmorphism p-6 rounded-xl hover-lift">
+                <div class="text-3xl font-bold text-white">100%</div>
+                <div class="text-purple-200">JavaScript</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Installation Section -->
+      <section id="instalacion" class="py-20 bg-gray-800">
+        <div class="container mx-auto px-8">
+          <div class="text-center mb-16">
+            <h2 class="text-4xl lg:text-5xl font-bold mb-6 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">📦 Instalación Rápida</h2>
+            <p class="text-xl text-gray-300 max-w-2xl mx-auto">Comienza en segundos. No necesitas configuración, build tools o dependencias.</p>
+          </div>
+
+          <div class="max-w-4xl mx-auto">
+            <div class="code-window mb-12">
+              <div class="code-header">
+                <div class="code-dot bg-red-500"></div>
+                <div class="code-dot bg-yellow-500"></div>
+                <div class="code-dot bg-green-500"></div>
+                <span class="ml-4 text-white text-sm">📄 app.js</span>
+              </div>
+              <div class="p-6">
+                <pre><code class="language-javascript">// Opción 1: Importar desde CDN
+import { Component, Router, Modal } from "https://cdn.jsdelivr.net/gh/pablotheblink/ScopeJS/js/ScopeJS.min.js";
+
+// Opción 2: CDN alternativo (más rápido)
+import { Component, Router, Modal } from "https://cdn.devetty.es/ScopeJS/js";
+
+// ¡Ya está! Comienza a crear componentes 🚀</code></pre>
+              </div>
+            </div>
+
+            <div class="feature-grid">
+              <div class="glassmorphism-dark p-8 rounded-2xl hover-lift">
+                <div class="text-4xl mb-4">⚡</div>
+                <h3 class="text-2xl font-bold mb-4 text-white">Setup Instantáneo</h3>
+                <p class="text-gray-300 leading-relaxed">Sin npm, webpack o configuraciones complejas. Una sola línea de import y listo para usar.</p>
+              </div>
+
+              <div class="glassmorphism-dark p-8 rounded-2xl hover-lift">
+                <div class="text-4xl mb-4">🎯</div>
+                <h3 class="text-2xl font-bold mb-4 text-white">API Intuitiva</h3>
+                <p class="text-gray-300 leading-relaxed">Diseñado para ser fácil de aprender. Si sabes JavaScript, ya sabes ScopeJS.</p>
+              </div>
+
+              <div class="glassmorphism-dark p-8 rounded-2xl hover-lift">
+                <div class="text-4xl mb-4">🔄</div>
+                <h3 class="text-2xl font-bold mb-4 text-white">Reactividad Real</h3>
+                <p class="text-gray-300 leading-relaxed">Actualización automática del DOM cuando cambian los datos. Sin virtual DOM, sin complicaciones.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Components Section -->
+      <section id="componentes" class="py-20 bg-gray-900">
+        <div class="container mx-auto px-8">
+          <div class="text-center mb-16">
+            <h2 class="text-4xl lg:text-5xl font-bold mb-6 bg-gradient-to-r from-green-400 to-blue-400 bg-clip-text text-transparent">🧩 Componentes Reactivos</h2>
+            <p class="text-xl text-gray-300 max-w-2xl mx-auto">Crea componentes reutilizables con estado reactivo y ciclo de vida completo.</p>
+          </div>
+
+          <div class="grid lg:grid-cols-2 gap-12 max-w-7xl mx-auto">
+            <div class="glassmorphism-dark p-8 rounded-2xl">
+              <h3 class="text-2xl font-bold mb-6 text-white flex items-center"><span class="mr-3">💻</span> Estructura del Componente</h3>
+              <div class="code-window">
+                <div class="code-header">
+                  <div class="code-dot bg-red-500"></div>
+                  <div class="code-dot bg-yellow-500"></div>
+                  <div class="code-dot bg-green-500"></div>
+                </div>
+                <div class="p-4">
+                  <pre><code class="language-javascript">Component({
+  tagName: "contador-app",
+  
+  style: `
+    .contador {
+      text-align: center;
+      padding: 2rem;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      border-radius: 16px;
+      color: white;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+    
+    .numero {
+      font-size: 3rem;
+      font-weight: bold;
+      margin: 1rem 0;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+    
+    button {
+      background: rgba(255,255,255,0.2);
+      border: none;
+      padding: 12px 24px;
+      margin: 0 8px;
+      border-radius: 8px;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    button:hover {
+      background: rgba(255,255,255,0.3);
+      transform: translateY(-2px);
+    }
+  `,
+  
+  controller: function() {
+    // Estado reactivo
+    this.contador = 0;
+    this.mensaje = "¡Hola ScopeJS!";
+    
+    // Métodos del componente
+    this.incrementar = function() {
+      this.contador++;
+      this.apply(); // Actualiza la vista
+    };
+    
+    this.decrementar = function() {
+      this.contador--;
+      this.apply();
+    };
+    
+    this.reset = function() {
+      this.contador = 0;
+      this.mensaje = "¡Reiniciado!";
+      this.apply();
+    };
+  },
+  
+  render: function() {
+    return `
+      <div class="contador">
+        <h2>${this.mensaje}</h2>
+        <div class="numero">${this.contador}</div>
+        <div>
+          <button onclick="decrementar()">➖ Decrementar</button>
+          <button onclick="reset()">🔄 Reset</button>
+          <button onclick="incrementar()">➕ Incrementar</button>
+        </div>
+      </div>
+    `;
+  },
+  
+  postRender: function() {
+    // Se ejecuta después de cada renderizado
+    console.log('Componente renderizado:', this.contador);
+  }
+});</code></pre>
+                </div>
+              </div>
+            </div>
+
+            <div class="glassmorphism-dark p-8 rounded-2xl">
+              <h3 class="text-2xl font-bold mb-6 text-white flex items-center"><span class="mr-3">🎭</span> Demo en Vivo</h3>
+
+              <div class="mb-6">
+                <div id="contador-demo" class="bg-gradient-to-br from-purple-600 to-blue-600 p-8 rounded-2xl text-center text-white">
+                  <h2 class="text-xl mb-4" id="contador-mensaje">¡Hola ScopeJS!</h2>
+                  <div class="text-4xl font-bold mb-6" id="contador-numero">0</div>
+                  <div class="space-x-4">
+                    <button onclick="decrementarDemo()" class="bg-white bg-opacity-20 px-6 py-3 rounded-lg font-semibold hover:bg-opacity-30 transition-all duration-300 transform hover:scale-105">➖ Decrementar</button>
+                    <button onclick="resetDemo()" class="bg-white bg-opacity-20 px-6 py-3 rounded-lg font-semibold hover:bg-opacity-30 transition-all duration-300 transform hover:scale-105">🔄 Reset</button>
+                    <button onclick="incrementarDemo()" class="bg-white bg-opacity-20 px-6 py-3 rounded-lg font-semibold hover:bg-opacity-30 transition-all duration-300 transform hover:scale-105">➕ Incrementar</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Router Section -->
+      <section id="router" class="py-20 bg-gray-800">
+        <div class="container mx-auto px-8">
+          <div class="text-center mb-16">
+            <h2 class="text-4xl lg:text-5xl font-bold mb-6 bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">🛤️ Router para SPAs</h2>
+            <p class="text-xl text-gray-300 max-w-2xl mx-auto">Gestiona la navegación en tu aplicación de una sola página con facilidad.</p>
+          </div>
+
+          <div class="max-w-4xl mx-auto">
+            <div class="code-window mb-12">
+              <div class="code-header">
+                <div class="code-dot bg-red-500"></div>
+                <div class="code-dot bg-yellow-500"></div>
+                <div class="code-dot bg-green-500"></div>
+                <span class="ml-4 text-white text-sm">📄 router.js</span>
+              </div>
+              <div class="p-6">
+                <pre><code class="language-javascript">import { Router } from "https://cdn.devetty.es/ScopeJS/js";
+
+const router = Router([
+  { path: "/", controller: HomePage, alias: "home" },
+  { path: "/productos", controller: ProductsPage, alias: "products" },
+  { path: "/:id", controller: ItemPage, alias: "item" }
+], { useHash: true });
+
+router.listen(() => {
+  console.log('Ruta actual:', router.path, 'Alias:', router.alias);
+});
+
+router.render(document.getElementById('app-content'));</code></pre>
+              </div>
+            </div>
+
+            <div class="feature-grid">
+              <div class="glassmorphism-dark p-8 rounded-2xl hover-lift">
+                <div class="text-4xl mb-4">🛠️</div>
+                <h3 class="text-2xl font-bold mb-4 text-white">Navegación Dinámica</h3>
+                <p class="text-gray-300 leading-relaxed">Navega entre rutas sin recargar la página, con soporte para parámetros dinámicos.</p>
+              </div>
+              <div class="glassmorphism-dark p-8 rounded-2xl hover-lift">
+                <div class="text-4xl mb-4">🔗</div>
+                <h3 class="text-2xl font-bold mb-4 text-white">Soporte Hash o HTML5</h3>
+                <p class="text-gray-300 leading-relaxed">Usa hash (#) para entornos simples o HTML5 history API para URLs limpias.</p>
+              </div>
+              <div class="glassmorphism-dark p-8 rounded-2xl hover-lift">
+                <div class="text-4xl mb-4">⚡</div>
+                <h3 class="text-2xl font-bold mb-4 text-white">Rutas Parametrizadas</h3>
+                <p class="text-gray-300 leading-relaxed">Maneja rutas dinámicas como /users/:id con acceso fácil a los parámetros.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Modal Section -->
+      <section id="modal" class="py-20 bg-gray-900">
+        <div class="container mx-auto px-8">
+          <div class="text-center mb-16">
+            <h2 class="text-4xl lg:text-5xl font-bold mb-6 bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent">🎭 Modales Interactivos</h2>
+            <p class="text-xl text-gray-300 max-w-2xl mx-auto">Crea modales reutilizables con facilidad para interacciones dinámicas.</p>
+          </div>
+
+          <div class="max-w-4xl mx-auto">
+            <div class="code-window mb-12">
+              <div class="code-header">
+                <div class="code-dot bg-red-500"></div>
+                <div class="code-dot bg-yellow-500"></div>
+                <div class="code-dot bg-green-500"></div>
+                <span class="ml-4 text-white text-sm">📄 modal.js</span>
+              </div>
+              <div class="p-6">
+                <pre><code class="language-javascript">import { Modal } from "https://cdn.devetty.es/ScopeJS/js";
+
+Modal({
+  controller: function() {
+    this.confirmar = function() {
+      console.log('Confirmado!');
+      this.close();
+    };
+  },
+  render: function() {
+    return `
+      <div style="padding: 2rem; text-align: center;">
+        <h3>¿Estás seguro?</h3>
+        <p>Esta acción no se puede deshacer.</p>
+        <div style="margin-top: 1rem;">
+          <button onclick="confirmar()" style="padding: 0.5rem 1rem; background: #28a745; color: white; border: none; border-radius: 4px;">
+            Confirmar
+          </button>
+          <button onclick="this.close()" style="padding: 0.5rem 1rem; background: #dc3545; color: white; border: none; border-radius: 4px;">
+            Cancelar
+          </button>
+        </div>
+      </div>
+    `;
+  },
+  hideWhenClickOverlay: true
+});</code></pre>
+              </div>
+            </div>
+
+            <div class="text-center">
+              <button onclick="showDemoModal()" class="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-8 py-4 rounded-xl font-semibold hover:bg-opacity-90 transition-all duration-300 transform hover:scale-105">🖱️ Probar Modal</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Use Cases Section -->
+      <section id="casos-uso" class="py-20 bg-gray-800">
+        <div class="container mx-auto px-8">
+          <div class="text-center mb-16">
+            <h2 class="text-4xl lg:text-5xl font-bold mb-6 bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent">💼 Casos de Uso</h2>
+            <p class="text-xl text-gray-300 max-w-2xl mx-auto">Descubre dónde ScopeJS brilla con aplicaciones prácticas.</p>
+          </div>
+
+          <div class="feature-grid max-w-7xl mx-auto">
+            <div class="glassmorphism-dark p-8 rounded-2xl hover-lift">
+              <div class="text-4xl mb-4">📱</div>
+              <h3 class="text-2xl font-bold mb-4 text-white">SPAs Pequeñas</h3>
+              <p class="text-gray-300 leading-relaxed">Ideal para aplicaciones de una sola página con navegación fluida y reactiva.</p>
+            </div>
+            <div class="glassmorphism-dark p-8 rounded-2xl hover-lift">
+              <div class="text-4xl mb-4">📊</div>
+              <h3 class="text-2xl font-bold mb-4 text-white">Dashboards</h3>
+              <p class="text-gray-300 leading-relaxed">Construye paneles interactivos con widgets reutilizables y datos en tiempo real.</p>
+            </div>
+            <div class="glassmorphism-dark p-8 rounded-2xl hover-lift">
+              <div class="text-4xl mb-4">📝</div>
+              <h3 class="text-2xl font-bold mb-4 text-white">Formularios</h3>
+              <p class="text-gray-300 leading-relaxed">Crea formularios con validación en tiempo real y modales de confirmación.</p>
+            </div>
+            <div class="glassmorphism-dark p-8 rounded-2xl hover-lift">
+              <div class="text-4xl mb-4">🚀</div>
+              <h3 class="text-2xl font-bold mb-4 text-white">Prototipos Rápidos</h3>
+              <p class="text-gray-300 leading-relaxed">Perfecto para MVPs y prototipos con implementación rápida y sin dependencias.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Examples Section -->
+      <section id="ejemplos" class="py-20 bg-gray-900">
+        <div class="container mx-auto px-8">
+          <div class="text-center mb-16">
+            <h2 class="text-4xl lg:text-5xl font-bold mb-6 bg-gradient-to-r from-green-400 to-teal-400 bg-clip-text text-transparent">💡 Ejemplos Prácticos</h2>
+            <p class="text-xl text-gray-300 max-w-2xl mx-auto">Explora ejemplos funcionales que muestran el poder de ScopeJS.</p>
+          </div>
+
+          <div class="feature-grid max-w-7xl mx-auto">
+            <div class="glassmorphism-dark p-8 rounded-2xl hover-lift">
+              <h3 class="text-2xl font-bold mb-4 text-white">Contador Interactivo</h3>
+              <p class="text-gray-300 mb-4">Un contador simple que demuestra el manejo reactivo de estado.</p>
+              <a href="#componentes" class="text-blue-400 hover:underline">Ver ejemplo</a>
+            </div>
+            <div class="glassmorphism-dark p-8 rounded-2xl hover-lift">
+              <h3 class="text-2xl font-bold mb-4 text-white">Lista de Tareas</h3>
+              <p class="text-gray-300 mb-4">Una aplicación de tareas con filtros, prioridades y modales.</p>
+              <a href="#todo-app" class="text-blue-400 hover:underline">Ver código</a>
+            </div>
+            <div class="glassmorphism-dark p-8 rounded-2xl hover-lift">
+              <h3 class="text-2xl font-bold mb-4 text-white">Formulario de Contacto</h3>
+              <p class="text-gray-300 mb-4">Formulario con validación en tiempo real y confirmaciones.</p>
+              <a href="#contact-form" class="text-blue-400 hover:underline">Ver código</a>
+            </div>
+            <div class="glassmorphism-dark p-8 rounded-2xl hover-lift">
+              <h3 class="text-2xl font-bold mb-4 text-white">SPA con Router</h3>
+              <p class="text-gray-300 mb-4">Aplicación de una sola página con navegación y rutas dinámicas.</p>
+              <a href="#spa-app" class="text-blue-400 hover:underline">Ver código</a>
+            </div>
+          </div>
+
+          <!-- Example Code Snippets -->
+          <div id="todo-app" class="mt-12">
+            <h3 class="text-2xl font-bold mb-6 text-white">Lista de Tareas</h3>
+            <div class="code-window">
+              <div class="code-header">
+                <div class="code-dot bg-red-500"></div>
+                <div class="code-dot bg-yellow-500"></div>
+                <div class="code-dot bg-green-500"></div>
+                <span class="ml-4 text-white text-sm">📄 todo-app.html</span>
+              </div>
+              <div class="p-6">
+                <pre><code class="language-html">&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;Lista de Tareas&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;todo-app autoload&gt;&lt;/todo-app&gt;
+
+    &lt;script type="module"&gt;
+      import { Component, Modal } from "https://cdn.devetty.es/ScopeJS/js";
+
+      Component({
+        tagName: "todo-app",
+        style: `
+          max-width: 600px;
+          margin: 2rem auto;
+          padding: 2rem;
+          font-family: 'Segoe UI', sans-serif;
+          box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+          border-radius: 8px;
+        `,
+        controller: function () {
+          this.tasks = [
+            { id: 1, text: "Aprender ScopeJS", completed: false, priority: "high" },
+            { id: 2, text: "Crear mi primera app", completed: false, priority: "medium" },
+          ];
+          this.newTask = "";
+          this.filter = "all";
+          this.newTaskPriority = "medium";
+
+          this.addTask = function (e) {
+            e.preventDefault();
+            if (!this.newTask.trim()) return;
+            const task = {
+              id: Date.now(),
+              text: this.newTask.trim(),
+              completed: false,
+              priority: this.newTaskPriority,
+            };
+            this.tasks.push(task);
+            this.newTask = "";
+            this.apply();
+          };
+
+          this.toggleTask = function (id) {
+            const task = this.tasks.find((t) => t.id === id);
+            if (task) {
+              task.completed = !task.completed;
+              this.apply();
+            }
+          };
+
+          this.deleteTask = function (id) {
+            Modal({
+              controller: function () {
+                this.confirm = function () {
+                  const index = this.tasks.findIndex((t) => t.id === id);
+                  if (index > -1) {
+                    this.tasks.splice(index, 1);
+                    this.apply();
+                  }
+                  this.close();
+                }.bind(this);
+                this.cancel = function () {
+                  this.close();
+                };
+              }.bind(this),
+              render: function () {
+                return `
+                  &lt;div style="padding: 2rem; text-align: center;"&gt;
+                    &lt;h3&gt;¿Eliminar tarea?&lt;/h3&gt;
+                    &lt;p&gt;Esta acción no se puede deshacer.&lt;/p&gt;
+                    &lt;div style="margin-top: 1rem;"&gt;
+                      &lt;button onclick="cancel()" style="margin: 0.5rem; padding: 0.5rem 1rem;"&gt;Cancelar&lt;/button&gt;
+                      &lt;button onclick="confirm()" style="margin: 0.5rem; padding: 0.5rem 1rem; background: red; color: white; border: none; border-radius: 4px;"&gt;Eliminar&lt;/button&gt;
+                    &lt;/div&gt;
+                  &lt;/div&gt;
+                `;
+              },
+              hideWhenClickOverlay: true,
+            });
+          };
+
+          this.setFilter = function (filter) {
+            this.filter = filter;
+            this.apply();
+          };
+
+          this.getFilteredTasks = function () {
+            switch (this.filter) {
+              case "active":
+                return this.tasks.filter((t) => !t.completed);
+              case "completed":
+                return this.tasks.filter((t) => t.completed);
+              default:
+                return this.tasks;
+            }
+          };
+
+          this.getStats = function () {
+            const total = this.tasks.length;
+            const completed = this.tasks.filter((t) => t.completed).length;
+            const pending = total - completed;
+            return { total, completed, pending };
+          };
+        },
+        render: function () {
+          const filteredTasks = this.getFilteredTasks();
+          const stats = this.getStats();
+          return `
+            &lt;h1&gt;📝 Lista de Tareas&lt;/h1&gt;
+            &lt;div style="background: #f5f5f5; padding: 1rem; border-radius: 4px; margin-bottom: 1rem;"&gt;
+              &lt;strong&gt;Total: ${stats.total}&lt;/strong&gt; | 
+              &lt;span style="color: orange;"&gt;Pendientes: ${stats.pending}&lt;/span&gt; | 
+              &lt;span style="color: green;"&gt;Completadas: ${stats.completed}&lt;/span&gt;
+            &lt;/div&gt;
+            &lt;form onsubmit="addTask()" style="margin-bottom: 2rem;"&gt;
+              &lt;div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;"&gt;
+                &lt;input type="text" model="newTask" placeholder="Nueva tarea..." style="flex: 1; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;" required&gt;
+                &lt;select model="newTaskPriority" style="padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;"&gt;
+                  &lt;option value="low"&gt;Baja&lt;/option&gt;
+                  &lt;option value="medium" selected&gt;Media&lt;/option&gt;
+                  &lt;option value="high"&gt;Alta&lt;/option&gt;
+                &lt;/select&gt;
+                &lt;button type="submit" style="padding: 0.5rem 1rem; background: #007bff; color: white; border: none; border-radius: 4px;"&gt;Añadir&lt;/button&gt;
+              &lt;/div&gt;
+            &lt;/form&gt;
+            &lt;div style="margin-bottom: 1rem;"&gt;
+              &lt;button onclick="setFilter('all')" style="margin-right: 0.5rem; padding: 0.25rem 0.5rem; background: ${this.filter === "all" ? "#007bff" : "#f8f9fa"}; color: ${this.filter === "all" ? "white" : "black"}; border: 1px solid #ddd; border-radius: 4px;"&gt;Todas&lt;/button&gt;
+              &lt;button onclick="setFilter('active')" style="margin-right: 0.5rem; padding: 0.25rem 0.5rem; background: ${this.filter === "active" ? "#007bff" : "#f8f9fa"}; color: ${this.filter === "active" ? "white" : "black"}; border: 1px solid #ddd; border-radius: 4px;"&gt;Pendientes&lt;/button&gt;
+              &lt;button onclick="setFilter('completed')" style="margin-right: 0.5rem; padding: 0.25rem 0.5rem; background: ${this.filter === "completed" ? "#007bff" : "#f8f9fa"}; color: ${this.filter === "completed" ? "white" : "black"}; border: 1px solid #ddd; border-radius: 4px;"&gt;Completadas&lt;/button&gt;
+            &lt;/div&gt;
+            &lt;div&gt;
+              ${
+                filteredTasks.length === 0
+                  ? `<p style="text-align: center; color: #999; font-style: italic;">${this.filter === "all" ? "No hay tareas" : this.filter === "active" ? "No hay tareas pendientes" : "No hay tareas completadas"}</p>`
+                  : filteredTasks.map((task) => `
+                    &lt;div style="display: flex; align-items: center; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px; margin-bottom: 0.5rem; background: ${task.completed ? "#f8f9fa" : "white"};"&gt;
+                      &lt;input type="checkbox" ${task.completed ? "checked" : ""} onclick="toggleTask(${task.id})" style="margin-right: 0.75rem;"&gt;
+                      &lt;span style="flex: 1; text-decoration: ${task.completed ? "line-through" : "none"}; color: ${task.completed ? "#999" : "black"};"&gt;${task.text}&lt;/span&gt;
+                      &lt;span style="padding: 0.25rem 0.5rem; border-radius: 12px; font-size: 0.75rem; margin-right: 0.5rem; background: ${task.priority === "high" ? "#ffebee" : task.priority === "medium" ? "#fff3e0" : "#f3e5f5"}; color: ${task.priority === "high" ? "#c62828" : task.priority === "medium" ? "#ef6c00" : "#7b1fa2"};"&gt;${task.priority === "high" ? "Alta" : task.priority === "medium" ? "Media" : "Baja"}&lt;/span&gt;
+                      &lt;button onclick="deleteTask(${task.id})" style="background: #dc3545; color: white; border: none; border-radius: 4px; padding: 0.25rem 0.5rem; font-size: 0.875rem;"&gt;🗑️&lt;/button&gt;
+                    &lt;/div&gt;
+                  `).join("")
+              }
+            &lt;/div&gt;
+          `;
+        }
+      });
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+              </div>
+            </div>
+          </div>
+
+          <div id="contact-form" class="mt-12">
+            <h3 class="text-2xl font-bold mb-6 text-white">Formulario de Contacto</h3>
+            <div class="code-window">
+              <div class="code-header">
+                <div class="code-dot bg-red-500"></div>
+                <div class="code-dot bg-yellow-500"></div>
+                <div class="code-dot bg-green-500"></div>
+                <span class="ml-4 text-white text-sm">📄 contact-form.html</span>
+              </div>
+              <div class="p-6">
+                <pre><code class="language-html">&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;Formulario de Contacto&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;contact-form autoload&gt;&lt;/contact-form&gt;
+
+    &lt;script type="module"&gt;
+      import { Component, Modal } from "https://cdn.devetty.es/ScopeJS/js";
+
+      Component({
+        tagName: "contact-form",
+        style: `
+          max-width: 500px;
+          margin: 2rem auto;
+          padding: 2rem;
+          font-family: 'Segoe UI', sans-serif;
+          box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+          border-radius: 8px;
+        `,
+        controller: function () {
+          this.formData = {
+            name: "",
+            email: "",
+            subject: "",
+            message: "",
+            urgency: "normal",
+          };
+          this.errors = {};
+          this.isSubmitting = false;
+          this.submitted = false;
+
+          this.validateField = function (field) {
+            const value = this.formData[field];
+            delete this.errors[field];
+            switch (field) {
+              case "name":
+                if (!value.trim()) this.errors[field] = "El nombre es requerido";
+                else if (value.trim().length < 2) this.errors[field] = "El nombre debe tener al menos 2 caracteres";
+                break;
+              case "email":
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!value.trim()) this.errors[field] = "El email es requerido";
+                else if (!emailRegex.test(value)) this.errors[field] = "Email inválido";
+                break;
+              case "subject":
+                if (!value.trim()) this.errors[field] = "El asunto es requerido";
+                break;
+              case "message":
+                if (!value.trim()) this.errors[field] = "El mensaje es requerido";
+                else if (value.trim().length < 10) this.errors[field] = "El mensaje debe tener al menos 10 caracteres";
+                break;
+            }
+            this.apply();
+          };
+
+          this.validateForm = function () {
+            Object.keys(this.formData).forEach((field) => {
+              if (field !== "urgency") this.validateField(field);
+            });
+            return Object.keys(this.errors).length === 0;
+          };
+
+          this.submitForm = function (e) {
+            e.preventDefault();
+            if (!this.validateForm()) {
+              Modal({
+                controller: function () {
+                  this.close = function () {
+                    this.close();
+                  };
+                },
+                render: function () {
+                  return `
+                    &lt;div style="padding: 2rem; text-align: center;"&gt;
+                      &lt;h3&gt;❌ Errores en el formulario&lt;/h3&gt;
+                      &lt;p&gt;Por favor, corrige los errores antes de enviar.&lt;/p&gt;
+                      &lt;button onclick="close()" style="margin-top: 1rem; padding: 0.5rem 1rem; background: #007bff; color: white; border: none; border-radius: 4px;"&gt;Entendido&lt;/button&gt;
+                    &lt;/div&gt;
+                  `;
+                },
+                hideWhenClickOverlay: true,
+              });
+              return;
+            }
+            this.isSubmitting = true;
+            this.apply();
+            setTimeout(() => {
+              this.isSubmitting = false;
+              this.submitted = true;
+              this.apply();
+              Modal({
+                controller: function () {
+                  this.reset = function () {
+                    this.formData = { name: "", email: "", subject: "", message: "", urgency: "normal" };
+                    this.submitted = false;
+                    this.apply();
+                    this.close();
+                  }.bind(this);
+                }.bind(this),
+                render: function () {
+                  return `
+                    &lt;div style="padding: 2rem; text-align: center;"&gt;
+                      &lt;h3&gt;✅ ¡Mensaje enviado!&lt;/h3&gt;
+                      &lt;p&gt;Gracias por contactarnos. Te responderemos pronto.&lt;/p&gt;
+                      &lt;button onclick="reset()" style="margin-top: 1rem; padding: 0.5rem 1rem; background: #28a745; color: white; border: none; border-radius: 4px;"&gt;Enviar otro mensaje&lt;/button&gt;
+                    &lt;/div&gt;
+                  `;
+                },
+                hideWhenClickOverlay: false,
+              });
+            }, 2000);
+          };
+
+          this.resetForm = function () {
+            this.formData = { name: "", email: "", subject: "", message: "", urgency: "normal" };
+            this.errors = {};
+            this.submitted = false;
+            this.apply();
+          };
+        },
+        render: function () {
+          if (this.submitted) {
+            return `
+              &lt;div style="text-align: center; padding: 2rem;"&gt;
+                &lt;h2&gt;✅ ¡Gracias!&lt;/h2&gt;
+                &lt;p&gt;Tu mensaje ha sido enviado correctamente.&lt;/p&gt;
+                &lt;button onclick="resetForm()" style="margin-top: 1rem; padding: 0.5rem 1rem; background: #007bff; color: white; border: none; border-radius: 4px;"&gt;Enviar otro mensaje&lt;/button&gt;
+              &lt;/div&gt;
+            `;
+          }
+          return `
+            &lt;h1&gt;📧 Formulario de Contacto&lt;/h1&gt;
+            &lt;form onsubmit="submitForm()"&gt;
+              &lt;div style="margin-bottom: 1rem;"&gt;
+                &lt;label style="display: block; margin-bottom: 0.5rem; font-weight: bold;"&gt;Nombre *&lt;/label&gt;
+                &lt;input type="text" model="formData.name" oninput="validateField('name')" style="width: 100%; padding: 0.75rem; border: 1px solid ${this.errors.name ? "#dc3545" : "#ddd"}; border-radius: 4px; box-sizing: border-box;" placeholder="Tu nombre completo"&gt;
+                ${this.errors.name ? `&lt;div style="color: #dc3545; font-size: 0.875rem; margin-top: 0.25rem;"&gt;${this.errors.name}&lt;/div&gt;` : ""}
+              &lt;/div&gt;
+              &lt;div style="margin-bottom: 1rem;"&gt;
+                &lt;label style="display: block; margin-bottom: 0.5rem; font-weight: bold;"&gt;Email *&lt;/label&gt;
+                &lt;input type="email" model="formData.email" oninput="validateField('email')" style="width: 100%; padding: 0.75rem; border: 1px solid ${this.errors.email ? "#dc3545" : "#ddd"}; border-radius: 4px; box-sizing: border-box;" placeholder="tu@email.com"&gt;
+                ${this.errors.email ? `&lt;div style="color: #dc3545; font-size: 0.875rem; margin-top: 0.25rem;"&gt;${this.errors.email}&lt;/div&gt;` : ""}
+              &lt;/div&gt;
+              &lt;div style="margin-bottom: 1rem;"&gt;
+                &lt;label style="display: block; margin-bottom: 0.5rem; font-weight: bold;"&gt;Asunto *&lt;/label&gt;
+                &lt;input type="text" model="formData.subject" oninput="validateField('subject')" style="width: 100%; padding: 0.75rem; border: 1px solid ${this.errors.subject ? "#dc3545" : "#ddd"}; border-radius: 4px; box-sizing: border-box;" placeholder="¿De qué se trata tu mensaje?"&gt;
+                ${this.errors.subject ? `&lt;div style="color: #dc3545; font-size: 0.875rem; margin-top: 0.25rem;"&gt;${this.errors.subject}&lt;/div&gt;` : ""}
+              &lt;/div&gt;
+              &lt;div style="margin-bottom: 1rem;"&gt;
+                &lt;label style="display: block; margin-bottom: 0.5rem; font-weight: bold;"&gt;Urgencia&lt;/label&gt;
+                &lt;select model="formData.urgency" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;"&gt;
+                  &lt;option value="low"&gt;Baja - Respuesta en 5-7 días&lt;/option&gt;
+                  &lt;option value="normal" selected&gt;Normal - Respuesta en 2-3 días&lt;/option&gt;
+                  &lt;option value="high"&gt;Alta - Respuesta en 24 horas&lt;/option&gt;
+                  &lt;option value="urgent"&gt;Urgente - Respuesta inmediata&lt;/option&gt;
+                &lt;/select&gt;
+              &lt;/div&gt;
+              &lt;div style="margin-bottom: 1rem;"&gt;
+                &lt;label style="display: block; margin-bottom: 0.5rem; font-weight: bold;"&gt;Mensaje *&lt;/label&gt;
+                &lt;textarea model="formData.message" oninput="validateField('message')" rows="5" style="width: 100%; padding: 0.75rem; border: 1px solid ${this.errors.message ? "#dc3545" : "#ddd"}; border-radius: 4px; box-sizing: border-box; resize: vertical;" placeholder="Escribe tu mensaje aquí..."&gt;&lt;/textarea&gt;
+                ${this.errors.message ? `&lt;div style="color: #dc3545; font-size: 0.875rem; margin-top: 0.25rem;"&gt;${this.errors.message}&lt;/div&gt;` : ""}
+              &lt;/div&gt;
+              &lt;div style="display: flex; gap: 1rem; justify-content: flex-end;"&gt;
+                &lt;button type="button" onclick="resetForm()" style="padding: 0.75rem 1.5rem; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer;" ${this.isSubmitting ? "disabled" : ""}&gt;Limpiar&lt;/button&gt;
+                &lt;button type="submit" style="padding: 0.75rem 1.5rem; background: ${this.isSubmitting ? "#6c757d" : "#007bff"}; color: white; border: none; border-radius: 4px; cursor: ${this.isSubmitting ? "not-allowed" : "pointer"};" ${this.isSubmitting ? "disabled" : ""}&gt;${this.isSubmitting ? "⏳ Enviando..." : "📤 Enviar Mensaje"}&lt;/button&gt;
+              &lt;/div&gt;
+            &lt;/form&gt;
+          `;
+        }
+      });
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+              </div>
+            </div>
+          </div>
+
+          <div id="spa-app" class="mt-12">
+            <h3 class="text-2xl font-bold mb-6 text-white">SPA con Router</h3>
+            <div class="code-window">
+              <div class="code-header">
+                <div class="code-dot bg-red-500"></div>
+                <div class="code-dot bg-yellow-500"></div>
+                <div class="code-dot bg-green-500"></div>
+                <span class="ml-4 text-white text-sm">📄 spa-app.html</span>
+              </div>
+              <div class="p-6">
+                <pre><code class="language-html">&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;Mi SPA con ScopeJS&lt;/title&gt;
+    &lt;style&gt;
+      body { margin: 0; font-family: "Segoe UI", sans-serif; }
+      .navbar { background: #343a40; color: white; padding: 1rem; display: flex; justify-content: space-between; align-items: center; }
+      .navbar a { color: white; text-decoration: none; margin: 0 1rem; padding: 0.5rem 1rem; border-radius: 4px; transition: background 0.3s; }
+      .navbar a:hover { background: rgba(255, 255, 255, 0.1); }
+      .navbar a.active { background: #007bff; }
+      .content { padding: 2rem; min-height: calc(100vh - 140px); }
+      .footer { background: #f8f9fa; text-align: center; padding: 1rem; border-top: 1px solid #ddd; }
+    &lt;/style&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;spa-app autoload&gt;&lt;/spa-app&gt;
+
+    &lt;script type="module"&gt;
+      import { Component, Router, Modal } from "https://cdn.devetty.es/ScopeJS/js";
+
+      Component({
+        tagName: "navbar-component",
+        controller: function () {
+          this.currentPath = "";
+          this.isActive = function (path) {
+            return this.currentPath === path ? "active" : "";
+          };
+        },
+        render: function () {
+          return `
+            &lt;nav class="navbar"&gt;
+              &lt;div&gt;&lt;strong&gt;Mi SPA&lt;/strong&gt;&lt;/div&gt;
+              &lt;div&gt;
+                &lt;a href="#/" class="${this.isActive("/")}"&gt;🏠 Inicio&lt;/a&gt;
+                &lt;a href="#/productos" class="${this.isActive("/productos")}"&gt;🛍️ Productos&lt;/a&gt;
+                &lt;a href="#/acerca" class="${this.isActive("/acerca")}"&gt;ℹ️ Acerca&lt;/a&gt;
+                &lt;a href="#/contacto" class="${this.isActive("/contacto")}"&gt;📧 Contacto&lt;/a&gt;
+              &lt;/div&gt;
+            &lt;/nav&gt;
+          `;
+        },
+      });
+
+      const HomePage = {
+        title: "Inicio - Mi SPA",
+        controller: function () {
+          this.stats = { productos: 150, usuarios: 1250, ventas: 89 };
+          this.showWelcome = function () {
+            Modal({
+              controller: function () {},
+              render: function () {
+                return `
+                  &lt;div style="padding: 2rem; text-align: center;"&gt;
+                    &lt;h2&gt;🎉 ¡Bienvenido!&lt;/h2&gt;
+                    &lt;p&gt;Gracias por visitar nuestra aplicación.&lt;/p&gt;
+                    &lt;button onclick="this.close()" style="margin-top: 1rem; padding: 0.5rem 1rem; background: #007bff; color: white; border: none; border-radius: 4px;"&gt;¡Genial!&lt;/button&gt;
+                  &lt;/div&gt;
+                `;
+              },
+              hideWhenClickOverlay: true,
+            });
+          };
+        },
+        render: function () {
+          return `
+            &lt;div class="content"&gt;
+              &lt;h1&gt;🏠 Bienvenido a Mi SPA&lt;/h1&gt;
+              &lt;div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin: 2rem 0;"&gt;
+                &lt;div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 2rem; border-radius: 8px; text-align: center;"&gt;
+                  &lt;h2&gt;${this.stats.productos}&lt;/h2&gt;
+                  &lt;p&gt;Productos Disponibles&lt;/p&gt;
+                &lt;/div&gt;
+                &lt;div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 2rem; border-radius: 8px; text-align: center;"&gt;
+                  &lt;h2&gt;${this.stats.usuarios}&lt;/h2&gt;
+                  &lt;p&gt;Usuarios Registrados&lt;/p&gt;
+                &lt;/div&gt;
+                &lt;div style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 2rem; border-radius: 8px; text-align: center;"&gt;
+                  &lt;h2&gt;${this.stats.ventas}%&lt;/h2&gt;
+                  &lt;p&gt;Satisfacción&lt;/p&gt;
+                &lt;/div&gt;
+              &lt;/div&gt;
+              &lt;div style="text-align: center; margin-top: 2rem;"&gt;
+                &lt;button onclick="showWelcome()" style="padding: 1rem 2rem; background: #28a745; color: white; border: none; border-radius: 4px; font-size: 1.1rem; cursor: pointer;"&gt;🎉 ¡Mostrar Bienvenida!&lt;/button&gt;
+              &lt;/div&gt;
+            &lt;/div&gt;
+          `;
+        },
+      };
+
+      const router = Router([
+        { path: "/", controller: HomePage, alias: "home" },
+        { path: "/productos", controller: ProductsPage, alias: "products" },
+        { path: "/acerca", controller: AboutPage, alias: "about" },
+        { path: "/contacto", controller: ContactPage, alias: "contact" },
+      ]);
+
+      Component({
+        tagName: "spa-app",
+        controller: function () {
+          router.listen(() => {
+            const navbar = document.querySelector("navbar-component");
+            if (navbar && navbar.componentInstance) {
+              navbar.componentInstance.currentPath = router.path;
+              navbar.componentInstance.apply();
+            }
+          });
+        },
+        render: function () {
+          return `
+            &lt;navbar-component autoload&gt;&lt;/navbar-component&gt;
+            &lt;main id="app-content"&gt;&lt;/main&gt;
+            &lt;footer class="footer"&gt;
+              &lt;p&gt;© 2024 Mi SPA - Construida con ScopeJS | Ruta actual: &lt;strong&gt;${router.path || "/"}&lt;/strong&gt; | Alias: &lt;strong&gt;${router.alias || "N/A"}&lt;/strong&gt;&lt;/p&gt;
+            &lt;/footer&gt;
+          `;
+        },
+        postRender: function () {
+          const content = document.getElementById("app-content");
+          if (content) {
+            router.render(content);
+          }
+        },
+      });
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Generator Section -->
+      <section id="generador" class="py-20 bg-gray-800">
+        <div class="container mx-auto px-8">
+          <div class="text-center mb-16">
+            <h2 class="text-4xl lg:text-5xl font-bold mb-6 bg-gradient-to-r from-indigo-400 to-blue-400 bg-clip-text text-transparent">⚡ Generador de Proyectos</h2>
+            <p class="text-xl text-gray-300 max-w-2xl mx-auto">Crea proyectos ScopeJS rápidamente con nuestra herramienta de generación.</p>
+          </div>
+
+          <div class="max-w-4xl mx-auto">
+            <div class="glassmorphism-dark p-8 rounded-2xl">
+              <h3 class="text-2xl font-bold mb-6 text-white">Próximamente</h3>
+              <p class="text-gray-300 mb-6">Estamos trabajando en un generador de proyectos que te permitirá crear aplicaciones ScopeJS con una estructura predefinida, incluyendo componentes, rutas y configuraciones optimizadas.</p>
+              <div class="demo-terminal">
+                <div class="terminal-line">$ npx scopejs-create my-app</div>
+                <div class="terminal-line">> Creando proyecto ScopeJS...</div>
+                <div class="terminal-line">> ¡Listo! cd my-app && npm start</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Playground Section -->
+      <section id="playground" class="py-20 bg-gray-900">
+        <div class="container mx-auto px-8">
+          <div class="text-center mb-16">
+            <h2 class="text-4xl lg:text-5xl font-bold mb-6 bg-gradient-to-r from-teal-400 to-green-400 bg-clip-text text-transparent">🎮 Playground Interactivo</h2>
+            <p class="text-xl text-gray-300 max-w-2xl mx-auto">Experimenta con ScopeJS en tiempo real en nuestro playground interactivo.</p>
+          </div>
+
+          <div class="max-w-4xl mx-auto">
+            <div class="glassmorphism-dark p-8 rounded-2xl">
+              <h3 class="text-2xl font-bold mb-6 text-white">Prueba ScopeJS Ahora</h3>
+              <p class="text-gray-300 mb-6">Visita nuestro playground en línea para probar ScopeJS directamente en tu navegador. Crea, edita y ejecuta componentes en tiempo real.</p>
+              <a href="https://scopejs.dev/playground" target="_blank" class="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-8 py-4 rounded-xl font-semibold hover:bg-opacity-90 transition-all duration-300 transform hover:scale-105"> 🚀 Ir al Playground </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Footer -->
+      <footer class="py-12 bg-gray-800 text-center">
+        <div class="container mx-auto px-8">
+          <p class="text-gray-400 mb-4">© 2025 ScopeJS - Creado por <a href="https://github.com/pablotheblink" target="_blank" class="text-purple-400 hover:text-purple-300">@pablotheblink</a></p>
+          <div class="flex justify-center space-x-6 mb-6">
+            <a href="https://github.com/pablotheblink/ScopeJS" target="_blank" class="text-gray-400 hover:text-white transition-colors"> <span class="text-xl">📦</span> GitHub </a>
+            <a href="https://scopejs.dev/docs" target="_blank" class="text-gray-400 hover:text-white transition-colors"> <span class="text-xl">📚</span> Documentación </a>
+            <a href="https://scopejs.dev/playground" target="_blank" class="text-gray-400 hover:text-white transition-colors"> <span class="text-xl">🎮</span> Playground </a>
+          </div>
+          <p class="text-sm text-gray-500">Hecho con ❤️ y JavaScript puro</p>
+        </div>
+      </footer>
+    </main>
+
+    <script>
+      // Funciones de navegación móvil
+      function toggleMobileNav() {
+        const nav = document.querySelector(".mobile-nav");
+        const burger1 = document.getElementById("burger-1");
+        const burger2 = document.getElementById("burger-2");
+        const burger3 = document.getElementById("burger-3");
+
+        nav.classList.toggle("open");
+        burger1.classList.toggle("rotate-45");
+        burger1.classList.toggle("translate-y-1.5");
+        burger2.classList.toggle("opacity-0");
+        burger3.classList.toggle("-rotate-45");
+        burger3.classList.toggle("-translate-y-1.5");
+      }
+
+      function closeMobileNav() {
+        const nav = document.querySelector(".mobile-nav");
+        const burger1 = document.getElementById("burger-1");
+        const burger2 = document.getElementById("burger-2");
+        const burger3 = document.getElementById("burger-3");
+
+        nav.classList.remove("open");
+        burger1.classList.remove("rotate-45", "translate-y-1.5");
+        burger2.classList.remove("opacity-0");
+        burger3.classList.remove("-rotate-45", "-translate-y-1.5");
+      }
+
+      // Función para scroll suave
+      function scrollToSection(sectionId) {
+        const section = document.getElementById(sectionId);
+        if (section) {
+          section.scrollIntoView({ behavior: "smooth" });
+          closeMobileNav();
+        }
+      }
+
+      // Demo del contador
+      let contadorDemo = 0;
+      const contadorNumero = document.getElementById("contador-numero");
+      const contadorMensaje = document.getElementById("contador-mensaje");
+
+      function incrementarDemo() {
+        contadorDemo++;
+        actualizarContador();
+      }
+
+      function decrementarDemo() {
+        contadorDemo--;
+        actualizarContador();
+      }
+
+      function resetDemo() {
+        contadorDemo = 0;
+        contadorMensaje.textContent = "¡Reiniciado!";
+        actualizarContador();
+        setTimeout(() => {
+          contadorMensaje.textContent = "¡Hola ScopeJS!";
+        }, 2000);
+      }
+
+      function actualizarContador() {
+        contadorNumero.textContent = contadorDemo;
+      }
+
+      // Demo del modal
+      function showDemoModal() {
+        const modal = document.createElement("div");
+        modal.className = "fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50";
+        modal.innerHTML = `
+                <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4">
+                    <h3 class="text-2xl font-bold mb-4">🎉 ¡Bienvenido a ScopeJS!</h3>
+                    <p class="text-gray-600 mb-6">
+                        Este es un ejemplo de modal interactivo creado con ScopeJS.
+                        Puedes cerrarlo haciendo clic fuera o en el botón de cerrar.
+                    </p>
+                    <div class="flex justify-end">
+                        <button onclick="this.parentElement.parentElement.parentElement.remove()" 
+                                class="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition-colors">
+                            Cerrar
+                        </button>
+                    </div>
+                </div>
+            `;
+        document.body.appendChild(modal);
+        modal.addEventListener("click", (e) => {
+          if (e.target === modal) {
+            modal.remove();
+          }
+        });
+      }
+
+      // Inicialización
+      document.addEventListener("DOMContentLoaded", () => {
+        // Función para actualizar el elemento activo
+        function updateActiveNavItem() {
+          const navLinks = document.querySelectorAll(".nav-item");
+          const currentHash = window.location.hash || "#inicio";
+
+          navLinks.forEach((link) => {
+            // Remover clase activa de todos los enlaces
+            link.classList.remove("bg-white", "bg-opacity-10");
+            // Agregar clase activa al enlace actual
+            if (link.getAttribute("href") === currentHash) {
+              link.classList.add("bg-white", "bg-opacity-10");
+            }
+          });
+        }
+
+        // Actualizar elemento activo al cargar la página
+        updateActiveNavItem();
+
+        // Actualizar elemento activo cuando cambia el hash
+        window.addEventListener("hashchange", updateActiveNavItem);
+
+        // Observador de intersección para animaciones
+        const observer = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                entry.target.classList.add("slide-in-up");
+              }
+            });
+          },
+          { threshold: 0.1 }
+        );
+
+        document.querySelectorAll("section").forEach((section) => {
+          observer.observe(section);
+        });
+      });
+    </script>
+  </body>
+</html>
