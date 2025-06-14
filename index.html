@@ -53,7 +53,10 @@
     <script type="module" src="js/ScopeJS.js"></script>
     <style>
       .gradient-bg {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(to bottom, #667eea 0%, #764ba2 100%);
+      }
+      .gradient-bg2 {
+        background: linear-gradient(to top, #667eea 0%, #764ba2 100%);
       }
       .code-preview {
         max-height: 400px;
@@ -339,7 +342,7 @@
 
   <body class="bg-gray-50 text-gray-900">
     <!-- Header -->
-    <header class="gradient-bg text-white sticky top-0 z-50 shadow-lg">
+    <header class="gradient-bg text-white sticky top-0 z-50">
       <div class="container mx-auto px-4 sm:px-6 py-4">
         <div class="flex items-center justify-between">
           <div class="flex items-center space-x-3 sm:space-x-4">
@@ -385,7 +388,7 @@
     </header>
 
     <!-- Hero Section -->
-    <section id="inicio" class="gradient-bg text-white py-12 sm:py-16 lg:py-20">
+    <section id="inicio" class="gradient-bg2 text-white py-12 sm:py-16 lg:py-20">
       <div class="container mx-auto px-4 sm:px-6 text-center">
         <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold font-montserrat mb-4 sm:mb-6">Framework JavaScript Ligero y Potente</h2>
         <p class="text-base sm:text-lg lg:text-xl mb-6 sm:mb-8 max-w-3xl mx-auto px-4 font-inter">ScopeJS es un framework moderno para desarrollo basado en componentes. Ligero, rápido y fácil de usar, perfecto para aplicaciones web dinámicas.</p>
@@ -1448,7 +1451,7 @@ MiComponente.render(container);</textarea
     </section>
 
     <!-- Footer -->
-    <footer class="gradient-bg text-white py-12">
+    <footer class="gradient-bg2 text-white py-12">
       <div class="container mx-auto px-6">
         <div class="text-center">
           <div class="flex items-center justify-center space-x-4 mb-6">
