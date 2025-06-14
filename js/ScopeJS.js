@@ -850,5 +850,4 @@
 
   // Return for UMD wrapper
   return ScopeJSExports;
-
 });
