@@ -1,5 +1,5 @@
 /**
- * ScopeJS V2.0.3 - Optimized & Refactored
+ * ScopeJS V2.0.4 - Optimized & Refactored
  * A lightweight JavaScript framework for component-based development
  * Supports both ES6 modules and global script usage
  */

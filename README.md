@@ -900,7 +900,7 @@ Component({
 });
 ```
 
-## Novedades V2.0.3
+## Novedades V2.0.4
 
 ### Optimizaciones y Refactorización
 
