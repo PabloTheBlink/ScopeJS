@@ -1647,26 +1647,35 @@ MiComponente.render(container);</textarea
           // Limpiar preview
           preview.innerHTML = '<div id="preview"></div>';
 
-          // Crear contexto seguro para ejecutar el código
-          const script = document.createElement("script");
-          script.type = "module";
-          script.textContent = `
-            import { Component, Modal, Router } from './js/ScopeJS.js';
+          // Verificar que ScopeJS esté disponible
+          if (typeof Component === "undefined" || typeof Modal === "undefined" || typeof Router === "undefined") {
+            preview.innerHTML = '<div class="text-red-600 p-4"><strong>Error:</strong> ScopeJS no está disponible. Asegúrate de que el archivo ScopeJS.js esté cargado correctamente.</div>';
+            return;
+          }
+
+          // Crear una función que ejecute el código en el contexto correcto
+          const executeCode = new Function(
+            "Component",
+            "Modal",
+            "Router",
+            "document",
+            `
             try {
               ${codigo}
             } catch (error) {
-              document.getElementById('configurador-preview').innerHTML = 
-                '<div class="text-red-600 p-4"><strong>Error:</strong> ' + error.message + '</div>';
+              const preview = document.getElementById('configurador-preview');
+              if (preview) {
+                preview.innerHTML = '<div class="text-red-600 p-4"><strong>Error:</strong> ' + error.message + '</div>';
+              }
+              throw error;
             }
-          `;
+          `
+          );
 
-          document.head.appendChild(script);
-
-          // Remover script después de ejecutar
-          setTimeout(() => {
-            script.remove();
-          }, 100);
+          // Ejecutar el código con las dependencias necesarias
+          executeCode(Component, Modal, Router, document);
         } catch (error) {
+          console.error("Error ejecutando código:", error);
           preview.innerHTML = `<div class="text-red-600 p-4"><strong>Error:</strong> ${error.message}</div>`;
         }
       }
