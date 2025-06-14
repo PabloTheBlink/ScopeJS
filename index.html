@@ -543,7 +543,7 @@
 
   &lt;script&gt;
     // Tu código de la aplicación aquí
-    const App = Component({
+    const App = ScopeJS.Component({
       controller: class {
         constructor() {
           this.titulo = "Mi Primera App ScopeJS";
@@ -744,7 +744,9 @@ Counter.render(container);</code></pre>
               </div>
 
               <div id="todo-code" class="code-section">
-                <pre class="code-preview"><code class="language-javascript">const TodoList = Component({
+                <pre class="code-preview"><code class="language-javascript">import { Component } from './js/ScopeJS.js';
+
+const TodoList = Component({
     controller: class {
         constructor() {
             this.todos = [];
