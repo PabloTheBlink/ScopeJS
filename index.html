@@ -2,13 +2,26 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="format-detection" content="telephone=no" />
     <title>ScopeJS - Framework JavaScript Moderno</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
         theme: {
           extend: {
+            fontFamily: {
+              montserrat: ["Montserrat", "sans-serif"],
+              inter: ["Inter", "sans-serif"],
+            },
             colors: {
               purple: {
                 50: "#faf7ff",
@@ -31,6 +44,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script src="js/ScopeJS.js"></script>
     <script type="module" src="js/ScopeJS.js"></script>
     <style>
       .gradient-bg {
@@ -39,6 +53,8 @@
       .code-preview {
         max-height: 400px;
         overflow-y: auto;
+        overflow-x: auto;
+        word-wrap: break-word;
       }
       .nav-indicator {
         transition: all 0.3s ease;
@@ -51,13 +67,26 @@
         scroll-behavior: smooth;
       }
 
-      /* Estilos para el preview en vivo */
+      .code-preview {
+        max-width: calc(100dvw - 2rem) !important;
+      }
+
+      /* Estilos para el preview en vivo - Mejorados para móviles */
       .live-preview {
         border: 2px dashed #e5e7eb;
         min-height: 100px;
-        padding: 1rem;
+        padding: 0.75rem;
         border-radius: 0.5rem;
         background: #f9fafb;
+        overflow: hidden;
+        word-wrap: break-word;
+        box-sizing: border-box;
+      }
+
+      /* Asegurar que ningún elemento se salga del contenedor */
+      .live-preview * {
+        max-width: 100%;
+        box-sizing: border-box;
       }
 
       /* Botón toggle para código */
@@ -66,13 +95,239 @@
       }
 
       .code-section {
-        max-height: 0;
-        overflow: hidden;
-        transition: max-height 0.3s ease;
+        max-height: none;
+        overflow: visible;
+        transition: none;
       }
 
       .code-section.expanded {
-        max-height: 500px;
+        max-height: none;
+        overflow-y: auto;
+        overflow-x: auto;
+      }
+
+      /* Mostrar código por defecto en móviles */
+      @media (max-width: 768px) {
+        .code-section {
+          max-height: none;
+          overflow: visible;
+        }
+
+        .code-toggle {
+          display: none;
+        }
+      }
+
+      /* Mejoras para elementos que pueden desbordarse */
+      pre,
+      code {
+        word-wrap: break-word;
+        white-space: pre-wrap;
+        overflow-wrap: break-word;
+        max-width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      /* Prevenir overflow en contenedores principales */
+      .container {
+        max-width: 100vw;
+        padding-left: 1rem;
+        padding-right: 1rem;
+        box-sizing: border-box;
+      }
+
+      /* Contenedores de grid responsive */
+      .grid {
+        gap: 1rem;
+      }
+
+      @media (max-width: 768px) {
+        .grid {
+          display: block;
+        }
+
+        .grid > * {
+          margin-bottom: 1.5rem;
+        }
+
+        .grid > *:last-child {
+          margin-bottom: 0;
+        }
+      }
+
+      /* Mejorar elementos específicos que causan overflow */
+      .live-preview,
+      .code-preview,
+      .bg-white,
+      .bg-gray-50,
+      .bg-purple-50 {
+        max-width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        box-sizing: border-box;
+      }
+
+      /* Tablas responsive */
+      .table-container {
+        overflow-x: auto;
+        max-width: 100%;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      /* Asegurar que las tablas no se desborden */
+      table {
+        min-width: 100%;
+      }
+
+      @media (max-width: 768px) {
+        table {
+          font-size: 0.75rem;
+        }
+
+        th,
+        td {
+          padding: 0.25rem;
+          white-space: nowrap;
+        }
+      }
+
+      /* Inputs y elementos de formulario */
+      input,
+      textarea,
+      button {
+        max-width: 100%;
+        box-sizing: border-box;
+      }
+
+      /* Asegurar que los flex items no se salgan */
+      .flex {
+        flex-wrap: wrap;
+      }
+
+      /* Prevenir overflow horizontal en toda la página */
+      body {
+        overflow-x: hidden;
+        max-width: 100vw;
+      }
+
+      /* Específico para elementos de código en móviles */
+      @media (max-width: 640px) {
+        .code-preview {
+          font-size: 0.75rem;
+          line-height: 1.2;
+          padding: 0.5rem;
+        }
+
+        .live-preview {
+          padding: 0.5rem;
+        }
+
+        pre code {
+          font-size: 0.7rem;
+          line-height: 1.3;
+        }
+
+        /* Asegurar que el código no cause scroll horizontal */
+        pre {
+          white-space: pre-wrap;
+          word-break: break-all;
+          overflow-wrap: break-word;
+        }
+      }
+
+      /* Estilos específicos para iOS y WebKit */
+      * {
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        -khtml-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      /* Permitir selección en inputs y textos */
+      input,
+      textarea,
+      pre,
+      code,
+      p,
+      span,
+      div {
+        -webkit-user-select: text;
+        -moz-user-select: text;
+        -ms-user-select: text;
+        user-select: text;
+      }
+
+      /* Prevenir zoom en iOS */
+      input,
+      textarea,
+      select,
+      button {
+        font-size: 16px !important;
+        -webkit-appearance: none;
+        border-radius: 0;
+      }
+
+      /* Prevenir el bounce scroll en iOS */
+      body {
+        position: relative;
+        overflow-x: hidden;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      /* Botones y elementos táctiles optimizados para iOS */
+      button,
+      .code-toggle,
+      a {
+        -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+        touch-action: manipulation;
+      }
+
+      /* Asegurar que los contenedores no se desborden */
+      .container,
+      .live-preview,
+      .code-section,
+      .bg-white,
+      .bg-gray-50 {
+        max-width: 100%;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+      }
+
+      /* Tablas específicas para iOS */
+      @media (max-width: 768px) {
+        table {
+          width: 100%;
+          table-layout: fixed;
+        }
+
+        td,
+        th {
+          word-wrap: break-word;
+          overflow-wrap: break-word;
+          hyphens: auto;
+          -webkit-hyphens: auto;
+        }
+      }
+
+      /* Mejorar el scroll en elementos pequeños */
+      .overflow-x-auto {
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+      }
+
+      /* Prevenir problemas de viewport en iOS */
+      @supports (-webkit-touch-callout: none) {
+        .container {
+          max-width: calc(100vw - 2rem);
+        }
+
+        .live-preview {
+          max-width: calc(100% - 1rem);
+        }
       }
     </style>
   </head>
@@ -80,18 +335,20 @@
   <body class="bg-gray-50 text-gray-900">
     <!-- Header -->
     <header class="gradient-bg text-white sticky top-0 z-50 shadow-lg">
-      <div class="container mx-auto px-6 py-4">
+      <div class="container mx-auto px-4 sm:px-6 py-4">
         <div class="flex items-center justify-between">
-          <div class="flex items-center space-x-4">
-            <div class="w-10 h-10 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
-              <span class="text-2xl font-bold">S</span>
+          <div class="flex items-center space-x-3 sm:space-x-4">
+            <div class="w-8 h-8 sm:w-10 sm:h-10 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
+              <span class="text-lg sm:text-2xl font-bold">S</span>
             </div>
             <div>
-              <h1 class="text-2xl font-bold">ScopeJS</h1>
-              <p class="text-purple-200 text-sm">v2.0.3 - Framework JavaScript Moderno</p>
+              <h1 class="text-xl sm:text-2xl font-bold font-montserrat">ScopeJS</h1>
+              <p class="text-purple-200 text-xs sm:text-sm font-inter">v2.0.3 - Framework JavaScript Moderno</p>
             </div>
           </div>
-          <nav class="hidden md:flex space-x-6">
+
+          <!-- Navegación desktop -->
+          <nav class="hidden lg:flex space-x-6 font-inter">
             <a href="#inicio" class="hover:text-purple-200 transition-colors">Inicio</a>
             <a href="#componentes" class="hover:text-purple-200 transition-colors">Componentes</a>
             <a href="#modal" class="hover:text-purple-200 transition-colors">Modal</a>
@@ -99,38 +356,249 @@
             <a href="#api" class="hover:text-purple-200 transition-colors">API</a>
             <a href="#configurador" class="hover:text-purple-200 transition-colors">Configurador</a>
           </nav>
+
+          <!-- Botón menú móvil -->
+          <button id="mobile-menu-button" class="lg:hidden p-2 rounded-md hover:bg-white hover:bg-opacity-10 transition-colors">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+            </svg>
+          </button>
         </div>
+
+        <!-- Menú móvil -->
+        <nav id="mobile-menu" class="hidden lg:hidden mt-4 pb-4 border-t border-purple-400 border-opacity-30">
+          <div class="flex flex-col space-y-3 pt-4">
+            <a href="#inicio" class="hover:text-purple-200 transition-colors text-sm">Inicio</a>
+            <a href="#componentes" class="hover:text-purple-200 transition-colors text-sm">Componentes</a>
+            <a href="#modal" class="hover:text-purple-200 transition-colors text-sm">Modal</a>
+            <a href="#router" class="hover:text-purple-200 transition-colors text-sm">Router</a>
+            <a href="#api" class="hover:text-purple-200 transition-colors text-sm">API</a>
+            <a href="#configurador" class="hover:text-purple-200 transition-colors text-sm">Configurador</a>
+          </div>
+        </nav>
       </div>
     </header>
 
     <!-- Hero Section -->
-    <section id="inicio" class="gradient-bg text-white py-20">
-      <div class="container mx-auto px-6 text-center">
-        <h2 class="text-5xl font-bold mb-6">Framework JavaScript Ligero y Potente</h2>
-        <p class="text-xl mb-8 max-w-3xl mx-auto">ScopeJS es un framework moderno para desarrollo basado en componentes. Ligero, rápido y fácil de usar, perfecto para aplicaciones web dinámicas.</p>
-        <div class="flex flex-wrap justify-center gap-4">
-          <span class="bg-white bg-opacity-20 px-4 py-2 rounded-full">✨ Componentes Reactivos</span>
-          <span class="bg-white bg-opacity-20 px-4 py-2 rounded-full">🚀 Modales Inteligentes</span>
-          <span class="bg-white bg-opacity-20 px-4 py-2 rounded-full">🛣️ Router SPA</span>
-          <span class="bg-white bg-opacity-20 px-4 py-2 rounded-full">⚡ Solo 15KB</span>
+    <section id="inicio" class="gradient-bg text-white py-12 sm:py-16 lg:py-20">
+      <div class="container mx-auto px-4 sm:px-6 text-center">
+        <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold font-montserrat mb-4 sm:mb-6">Framework JavaScript Ligero y Potente</h2>
+        <p class="text-base sm:text-lg lg:text-xl mb-6 sm:mb-8 max-w-3xl mx-auto px-4 font-inter">ScopeJS es un framework moderno para desarrollo basado en componentes. Ligero, rápido y fácil de usar, perfecto para aplicaciones web dinámicas.</p>
+        <div class="flex flex-wrap justify-center gap-2 sm:gap-4 px-4">
+          <span class="bg-white bg-opacity-20 px-3 py-2 sm:px-4 sm:py-2 rounded-full text-sm sm:text-base">✨ Componentes Reactivos</span>
+          <span class="bg-white bg-opacity-20 px-3 py-2 sm:px-4 sm:py-2 rounded-full text-sm sm:text-base">🚀 Modales Inteligentes</span>
+          <span class="bg-white bg-opacity-20 px-3 py-2 sm:px-4 sm:py-2 rounded-full text-sm sm:text-base">🛣️ Router SPA</span>
+          <span class="bg-white bg-opacity-20 px-3 py-2 sm:px-4 sm:py-2 rounded-full text-sm sm:text-base">⚡ Solo 15KB</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Instalación Section -->
+    <section id="instalacion" class="py-12 sm:py-16 bg-purple-50">
+      <div class="container mx-auto px-4 sm:px-6">
+        <div class="text-center mb-8 sm:mb-12">
+          <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold font-montserrat text-gray-900 mb-3 sm:mb-4">Instalación y Uso</h2>
+          <p class="text-base sm:text-lg lg:text-xl text-gray-600 max-w-3xl mx-auto px-4 font-inter">ScopeJS se puede utilizar de múltiples formas según tus necesidades y configuración de proyecto.</p>
+        </div>
+
+        <!-- Opciones de Instalación -->
+        <div class="grid gap-6 lg:grid-cols-2 lg:gap-8 mb-12">
+          <!-- Método 1: Script Normal -->
+          <div class="bg-white rounded-lg shadow-sm p-4 sm:p-6">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                <span class="text-purple-600 font-bold">1</span>
+              </div>
+              <h3 class="text-lg sm:text-xl font-bold font-montserrat text-gray-900">Script Normal (Recomendado para principiantes)</h3>
+            </div>
+            <p class="text-gray-600 mb-4 text-sm sm:text-base">Incluye ScopeJS directamente en tu HTML sin configuración adicional.</p>
+
+            <div class="bg-gray-900 rounded-lg p-3 sm:p-4 mb-4">
+              <pre class="text-green-400 font-mono text-xs sm:text-sm overflow-x-auto"><code>&lt;!-- En el &lt;head&gt; de tu HTML --&gt;
+&lt;script src="js/ScopeJS.js"&gt;&lt;/script&gt;
+
+&lt;script&gt;
+  // Las funciones están disponibles globalmente
+  const MiComponente = Component({
+    controller: class {
+      constructor() {
+        this.mensaje = "¡Hola Mundo!";
+      }
+    },
+    render() {
+      return `&lt;h1&gt;${this.mensaje}&lt;/h1&gt;`;
+    }
+  });
+
+  // Renderizar cuando la página cargue
+  window.addEventListener('load', () => {
+    const container = document.getElementById('app');
+    MiComponente.render(container);
+  });
+&lt;/script&gt;</code></pre>
+            </div>
+
+            <div class="flex flex-wrap gap-2 text-xs">
+              <span class="bg-green-100 text-green-800 px-2 py-1 rounded">✅ Fácil configuración</span>
+              <span class="bg-green-100 text-green-800 px-2 py-1 rounded">✅ Sin bundlers</span>
+              <span class="bg-green-100 text-green-800 px-2 py-1 rounded">✅ Funciona en cualquier navegador</span>
+            </div>
+          </div>
+
+          <!-- Método 2: ES6 Modules -->
+          <div class="bg-white rounded-lg shadow-sm p-4 sm:p-6">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                <span class="text-purple-600 font-bold">2</span>
+              </div>
+              <h3 class="text-lg sm:text-xl font-bold font-montserrat text-gray-900">ES6 Modules (Moderno)</h3>
+            </div>
+            <p class="text-gray-600 mb-4 text-sm sm:text-base">Para proyectos modernos que usan módulos ES6 y bundlers como Vite o Webpack.</p>
+
+            <div class="bg-gray-900 rounded-lg p-3 sm:p-4 mb-4">
+              <pre class="text-green-400 font-mono text-xs sm:text-sm overflow-x-auto"><code>&lt;!-- En el &lt;head&gt; de tu HTML --&gt;
+&lt;script type="module"&gt;
+  import { Component, Modal, Router } from './js/ScopeJS.js';
+
+  const MiComponente = Component({
+    controller: class {
+      constructor() {
+        this.mensaje = "¡Hola Mundo!";
+      }
+    },
+    render() {
+      return `&lt;h1&gt;${this.mensaje}&lt;/h1&gt;`;
+    }
+  });
+
+  // Renderizar cuando la página cargue
+  window.addEventListener('load', () => {
+    const container = document.getElementById('app');
+    MiComponente.render(container);
+  });
+&lt;/script&gt;</code></pre>
+            </div>
+
+            <div class="flex flex-wrap gap-2 text-xs">
+              <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded">🚀 Tree shaking</span>
+              <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded">🚀 Imports selectivos</span>
+              <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded">🚀 Mejor para proyectos grandes</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Métodos adicionales -->
+        <div class="bg-white rounded-lg shadow-sm p-4 sm:p-6 mb-8">
+          <h3 class="text-lg sm:text-xl font-bold font-montserrat text-gray-900 mb-4">Métodos Adicionales</h3>
+
+          <div class="grid gap-4 md:grid-cols-2">
+            <!-- CDN -->
+            <div class="border border-gray-200 rounded-lg p-4">
+              <h4 class="font-bold text-purple-800 mb-2 flex items-center gap-2"><span>🌐</span> CDN</h4>
+              <p class="text-gray-600 text-sm mb-2">Incluye desde una CDN para máxima velocidad:</p>
+              <div class="bg-gray-100 p-2 rounded text-xs font-mono">&lt;script src="https://cdn.jsdelivr.net/npm/scopejs@2.0.3/dist/ScopeJS.min.js"&gt;&lt;/script&gt;</div>
+            </div>
+
+            <!-- NPM -->
+            <div class="border border-gray-200 rounded-lg p-4">
+              <h4 class="font-bold text-purple-800 mb-2 flex items-center gap-2"><span>📦</span> NPM (Próximamente)</h4>
+              <p class="text-gray-600 text-sm mb-2">Instala como dependencia en proyectos Node.js:</p>
+              <div class="bg-gray-100 p-2 rounded text-xs font-mono">npm install scopejs</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Ejemplo de estructura HTML -->
+        <div class="bg-white rounded-lg shadow-sm p-4 sm:p-6">
+          <h3 class="text-lg sm:text-xl font-bold font-montserrat text-gray-900 mb-4">Estructura HTML Básica</h3>
+          <p class="text-gray-600 mb-4 text-sm sm:text-base">Aquí tienes un ejemplo completo de cómo estructurar tu página HTML:</p>
+
+          <div class="bg-gray-900 rounded-lg p-3 sm:p-4">
+            <pre class="text-green-400 font-mono text-xs sm:text-sm overflow-x-auto"><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="es"&gt;
+&lt;head&gt;
+  &lt;meta charset="UTF-8"&gt;
+  &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+  &lt;title&gt;Mi App con ScopeJS&lt;/title&gt;
+  
+  &lt;!-- Opción 1: Script normal --&gt;
+  &lt;script src="js/ScopeJS.js"&gt;&lt;/script&gt;
+  
+  &lt;!-- Opción 2: ES6 Module --&gt;
+  &lt;!-- &lt;script type="module" src="js/app.js"&gt;&lt;/script&gt; --&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;div id="app"&gt;
+    &lt;!-- Tu aplicación se renderizará aquí --&gt;
+  &lt;/div&gt;
+
+  &lt;script&gt;
+    // Tu código de la aplicación aquí
+    const App = Component({
+      controller: class {
+        constructor() {
+          this.titulo = "Mi Primera App ScopeJS";
+          this.contador = 0;
+        }
+        
+        incrementar() {
+          this.contador++;
+          this.apply();
+        }
+      },
+      
+      render() {
+        return `
+          &lt;div style="text-align: center; padding: 2rem;"&gt;
+            &lt;h1&gt;${this.titulo}&lt;/h1&gt;
+            &lt;p&gt;Contador: ${this.contador}&lt;/p&gt;
+            &lt;button onclick="incrementar()"&gt;
+              Incrementar
+            &lt;/button&gt;
+          &lt;/div&gt;
+        `;
+      }
+    });
+
+    // Inicializar cuando la página cargue
+    window.addEventListener('load', () => {
+      const container = document.getElementById('app');
+      App.render(container);
+    });
+  &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+          </div>
+        </div>
+
+        <!-- Consejos -->
+        <div class="mt-8 p-4 sm:p-6 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl">
+          <h4 class="font-bold font-montserrat text-purple-800 mb-3 text-lg">💡 Consejos de Instalación</h4>
+          <ul class="text-sm sm:text-base text-gray-700 space-y-2 pl-2">
+            <li>• <strong>Principiantes:</strong> Usa el método de script normal para empezar rápidamente</li>
+            <li>• <strong>Desarrollo moderno:</strong> Usa ES6 modules si ya trabajas con bundlers</li>
+            <li>• <strong>Producción:</strong> Minifica el archivo ScopeJS.js para mejor rendimiento</li>
+            <li>• <strong>Compatibilidad:</strong> ScopeJS funciona en todos los navegadores modernos (ES6+)</li>
+            <li>• <strong>Tamaño:</strong> Solo ~15KB minificado, perfecto para proyectos ligeros</li>
+          </ul>
         </div>
       </div>
     </section>
 
     <!-- Componentes Section -->
-    <section id="componentes" class="py-16 bg-white">
-      <div class="container mx-auto px-6">
-        <div class="text-center mb-12">
-          <h2 class="text-4xl font-bold text-gray-900 mb-4">Componentes</h2>
-          <p class="text-xl text-gray-600 max-w-3xl mx-auto">Crea componentes reutilizables con lógica encapsulada, estilos y eventos. Perfecto para construir interfaces modulares y mantenibles.</p>
+    <section id="componentes" class="py-12 sm:py-16 bg-white">
+      <div class="container mx-auto px-4 sm:px-6">
+        <div class="text-center mb-8 sm:mb-12">
+          <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold font-montserrat text-gray-900 mb-3 sm:mb-4">Componentes</h2>
+          <p class="text-base sm:text-lg lg:text-xl text-gray-600 max-w-3xl mx-auto px-4 font-inter">Crea componentes reutilizables con lógica encapsulada, estilos y eventos. Perfecto para construir interfaces modulares y mantenibles.</p>
         </div>
 
         <!-- ¿Qué son los Componentes? -->
-        <div class="mb-16">
-          <div class="bg-gradient-to-r from-purple-50 to-indigo-50 p-8 rounded-xl mb-8">
-            <h3 class="text-2xl font-bold text-purple-800 mb-4">¿Qué son los Componentes en ScopeJS?</h3>
-            <p class="text-gray-700 mb-4">Los componentes en ScopeJS son bloques de código reutilizables que encapsulan:</p>
-            <ul class="list-disc list-inside text-gray-700 space-y-2">
+        <div class="mb-12 sm:mb-16">
+          <div class="bg-gradient-to-r from-purple-50 to-indigo-50 p-4 sm:p-6 lg:p-8 rounded-xl mb-6 sm:mb-8">
+            <h3 class="text-xl sm:text-2xl font-bold font-montserrat text-purple-800 mb-3 sm:mb-4">¿Qué son los Componentes en ScopeJS?</h3>
+            <p class="text-sm sm:text-base text-gray-700 mb-3 sm:mb-4 font-inter">Los componentes en ScopeJS son bloques de código reutilizables que encapsulan:</p>
+            <ul class="list-disc list-inside text-sm sm:text-base text-gray-700 space-y-1 sm:space-y-2 pl-2">
               <li><strong>Lógica de negocio:</strong> Controladores con métodos y propiedades</li>
               <li><strong>Presentación:</strong> Templates HTML dinámicos</li>
               <li><strong>Estilos:</strong> CSS scoped al componente</li>
@@ -141,41 +609,41 @@
         </div>
 
         <!-- Casos de Uso -->
-        <div class="mb-16">
-          <h3 class="text-2xl font-bold text-gray-900 mb-6">Casos de Uso Principales</h3>
-          <div class="grid md:grid-cols-3 gap-6">
-            <div class="bg-purple-50 p-6 rounded-lg">
-              <div class="text-purple-600 text-2xl mb-4">🧩</div>
-              <h4 class="font-bold text-purple-800 mb-2">Widgets UI</h4>
-              <p class="text-gray-700">Botones, tarjetas, formularios y elementos interactivos reutilizables.</p>
+        <div class="mb-12 sm:mb-16">
+          <h3 class="text-xl sm:text-2xl font-bold font-montserrat text-gray-900 mb-4 sm:mb-6 text-center sm:text-left">Casos de Uso Principales</h3>
+          <div class="grid gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
+            <div class="bg-purple-50 p-4 sm:p-6 rounded-lg text-center">
+              <div class="text-purple-600 text-2xl mb-3 sm:mb-4">🧩</div>
+              <h4 class="font-bold font-montserrat text-purple-800 mb-2 text-sm sm:text-base">Widgets UI</h4>
+              <p class="text-gray-700 text-xs sm:text-sm font-inter">Botones, tarjetas, formularios y elementos interactivos reutilizables.</p>
             </div>
-            <div class="bg-purple-50 p-6 rounded-lg">
-              <div class="text-purple-600 text-2xl mb-4">📊</div>
-              <h4 class="font-bold text-purple-800 mb-2">Dashboard</h4>
-              <p class="text-gray-700">Gráficos, métricas y paneles de control dinámicos.</p>
+            <div class="bg-purple-50 p-4 sm:p-6 rounded-lg text-center">
+              <div class="text-purple-600 text-2xl mb-3 sm:mb-4">📊</div>
+              <h4 class="font-bold font-montserrat text-purple-800 mb-2 text-sm sm:text-base">Dashboard</h4>
+              <p class="text-gray-700 text-xs sm:text-sm font-inter">Gráficos, métricas y paneles de control dinámicos.</p>
             </div>
-            <div class="bg-purple-50 p-6 rounded-lg">
-              <div class="text-purple-600 text-2xl mb-4">🎨</div>
-              <h4 class="font-bold text-purple-800 mb-2">Interfaces</h4>
-              <p class="text-gray-700">Layouts complejos con estado compartido y comunicación entre componentes.</p>
+            <div class="bg-purple-50 p-4 sm:p-6 rounded-lg text-center md:col-span-2 lg:col-span-1">
+              <div class="text-purple-600 text-2xl mb-3 sm:mb-4">🎨</div>
+              <h4 class="font-bold font-montserrat text-purple-800 mb-2 text-sm sm:text-base">Interfaces</h4>
+              <p class="text-gray-700 text-xs sm:text-sm font-inter">Layouts complejos con estado compartido y comunicación entre componentes.</p>
             </div>
           </div>
         </div>
 
         <!-- Ejemplo Básico -->
-        <div class="mb-16">
-          <h3 class="text-2xl font-bold text-gray-900 mb-6">Ejemplo Básico: Contador</h3>
+        <div class="mb-12 sm:mb-16">
+          <h3 class="text-xl sm:text-2xl font-bold font-montserrat text-gray-900 mb-4 sm:mb-6 text-center sm:text-left">Ejemplo Básico: Contador</h3>
 
-          <div class="grid lg:grid-cols-2 gap-8">
+          <div class="grid gap-6 lg:grid-cols-2 lg:gap-8">
             <!-- Código -->
             <div>
               <div class="flex items-center justify-between mb-4">
-                <h4 class="text-lg font-semibold">Código del Componente</h4>
-                <button onclick="toggleCode('counter-code')" class="code-toggle bg-purple-600 text-white px-3 py-1 rounded text-sm hover:bg-purple-700">Mostrar Código</button>
+                <h4 class="text-base sm:text-lg font-semibold font-montserrat">Código del Componente</h4>
               </div>
 
               <div id="counter-code" class="code-section">
-                <pre class="code-preview"><code class="language-javascript">import { Component } from './js/ScopeJS.js';
+                <div class="overflow-hidden">
+                  <pre class="code-preview text-xs sm:text-sm overflow-x-auto"><code class="language-javascript">import { Component } from './js/ScopeJS.js';
 
 // Definir el componente
 const Counter = Component({
@@ -234,21 +702,22 @@ const Counter = Component({
 // Usar el componente
 const container = document.getElementById('app');
 Counter.render(container);</code></pre>
+                </div>
               </div>
             </div>
 
             <!-- Preview en vivo -->
             <div>
-              <h4 class="text-lg font-semibold mb-4">Vista Previa</h4>
+              <h4 class="text-base sm:text-lg font-semibold font-montserrat mb-4">Vista Previa</h4>
               <div class="live-preview">
-                <div id="counter-demo" class="text-center p-4 border-2 border-purple-500 rounded-lg bg-white">
-                  <h3 class="text-xl font-bold text-purple-800 mb-4">Contador: <span id="count-display">0</span></h3>
-                  <div class="flex items-center justify-center gap-2 mb-4">
-                    <button onclick="decrementDemo()" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">-</button>
-                    <input type="number" id="step-input" value="1" class="w-20 px-2 py-1 border rounded text-center" placeholder="Paso" />
-                    <button onclick="incrementDemo()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">+</button>
+                <div id="counter-demo" class="text-center p-4 sm:p-6 border-2 border-purple-500 rounded-lg bg-white">
+                  <h3 class="text-lg sm:text-xl font-bold font-montserrat text-purple-800 mb-4 sm:mb-6">Contador: <span id="count-display">0</span></h3>
+                  <div class="flex items-center justify-center gap-3 mb-4 sm:mb-6 flex-wrap">
+                    <button onclick="decrementDemo()" class="w-12 h-12 bg-purple-200 text-purple-800 rounded-lg hover:bg-purple-300 transition-all duration-200 text-lg font-bold shadow-md hover:shadow-lg transform hover:scale-105">-</button>
+                    <input type="number" id="step-input" value="1" class="w-20 h-12 px-3 border-2 border-gray-300 rounded-lg text-center text-sm font-medium focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200" placeholder="Paso" />
+                    <button onclick="incrementDemo()" class="w-12 h-12 bg-purple-300 text-purple-800 rounded-lg hover:bg-purple-400 transition-all duration-200 text-lg font-bold shadow-md hover:shadow-lg transform hover:scale-105">+</button>
                   </div>
-                  <button onclick="resetDemo()" class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700">Reset</button>
+                  <button onclick="resetDemo()" class="px-6 py-3 bg-purple-100 text-purple-800 rounded-lg hover:bg-purple-200 transition-all duration-200 font-medium shadow-md hover:shadow-lg transform hover:scale-105">Reset</button>
                 </div>
               </div>
             </div>
@@ -256,14 +725,13 @@ Counter.render(container);</code></pre>
         </div>
 
         <!-- Ejemplo Avanzado -->
-        <div class="mb-16">
-          <h3 class="text-2xl font-bold text-gray-900 mb-6">Ejemplo Avanzado: Lista de Tareas</h3>
+        <div class="mb-12 sm:mb-16">
+          <h3 class="text-xl sm:text-2xl font-bold font-montserrat text-gray-900 mb-4 sm:mb-6 text-center sm:text-left">Ejemplo Avanzado: Lista de Tareas</h3>
 
-          <div class="grid lg:grid-cols-2 gap-8">
+          <div class="grid gap-6 lg:grid-cols-2 lg:gap-8">
             <div>
               <div class="flex items-center justify-between mb-4">
-                <h4 class="text-lg font-semibold">Lista Interactiva</h4>
-                <button onclick="toggleCode('todo-code')" class="code-toggle bg-purple-600 text-white px-3 py-1 rounded text-sm hover:bg-purple-700">Ver Código</button>
+                <h4 class="text-lg font-semibold font-montserrat">Lista Interactiva</h4>
               </div>
 
               <div id="todo-code" class="code-section">
@@ -366,20 +834,20 @@ Counter.render(container);</code></pre>
 
             <!-- Preview en vivo -->
             <div>
-              <h4 class="text-lg font-semibold mb-4">Demo Interactivo</h4>
+              <h4 class="text-lg font-semibold font-montserrat mb-4">Demo Interactivo</h4>
               <div class="live-preview">
                 <div id="todo-demo" class="p-4 border-2 border-purple-500 rounded-lg bg-white">
-                  <h3 class="text-xl font-bold text-purple-800 mb-4">Lista de Tareas</h3>
+                  <h3 class="text-xl font-bold font-montserrat text-purple-800 mb-4">Lista de Tareas</h3>
 
                   <div class="flex gap-2 mb-4">
-                    <input type="text" id="new-todo-input" placeholder="Nueva tarea..." class="flex-1 px-3 py-2 border rounded" />
-                    <button onclick="addTodoDemo()" class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700">Agregar</button>
+                    <input type="text" id="new-todo-input" placeholder="Nueva tarea..." class="flex-1 px-3 py-2 border-2 border-gray-300 rounded-lg text-sm font-medium focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200" />
+                    <button onclick="addTodoDemo()" class="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-all duration-200 font-medium shadow-md hover:shadow-lg transform hover:scale-105">Agregar</button>
                   </div>
 
-                  <div class="flex gap-2 mb-4">
-                    <button onclick="filterTodos('all')" id="filter-all" class="filter-btn bg-purple-600 text-white px-3 py-1 rounded text-sm">Todas</button>
-                    <button onclick="filterTodos('active')" id="filter-active" class="filter-btn bg-gray-300 text-gray-700 px-3 py-1 rounded text-sm">Activas</button>
-                    <button onclick="filterTodos('completed')" id="filter-completed" class="filter-btn bg-gray-300 text-gray-700 px-3 py-1 rounded text-sm">Completadas</button>
+                  <div class="flex gap-2 mb-4 flex-wrap justify-center">
+                    <button onclick="filterTodos('all')" id="filter-all" class="filter-btn px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105">Todas</button>
+                    <button onclick="filterTodos('active')" id="filter-active" class="filter-btn px-4 py-2 bg-gray-300 text-gray-700 rounded-lg text-sm font-medium transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 hover:bg-gray-400">Activas</button>
+                    <button onclick="filterTodos('completed')" id="filter-completed" class="filter-btn px-4 py-2 bg-gray-300 text-gray-700 rounded-lg text-sm font-medium transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 hover:bg-gray-400">Completadas</button>
                   </div>
 
                   <ul id="todo-list" class="space-y-2"></ul>
@@ -390,28 +858,28 @@ Counter.render(container);</code></pre>
         </div>
 
         <!-- Features -->
-        <div class="mb-16">
-          <h3 class="text-2xl font-bold text-gray-900 mb-6">Características Principales</h3>
-          <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div class="bg-purple-50 p-6 rounded-lg text-center">
-              <div class="text-purple-600 text-3xl mb-4">🔄</div>
-              <h4 class="font-bold text-purple-800 mb-2">Data Binding</h4>
-              <p class="text-gray-700">Binding bidireccional automático con el atributo <code>model</code></p>
+        <div class="mb-12 sm:mb-16">
+          <h3 class="text-xl sm:text-2xl font-bold font-montserrat text-gray-900 mb-4 sm:mb-6 text-center sm:text-left">Características Principales</h3>
+          <div class="grid gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-4">
+            <div class="bg-purple-50 p-4 sm:p-6 rounded-lg text-center">
+              <div class="text-purple-600 text-2xl sm:text-3xl mb-3 sm:mb-4">🔄</div>
+              <h4 class="font-bold font-montserrat text-purple-800 mb-2 text-sm sm:text-base">Data Binding</h4>
+              <p class="text-gray-700 text-xs sm:text-sm font-inter">Binding bidireccional automático con el atributo <code class="text-xs">model</code></p>
             </div>
-            <div class="bg-purple-50 p-6 rounded-lg text-center">
-              <div class="text-purple-600 text-3xl mb-4">🎯</div>
-              <h4 class="font-bold text-purple-800 mb-2">Event Handling</h4>
-              <p class="text-gray-700">Manejo de eventos con parámetros y contexto automático</p>
+            <div class="bg-purple-50 p-4 sm:p-6 rounded-lg text-center">
+              <div class="text-purple-600 text-2xl sm:text-3xl mb-3 sm:mb-4">🎯</div>
+              <h4 class="font-bold font-montserrat text-purple-800 mb-2 text-sm sm:text-base">Event Handling</h4>
+              <p class="text-gray-700 text-xs sm:text-sm font-inter">Manejo de eventos con parámetros y contexto automático</p>
             </div>
-            <div class="bg-purple-50 p-6 rounded-lg text-center">
-              <div class="text-purple-600 text-3xl mb-4">🎨</div>
-              <h4 class="font-bold text-purple-800 mb-2">Scoped CSS</h4>
-              <p class="text-gray-700">Estilos encapsulados sin conflictos globales</p>
+            <div class="bg-purple-50 p-4 sm:p-6 rounded-lg text-center">
+              <div class="text-purple-600 text-2xl sm:text-3xl mb-3 sm:mb-4">🎨</div>
+              <h4 class="font-bold font-montserrat text-purple-800 mb-2 text-sm sm:text-base">Scoped CSS</h4>
+              <p class="text-gray-700 text-xs sm:text-sm font-inter">Estilos encapsulados sin conflictos globales</p>
             </div>
-            <div class="bg-purple-50 p-6 rounded-lg text-center">
-              <div class="text-purple-600 text-3xl mb-4">⚡</div>
-              <h4 class="font-bold text-purple-800 mb-2">Reactivo</h4>
-              <p class="text-gray-700">Re-renderizado eficiente solo cuando es necesario</p>
+            <div class="bg-purple-50 p-4 sm:p-6 rounded-lg text-center">
+              <div class="text-purple-600 text-2xl sm:text-3xl mb-3 sm:mb-4">⚡</div>
+              <h4 class="font-bold font-montserrat text-purple-800 mb-2 text-sm sm:text-base">Reactivo</h4>
+              <p class="text-gray-700 text-xs sm:text-sm font-inter">Re-renderizado eficiente solo cuando es necesario</p>
             </div>
           </div>
         </div>
@@ -419,26 +887,25 @@ Counter.render(container);</code></pre>
     </section>
 
     <!-- Modal Section -->
-    <section id="modal" class="py-16 bg-gray-50">
-      <div class="container mx-auto px-6">
-        <div class="text-center mb-12">
-          <h2 class="text-4xl font-bold text-gray-900 mb-4">Sistema de Modales</h2>
-          <p class="text-xl text-gray-600 max-w-3xl mx-auto">Crea modales elegantes y funcionales con animaciones suaves y control total sobre el comportamiento.</p>
+    <section id="modal" class="py-12 sm:py-16 bg-gray-50">
+      <div class="container mx-auto px-4 sm:px-6">
+        <div class="text-center mb-8 sm:mb-12">
+          <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold font-montserrat text-gray-900 mb-3 sm:mb-4">Sistema de Modales</h2>
+          <p class="text-base sm:text-lg lg:text-xl text-gray-600 max-w-3xl mx-auto px-4 font-inter">Crea modales elegantes y funcionales con animaciones suaves y control total sobre el comportamiento.</p>
         </div>
 
         <!-- Ejemplo de Modal -->
-        <div class="mb-16">
-          <h3 class="text-2xl font-bold text-gray-900 mb-6">Ejemplo de Modal</h3>
+        <div class="mb-12 sm:mb-16">
+          <h3 class="text-xl sm:text-2xl font-bold font-montserrat text-gray-900 mb-4 sm:mb-6 text-center sm:text-left">Ejemplo de Modal</h3>
 
-          <div class="grid lg:grid-cols-2 gap-8">
+          <div class="grid gap-6 lg:grid-cols-2 lg:gap-8">
             <div>
               <div class="flex items-center justify-between mb-4">
-                <h4 class="text-lg font-semibold">Código del Modal</h4>
-                <button onclick="toggleCode('modal-code')" class="code-toggle bg-purple-600 text-white px-3 py-1 rounded text-sm hover:bg-purple-700">Ver Código</button>
+                <h4 class="text-base sm:text-lg font-semibold font-montserrat">Código del Modal</h4>
               </div>
 
               <div id="modal-code" class="code-section">
-                <pre class="code-preview"><code class="language-javascript">import { Modal } from './js/ScopeJS.js';
+                <pre class="code-preview text-xs sm:text-sm overflow-x-auto"><code class="language-javascript">import { Modal } from './js/ScopeJS.js';
 
 // Abrir modal simple
 function openModal() {
@@ -490,11 +957,11 @@ function openModal() {
             </div>
 
             <div>
-              <h4 class="text-lg font-semibold mb-4">Demo Interactivo</h4>
+              <h4 class="text-base sm:text-lg font-semibold font-montserrat mb-4">Demo Interactivo</h4>
               <div class="live-preview">
                 <div class="text-center">
-                  <button onclick="demoModal()" class="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition-colors">Abrir Modal de Ejemplo</button>
-                  <p class="text-sm text-gray-600 mt-2">Haz clic para ver el modal en acción</p>
+                  <button onclick="demoModal()" class="bg-purple-600 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg hover:bg-purple-700 transition-colors text-sm sm:text-base">Abrir Modal de Ejemplo</button>
+                  <p class="text-xs sm:text-sm text-gray-600 mt-2">Haz clic para ver el modal en acción</p>
                 </div>
               </div>
             </div>
@@ -502,23 +969,23 @@ function openModal() {
         </div>
 
         <!-- Características del Modal -->
-        <div class="mb-16">
-          <h3 class="text-2xl font-bold text-gray-900 mb-6">Características del Sistema de Modales</h3>
-          <div class="grid md:grid-cols-3 gap-6">
-            <div class="bg-white p-6 rounded-lg shadow-sm">
-              <div class="text-purple-600 text-2xl mb-4">🎭</div>
-              <h4 class="font-bold text-purple-800 mb-2">Animaciones Suaves</h4>
-              <p class="text-gray-700">Transiciones CSS3 elegantes para abrir y cerrar modales</p>
+        <div class="mb-12 sm:mb-16">
+          <h3 class="text-xl sm:text-2xl font-bold font-montserrat text-gray-900 mb-4 sm:mb-6 text-center sm:text-left">Características del Sistema de Modales</h3>
+          <div class="grid gap-4 sm:gap-6 md:grid-cols-3">
+            <div class="bg-white p-4 sm:p-6 rounded-lg shadow-sm text-center">
+              <div class="text-purple-600 text-2xl mb-3 sm:mb-4">🎭</div>
+              <h4 class="font-bold font-montserrat text-purple-800 mb-2 text-sm sm:text-base">Animaciones Suaves</h4>
+              <p class="text-gray-700 text-xs sm:text-sm font-inter">Transiciones CSS3 elegantes para abrir y cerrar modales</p>
             </div>
-            <div class="bg-white p-6 rounded-lg shadow-sm">
-              <div class="text-purple-600 text-2xl mb-4">🔧</div>
-              <h4 class="font-bold text-purple-800 mb-2">Configuración Flexible</h4>
-              <p class="text-gray-700">Control total sobre comportamiento, posición y estilo</p>
+            <div class="bg-white p-4 sm:p-6 rounded-lg shadow-sm text-center">
+              <div class="text-purple-600 text-2xl mb-3 sm:mb-4">🔧</div>
+              <h4 class="font-bold font-montserrat text-purple-800 mb-2 text-sm sm:text-base">Configuración Flexible</h4>
+              <p class="text-gray-700 text-xs sm:text-sm font-inter">Control total sobre comportamiento, posición y estilo</p>
             </div>
-            <div class="bg-white p-6 rounded-lg shadow-sm">
-              <div class="text-purple-600 text-2xl mb-4">📱</div>
-              <h4 class="font-bold text-purple-800 mb-2">Responsive</h4>
-              <p class="text-gray-700">Adaptación automática a diferentes tamaños de pantalla</p>
+            <div class="bg-white p-4 sm:p-6 rounded-lg shadow-sm text-center">
+              <div class="text-purple-600 text-2xl mb-3 sm:mb-4">📱</div>
+              <h4 class="font-bold font-montserrat text-purple-800 mb-2 text-sm sm:text-base">Responsive</h4>
+              <p class="text-gray-700 text-xs sm:text-sm font-inter">Adaptación automática a diferentes tamaños de pantalla</p>
             </div>
           </div>
         </div>
@@ -526,88 +993,170 @@ function openModal() {
     </section>
 
     <!-- Router Section -->
-    <section id="router" class="py-16 bg-white">
-      <div class="container mx-auto px-6">
-        <div class="text-center mb-12">
-          <h2 class="text-4xl font-bold text-gray-900 mb-4">Router SPA</h2>
-          <p class="text-xl text-gray-600 max-w-3xl mx-auto">Sistema de enrutamiento para aplicaciones de una sola página con soporte para parámetros dinámicos y middleware.</p>
+    <section id="router" class="py-12 sm:py-16 bg-white">
+      <div class="container mx-auto px-4 sm:px-6">
+        <div class="text-center mb-8 sm:mb-12">
+          <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold font-montserrat text-gray-900 mb-3 sm:mb-4">Router SPA</h2>
+          <p class="text-base sm:text-lg lg:text-xl text-gray-600 max-w-3xl mx-auto px-4 font-inter">Sistema de enrutamiento para aplicaciones de una sola página con soporte para parámetros dinámicos y middleware.</p>
         </div>
 
         <!-- Ejemplo de Router -->
-        <div class="mb-16">
-          <h3 class="text-2xl font-bold text-gray-900 mb-6">Configuración del Router</h3>
+        <div class="mb-12 sm:mb-16">
+          <h3 class="text-xl sm:text-2xl font-bold font-montserrat text-gray-900 mb-4 sm:mb-6 text-center sm:text-left">Configuración del Router</h3>
 
-          <div class="grid lg:grid-cols-2 gap-8">
+          <div class="grid gap-6 lg:grid-cols-2 lg:gap-8">
             <div>
               <div class="flex items-center justify-between mb-4">
-                <h4 class="text-lg font-semibold">Configuración Básica</h4>
-                <button onclick="toggleCode('router-code')" class="code-toggle bg-purple-600 text-white px-3 py-1 rounded text-sm hover:bg-purple-700">Ver Código</button>
+                <h4 class="text-base sm:text-lg font-semibold font-montserrat">Configuración Básica</h4>
               </div>
 
               <div id="router-code" class="code-section">
-                <pre class="code-preview"><code class="language-javascript">import { Router, Component } from './js/ScopeJS.js';
+                <pre class="code-preview text-xs sm:text-sm overflow-x-auto"><code class="language-javascript">import { Router, Component } from './js/ScopeJS.js';
 
-// Definir rutas
-const routes = [
-    {
-        path: '/',
-        controller: {
-            render() {
-                return `&lt;h1&gt;Página de Inicio&lt;/h1&gt;`;
-            }
+// Definir las vistas/componentes
+const HomePage = Component({
+    controller: class {
+        constructor() {
+            this.title = "Página de Inicio";
+            this.message = "¡Bienvenido a ScopeJS!";
         }
     },
-    {
-        path: '/usuario/:id',
-        controller: {
-            render() {
-                return `
-                    &lt;h1&gt;Usuario: ${this.router.params.id}&lt;/h1&gt;
-                    &lt;p&gt;Ruta actual: ${this.router.path}&lt;/p&gt;
-                `;
-            }
-        }
-    },
-    {
-        path: '/productos',
-        middleware: (next) => {
-            // Verificar autenticación
-            if (isAuthenticated()) {
-                next();
-            } else {
-                router.navigate('/login');
-            }
-        },
-        controller: {
-            render() {
-                return `&lt;h1&gt;Lista de Productos&lt;/h1&gt;`;
-            }
-        }
+    
+    render() {
+        return `
+            &lt;div class="p-6 text-center"&gt;
+                &lt;h1 class="text-3xl font-bold text-purple-800 mb-4"&gt;
+                    ${this.title}
+                &lt;/h1&gt;
+                &lt;p class="text-gray-600"&gt;${this.message}&lt;/p&gt;
+                &lt;a href="/usuario/123" class="text-purple-600 hover:underline"&gt;
+                    Ver perfil de usuario
+                &lt;/a&gt;
+            &lt;/div&gt;
+        `;
     }
-];
-
-// Crear router
-const router = Router(routes, {
-    useHash: true, // Usar hash routing
 });
 
-// Renderizar en contenedor
+const UserProfile = Component({
+    controller: class {
+        constructor() {
+            this.userId = null;
+            this.userName = "";
+        }
+        
+        init(params) {
+            this.userId = params.id;
+            this.userName = `Usuario ${params.id}`;
+            this.apply();
+        }
+    },
+    
+    render() {
+        return `
+            &lt;div class="p-6"&gt;
+                &lt;h1 class="text-2xl font-bold text-purple-800 mb-4"&gt;
+                    Perfil de ${this.userName}
+                &lt;/h1&gt;
+                &lt;p class="text-gray-600 mb-4"&gt;ID: ${this.userId}&lt;/p&gt;
+                &lt;button onclick="history.back()" 
+                        class="bg-purple-600 text-white px-4 py-2 rounded"&gt;
+                    Volver
+                &lt;/button&gt;
+            &lt;/div&gt;
+        `;
+    }
+});
+
+// Configurar el router
+const AppRouter = Router([
+    {
+        path: "/",
+        component: HomePage
+    },
+    {
+        path: "/inicio",
+        component: HomePage
+    },
+    {
+        path: "/usuario/:id",
+        component: UserProfile,
+        middleware: (params, next) => {
+            // Validar que el ID sea un número
+            if (isNaN(params.id)) {
+                alert("ID de usuario inválido");
+                return false;
+            }
+            next();
+        }
+    },
+    {
+        path: "/productos",
+        component: Component({
+            render() {
+                return `
+                    &lt;div class="p-6"&gt;
+                        &lt;h1 class="text-2xl font-bold text-purple-800 mb-4"&gt;
+                            Catálogo de Productos
+                        &lt;/h1&gt;
+                        &lt;div class="grid grid-cols-2 gap-4"&gt;
+                            &lt;div class="border p-4 rounded"&gt;Producto 1&lt;/div&gt;
+                            &lt;div class="border p-4 rounded"&gt;Producto 2&lt;/div&gt;
+                        &lt;/div&gt;
+                    &lt;/div&gt;
+                `;
+            }
+        })
+    },
+    {
+        path: "*",
+        component: Component({
+            render() {
+                return `
+                    &lt;div class="p-6 text-center"&gt;
+                        &lt;h1 class="text-2xl font-bold text-red-600 mb-4"&gt;
+                            404 - Página no encontrada
+                        &lt;/h1&gt;
+                        &lt;a href="/" class="text-purple-600 hover:underline"&gt;
+                            Volver al inicio
+                        &lt;/a&gt;
+                    &lt;/div&gt;
+                `;
+            }
+        })
+    }
+]);
+
+// Renderizar el router en el DOM
 const container = document.getElementById('app');
-router.render(container);</code></pre>
+AppRouter.render(container);
+
+// Navegación programática
+function navigateToUser(userId) {
+    AppRouter.navigate(`/usuario/${userId}`);
+}
+
+function navigateToProducts() {
+    AppRouter.navigate('/productos');
+}
+
+// Escuchar cambios de ruta
+AppRouter.listen((route, params) => {
+    console.log('Navegando a:', route, 'Parámetros:', params);
+});</code></pre>
               </div>
             </div>
 
             <div>
-              <h4 class="text-lg font-semibold mb-4">Navegación Programática</h4>
+              <h4 class="text-base sm:text-lg font-semibold font-montserrat mb-4">Navegación Programática</h4>
               <div class="live-preview">
                 <div class="space-y-4">
-                  <div class="flex gap-2 flex-wrap">
-                    <button onclick="demoNavigate('/')" class="bg-blue-500 text-white px-3 py-2 rounded text-sm hover:bg-blue-600">Inicio</button>
-                    <button onclick="demoNavigate('/usuario/123')" class="bg-green-500 text-white px-3 py-2 rounded text-sm hover:bg-green-600">Usuario 123</button>
-                    <button onclick="demoNavigate('/productos')" class="bg-purple-500 text-white px-3 py-2 rounded text-sm hover:bg-purple-600">Productos</button>
+                  <div class="flex gap-3 flex-wrap justify-center">
+                    <button onclick="demoNavigate('/')" class="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-all duration-200 font-medium shadow-md hover:shadow-lg transform hover:scale-105 text-sm">🏠 Inicio</button>
+                    <button onclick="demoNavigate('/usuario/123')" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-all duration-200 font-medium shadow-md hover:shadow-lg transform hover:scale-105 text-sm">👤 Usuario 123</button>
+                    <button onclick="demoNavigate('/productos')" class="px-4 py-2 bg-purple-700 text-white rounded-lg hover:bg-purple-800 transition-all duration-200 font-medium shadow-md hover:shadow-lg transform hover:scale-105 text-sm">📦 Productos</button>
                   </div>
-                  <div id="router-demo" class="p-4 bg-gray-100 rounded min-h-[100px]">
-                    <p class="text-gray-600">Selecciona una ruta para ver la navegación</p>
+                  <div id="router-demo" class="p-3 sm:p-4 bg-gray-100 rounded min-h-[80px] sm:min-h-[100px]">
+                    <p class="text-gray-600 text-sm">Selecciona una ruta para ver la navegación</p>
                   </div>
                 </div>
               </div>
@@ -616,28 +1165,28 @@ router.render(container);</code></pre>
         </div>
 
         <!-- Características del Router -->
-        <div class="mb-16">
-          <h3 class="text-2xl font-bold text-gray-900 mb-6">Características del Router</h3>
-          <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div class="bg-purple-50 p-6 rounded-lg text-center">
-              <div class="text-purple-600 text-3xl mb-4">🔗</div>
-              <h4 class="font-bold text-purple-800 mb-2">Rutas Dinámicas</h4>
-              <p class="text-gray-700">Soporte para parámetros en las URL</p>
+        <div class="mb-12 sm:mb-16">
+          <h3 class="text-xl sm:text-2xl font-bold font-montserrat text-gray-900 mb-4 sm:mb-6 text-center sm:text-left">Características del Router</h3>
+          <div class="grid gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-4">
+            <div class="bg-purple-50 p-4 sm:p-6 rounded-lg text-center">
+              <div class="text-purple-600 text-2xl sm:text-3xl mb-3 sm:mb-4">🔗</div>
+              <h4 class="font-bold font-montserrat text-purple-800 mb-2 text-sm sm:text-base">Rutas Dinámicas</h4>
+              <p class="text-gray-700 text-xs sm:text-sm font-inter">Soporte para parámetros en las URL</p>
             </div>
-            <div class="bg-purple-50 p-6 rounded-lg text-center">
-              <div class="text-purple-600 text-3xl mb-4">🛡️</div>
-              <h4 class="font-bold text-purple-800 mb-2">Middleware</h4>
-              <p class="text-gray-700">Control de acceso y validación</p>
+            <div class="bg-purple-50 p-4 sm:p-6 rounded-lg text-center">
+              <div class="text-purple-600 text-2xl sm:text-3xl mb-3 sm:mb-4">🛡️</div>
+              <h4 class="font-bold font-montserrat text-purple-800 mb-2 text-sm sm:text-base">Middleware</h4>
+              <p class="text-gray-700 text-xs sm:text-sm font-inter">Control de acceso y validación</p>
             </div>
-            <div class="bg-purple-50 p-6 rounded-lg text-center">
-              <div class="text-purple-600 text-3xl mb-4">📱</div>
-              <h4 class="font-bold text-purple-800 mb-2">SPA Ready</h4>
-              <p class="text-gray-700">Navegación sin recarga de página</p>
+            <div class="bg-purple-50 p-4 sm:p-6 rounded-lg text-center">
+              <div class="text-purple-600 text-2xl sm:text-3xl mb-3 sm:mb-4">📱</div>
+              <h4 class="font-bold font-montserrat text-purple-800 mb-2 text-sm sm:text-base">SPA Ready</h4>
+              <p class="text-gray-700 text-xs sm:text-sm font-inter">Navegación sin recarga de página</p>
             </div>
-            <div class="bg-purple-50 p-6 rounded-lg text-center">
-              <div class="text-purple-600 text-3xl mb-4">🎭</div>
-              <h4 class="font-bold text-purple-800 mb-2">Transiciones</h4>
-              <p class="text-gray-700">Animaciones entre vistas</p>
+            <div class="bg-purple-50 p-4 sm:p-6 rounded-lg text-center">
+              <div class="text-purple-600 text-2xl sm:text-3xl mb-3 sm:mb-4">🎭</div>
+              <h4 class="font-bold font-montserrat text-purple-800 mb-2 text-sm sm:text-base">Transiciones</h4>
+              <p class="text-gray-700 text-xs sm:text-sm font-inter">Animaciones entre vistas</p>
             </div>
           </div>
         </div>
@@ -645,50 +1194,50 @@ router.render(container);</code></pre>
     </section>
 
     <!-- API Reference -->
-    <section id="api" class="py-16 bg-gray-50">
-      <div class="container mx-auto px-6">
-        <div class="text-center mb-12">
-          <h2 class="text-4xl font-bold text-gray-900 mb-4">Referencia de API</h2>
-          <p class="text-xl text-gray-600 max-w-3xl mx-auto">Documentación completa de todas las funciones y métodos disponibles en ScopeJS.</p>
+    <section id="api" class="py-12 sm:py-16 bg-gray-50">
+      <div class="container mx-auto px-4 sm:px-6">
+        <div class="text-center mb-8 sm:mb-12">
+          <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold font-montserrat text-gray-900 mb-3 sm:mb-4">Referencia de API</h2>
+          <p class="text-base sm:text-lg lg:text-xl text-gray-600 max-w-3xl mx-auto px-4 font-inter">Documentación completa de todas las funciones y métodos disponibles en ScopeJS.</p>
         </div>
 
         <!-- API Tables -->
-        <div class="grid lg:grid-cols-2 gap-8">
+        <div class="grid gap-6 lg:grid-cols-2 lg:gap-8">
           <!-- Component API -->
-          <div class="bg-white rounded-lg shadow-sm p-6">
-            <h3 class="text-xl font-bold text-gray-900 mb-4">Component API</h3>
+          <div class="bg-white rounded-lg shadow-sm p-4 sm:p-6">
+            <h3 class="text-lg sm:text-xl font-bold font-montserrat text-gray-900 mb-3 sm:mb-4">Component API</h3>
             <div class="overflow-x-auto">
-              <table class="w-full text-sm">
+              <table class="w-full text-xs sm:text-sm">
                 <thead>
                   <tr class="border-b">
-                    <th class="text-left py-2">Propiedad</th>
-                    <th class="text-left py-2">Tipo</th>
-                    <th class="text-left py-2">Descripción</th>
+                    <th class="text-left py-2 font-medium">Propiedad</th>
+                    <th class="text-left py-2 font-medium">Tipo</th>
+                    <th class="text-left py-2 font-medium">Descripción</th>
                   </tr>
                 </thead>
                 <tbody class="space-y-2">
                   <tr class="border-b">
-                    <td class="py-2 font-mono text-purple-600">controller</td>
+                    <td class="py-2 font-mono text-purple-600 text-xs">controller</td>
                     <td class="py-2">Class</td>
                     <td class="py-2">Clase controladora del componente</td>
                   </tr>
                   <tr class="border-b">
-                    <td class="py-2 font-mono text-purple-600">render</td>
+                    <td class="py-2 font-mono text-purple-600 text-xs">render</td>
                     <td class="py-2">Function</td>
                     <td class="py-2">Función que retorna el HTML del componente</td>
                   </tr>
                   <tr class="border-b">
-                    <td class="py-2 font-mono text-purple-600">style</td>
+                    <td class="py-2 font-mono text-purple-600 text-xs">style</td>
                     <td class="py-2">String</td>
                     <td class="py-2">CSS scoped para el componente</td>
                   </tr>
                   <tr class="border-b">
-                    <td class="py-2 font-mono text-purple-600">tagName</td>
+                    <td class="py-2 font-mono text-purple-600 text-xs">tagName</td>
                     <td class="py-2">String</td>
                     <td class="py-2">Nombre del elemento personalizado</td>
                   </tr>
                   <tr class="border-b">
-                    <td class="py-2 font-mono text-purple-600">postRender</td>
+                    <td class="py-2 font-mono text-purple-600 text-xs">postRender</td>
                     <td class="py-2">Function</td>
                     <td class="py-2">Callback ejecutado después del render</td>
                   </tr>
@@ -698,40 +1247,40 @@ router.render(container);</code></pre>
           </div>
 
           <!-- Modal API -->
-          <div class="bg-white rounded-lg shadow-sm p-6">
-            <h3 class="text-xl font-bold text-gray-900 mb-4">Modal API</h3>
+          <div class="bg-white rounded-lg shadow-sm p-4 sm:p-6">
+            <h3 class="text-lg sm:text-xl font-bold font-montserrat text-gray-900 mb-3 sm:mb-4">Modal API</h3>
             <div class="overflow-x-auto">
-              <table class="w-full text-sm">
+              <table class="w-full text-xs sm:text-sm">
                 <thead>
                   <tr class="border-b">
-                    <th class="text-left py-2">Propiedad</th>
-                    <th class="text-left py-2">Tipo</th>
-                    <th class="text-left py-2">Descripción</th>
+                    <th class="text-left py-2 font-medium">Propiedad</th>
+                    <th class="text-left py-2 font-medium">Tipo</th>
+                    <th class="text-left py-2 font-medium">Descripción</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr class="border-b">
-                    <td class="py-2 font-mono text-purple-600">controller</td>
+                    <td class="py-2 font-mono text-purple-600 text-xs">controller</td>
                     <td class="py-2">Class</td>
                     <td class="py-2">Controlador del modal</td>
                   </tr>
                   <tr class="border-b">
-                    <td class="py-2 font-mono text-purple-600">render</td>
+                    <td class="py-2 font-mono text-purple-600 text-xs">render</td>
                     <td class="py-2">Function</td>
                     <td class="py-2">Función de renderizado</td>
                   </tr>
                   <tr class="border-b">
-                    <td class="py-2 font-mono text-purple-600">hideWhenClickOverlay</td>
+                    <td class="py-2 font-mono text-purple-600 text-xs">hideWhenClickOverlay</td>
                     <td class="py-2">Boolean</td>
                     <td class="py-2">Cerrar al hacer clic fuera</td>
                   </tr>
                   <tr class="border-b">
-                    <td class="py-2 font-mono text-purple-600">className</td>
+                    <td class="py-2 font-mono text-purple-600 text-xs">className</td>
                     <td class="py-2">String</td>
                     <td class="py-2">Clase CSS adicional</td>
                   </tr>
                   <tr class="border-b">
-                    <td class="py-2 font-mono text-purple-600">referrer</td>
+                    <td class="py-2 font-mono text-purple-600 text-xs">referrer</td>
                     <td class="py-2">Element</td>
                     <td class="py-2">Elemento de referencia para posición</td>
                   </tr>
@@ -741,35 +1290,35 @@ router.render(container);</code></pre>
           </div>
 
           <!-- Router API -->
-          <div class="bg-white rounded-lg shadow-sm p-6">
-            <h3 class="text-xl font-bold text-gray-900 mb-4">Router API</h3>
+          <div class="bg-white rounded-lg shadow-sm p-4 sm:p-6">
+            <h3 class="text-lg sm:text-xl font-bold font-montserrat text-gray-900 mb-3 sm:mb-4">Router API</h3>
             <div class="overflow-x-auto">
-              <table class="w-full text-sm">
+              <table class="w-full text-xs sm:text-sm">
                 <thead>
                   <tr class="border-b">
-                    <th class="text-left py-2">Método</th>
-                    <th class="text-left py-2">Parámetros</th>
-                    <th class="text-left py-2">Descripción</th>
+                    <th class="text-left py-2 font-medium">Método</th>
+                    <th class="text-left py-2 font-medium">Parámetros</th>
+                    <th class="text-left py-2 font-medium">Descripción</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr class="border-b">
-                    <td class="py-2 font-mono text-purple-600">navigate</td>
+                    <td class="py-2 font-mono text-purple-600 text-xs">navigate</td>
                     <td class="py-2">path, body</td>
                     <td class="py-2">Navegar a una ruta específica</td>
                   </tr>
                   <tr class="border-b">
-                    <td class="py-2 font-mono text-purple-600">render</td>
+                    <td class="py-2 font-mono text-purple-600 text-xs">render</td>
                     <td class="py-2">container</td>
                     <td class="py-2">Renderizar el router en un contenedor</td>
                   </tr>
                   <tr class="border-b">
-                    <td class="py-2 font-mono text-purple-600">listen</td>
+                    <td class="py-2 font-mono text-purple-600 text-xs">listen</td>
                     <td class="py-2">callback</td>
                     <td class="py-2">Escuchar cambios de ruta</td>
                   </tr>
                   <tr class="border-b">
-                    <td class="py-2 font-mono text-purple-600">unlisten</td>
+                    <td class="py-2 font-mono text-purple-600 text-xs">unlisten</td>
                     <td class="py-2">uuid</td>
                     <td class="py-2">Remover listener de cambios</td>
                   </tr>
@@ -779,30 +1328,30 @@ router.render(container);</code></pre>
           </div>
 
           <!-- Utilidades -->
-          <div class="bg-white rounded-lg shadow-sm p-6">
-            <h3 class="text-xl font-bold text-gray-900 mb-4">Utilidades</h3>
+          <div class="bg-white rounded-lg shadow-sm p-4 sm:p-6">
+            <h3 class="text-lg sm:text-xl font-bold font-montserrat text-gray-900 mb-3 sm:mb-4">Utilidades</h3>
             <div class="overflow-x-auto">
-              <table class="w-full text-sm">
+              <table class="w-full text-xs sm:text-sm">
                 <thead>
                   <tr class="border-b">
-                    <th class="text-left py-2">Función</th>
-                    <th class="text-left py-2">Parámetros</th>
-                    <th class="text-left py-2">Descripción</th>
+                    <th class="text-left py-2 font-medium">Función</th>
+                    <th class="text-left py-2 font-medium">Parámetros</th>
+                    <th class="text-left py-2 font-medium">Descripción</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr class="border-b">
-                    <td class="py-2 font-mono text-purple-600">enableDebugger</td>
+                    <td class="py-2 font-mono text-purple-600 text-xs">enableDebugger</td>
                     <td class="py-2">boolean</td>
                     <td class="py-2">Activar/desactivar modo debug</td>
                   </tr>
                   <tr class="border-b">
-                    <td class="py-2 font-mono text-purple-600">apply</td>
+                    <td class="py-2 font-mono text-purple-600 text-xs">apply</td>
                     <td class="py-2">-</td>
                     <td class="py-2">Re-renderizar componente</td>
                   </tr>
                   <tr class="border-b">
-                    <td class="py-2 font-mono text-purple-600">close</td>
+                    <td class="py-2 font-mono text-purple-600 text-xs">close</td>
                     <td class="py-2">...args</td>
                     <td class="py-2">Cerrar modal (disponible en modales)</td>
                   </tr>
@@ -815,19 +1364,19 @@ router.render(container);</code></pre>
     </section>
 
     <!-- Configurador -->
-    <section id="configurador" class="py-16 bg-white">
-      <div class="container mx-auto px-6">
-        <div class="text-center mb-12">
-          <h2 class="text-4xl font-bold text-gray-900 mb-4">Configurador Interactivo</h2>
-          <p class="text-xl text-gray-600 max-w-3xl mx-auto">Experimenta con ScopeJS en tiempo real. Crea y prueba componentes directamente en el navegador.</p>
+    <section id="configurador" class="py-12 sm:py-16 bg-white">
+      <div class="container mx-auto px-4 sm:px-6">
+        <div class="text-center mb-8 sm:mb-12">
+          <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold font-montserrat text-gray-900 mb-3 sm:mb-4">Configurador Interactivo</h2>
+          <p class="text-base sm:text-lg lg:text-xl text-gray-600 max-w-3xl mx-auto px-4 font-inter">Experimenta con ScopeJS en tiempo real. Crea y prueba componentes directamente en el navegador.</p>
         </div>
 
-        <div class="grid lg:grid-cols-2 gap-8">
+        <div class="grid gap-6 lg:grid-cols-2 lg:gap-8">
           <!-- Editor -->
           <div>
-            <h3 class="text-xl font-bold text-gray-900 mb-4">Editor de Código</h3>
-            <div class="bg-gray-900 rounded-lg p-4">
-              <textarea id="code-editor" class="w-full h-96 bg-transparent text-green-400 font-mono text-sm resize-none outline-none" placeholder="Escribe tu código ScopeJS aquí...">
+            <h3 class="text-lg sm:text-xl font-bold font-montserrat text-gray-900 mb-3 sm:mb-4">Editor de Código</h3>
+            <div class="bg-gray-900 rounded-lg p-3 sm:p-4">
+              <textarea id="code-editor" class="w-full h-64 sm:h-80 lg:h-96 bg-transparent text-green-400 font-mono text-xs sm:text-sm resize-none outline-none" placeholder="Escribe tu código ScopeJS aquí...">
 const MiComponente = Component({
     controller: class {
         constructor() {
@@ -866,25 +1415,25 @@ const container = document.getElementById('preview');
 MiComponente.render(container);</textarea
               >
             </div>
-            <div class="flex gap-2 mt-4">
-              <button onclick="ejecutarCodigo()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">▶ Ejecutar</button>
-              <button onclick="limpiarEditor()" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">🗑 Limpiar</button>
-              <button onclick="cargarEjemplo()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">📋 Ejemplo</button>
+            <div class="flex flex-wrap gap-3 mt-3 sm:mt-4 justify-center sm:justify-start">
+              <button onclick="ejecutarCodigo()" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-all duration-200 font-medium shadow-md hover:shadow-lg transform hover:scale-105 text-sm flex items-center gap-2"><span>▶</span> Ejecutar</button>
+              <button onclick="limpiarEditor()" class="px-4 py-2 bg-purple-400 text-white rounded-lg hover:bg-purple-500 transition-all duration-200 font-medium shadow-md hover:shadow-lg transform hover:scale-105 text-sm flex items-center gap-2"><span>🗑</span> Limpiar</button>
+              <button onclick="cargarEjemplo()" class="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-all duration-200 font-medium shadow-md hover:shadow-lg transform hover:scale-105 text-sm flex items-center gap-2"><span>📋</span> Ejemplo</button>
             </div>
           </div>
 
           <!-- Preview -->
           <div>
-            <h3 class="text-xl font-bold text-gray-900 mb-4">Vista Previa</h3>
-            <div id="configurador-preview" class="border-2 border-dashed border-gray-300 rounded-lg p-6 min-h-96 bg-gray-50">
-              <p class="text-gray-500 text-center">El resultado aparecerá aquí cuando ejecutes el código</p>
+            <h3 class="text-lg sm:text-xl font-bold font-montserrat text-gray-900 mb-3 sm:mb-4">Vista Previa</h3>
+            <div id="configurador-preview" class="border-2 border-dashed border-gray-300 rounded-lg p-3 sm:p-6 min-h-64 sm:min-h-80 lg:min-h-96 bg-gray-50">
+              <p class="text-gray-500 text-center text-sm sm:text-base">El resultado aparecerá aquí cuando ejecutes el código</p>
             </div>
-            <div class="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded">
-              <h4 class="font-bold text-yellow-800 mb-2">💡 Consejos:</h4>
-              <ul class="text-sm text-yellow-700 space-y-1">
-                <li>• Usa <code>this.apply()</code> para re-renderizar</li>
-                <li>• El atributo <code>model</code> crea binding bidireccional</li>
-                <li>• Los eventos se definen con <code>onclick="metodo()"</code></li>
+            <div class="mt-3 sm:mt-4 p-3 sm:p-4 bg-yellow-50 border border-yellow-200 rounded">
+              <h4 class="font-bold font-montserrat text-yellow-800 mb-2 text-sm sm:text-base">💡 Consejos:</h4>
+              <ul class="text-xs sm:text-sm text-yellow-700 space-y-1">
+                <li>• Usa <code class="text-xs">this.apply()</code> para re-renderizar</li>
+                <li>• El atributo <code class="text-xs">model</code> crea binding bidireccional</li>
+                <li>• Los eventos se definen con <code class="text-xs">onclick="metodo()"</code></li>
                 <li>• Los estilos CSS se aplican automáticamente</li>
               </ul>
             </div>
@@ -902,15 +1451,15 @@ MiComponente.render(container);</textarea
               <span class="text-2xl font-bold">S</span>
             </div>
             <div>
-              <h3 class="text-2xl font-bold">ScopeJS</h3>
-              <p class="text-purple-200">Framework JavaScript Moderno</p>
+              <h3 class="text-2xl font-bold font-montserrat">ScopeJS</h3>
+              <p class="text-purple-200 font-inter">Framework JavaScript Moderno</p>
             </div>
           </div>
 
           <div class="grid md:grid-cols-3 gap-8 mb-8">
             <div>
-              <h4 class="font-bold mb-4">Características</h4>
-              <ul class="space-y-2 text-purple-200">
+              <h4 class="font-bold font-montserrat mb-4">Características</h4>
+              <ul class="space-y-2 text-purple-200 font-inter">
                 <li>Componentes Reactivos</li>
                 <li>Sistema de Modales</li>
                 <li>Router SPA</li>
@@ -918,8 +1467,8 @@ MiComponente.render(container);</textarea
               </ul>
             </div>
             <div>
-              <h4 class="font-bold mb-4">Recursos</h4>
-              <ul class="space-y-2 text-purple-200">
+              <h4 class="font-bold font-montserrat mb-4">Recursos</h4>
+              <ul class="space-y-2 text-purple-200 font-inter">
                 <li>Documentación</li>
                 <li>Ejemplos</li>
                 <li>API Reference</li>
@@ -927,8 +1476,8 @@ MiComponente.render(container);</textarea
               </ul>
             </div>
             <div>
-              <h4 class="font-bold mb-4">Información</h4>
-              <ul class="space-y-2 text-purple-200">
+              <h4 class="font-bold font-montserrat mb-4">Información</h4>
+              <ul class="space-y-2 text-purple-200 font-inter">
                 <li>Versión 2.0.3</li>
                 <li>Tamaño: ~15KB</li>
                 <li>ES6+ Compatible</li>
@@ -1027,7 +1576,7 @@ MiComponente.render(container);</textarea
                    onchange="toggleTodoDemo(${todo.id})" class="rounded">
             <span class="${todo.completed ? "line-through" : ""} flex-1">${todo.text}</span>
             <button onclick="deleteTodoDemo(${todo.id})" 
-                    class="bg-red-500 text-white px-2 py-1 rounded text-xs hover:bg-red-600">
+                    class="bg-purple-500 text-white px-2 py-1 rounded text-xs hover:bg-purple-600">
               Eliminar
             </button>
           </li>
@@ -1170,6 +1719,34 @@ MiComponente.render(container);`;
               });
             }
           });
+        });
+      });
+
+      // Toggle menú móvil
+      document.getElementById("mobile-menu-button").addEventListener("click", function () {
+        const menu = document.getElementById("mobile-menu");
+        const button = this;
+        const icon = button.querySelector("svg path");
+
+        menu.classList.toggle("hidden");
+
+        // Cambiar el ícono del menú hamburguesa
+        if (menu.classList.contains("hidden")) {
+          icon.setAttribute("d", "M4 6h16M4 12h16M4 18h16");
+        } else {
+          icon.setAttribute("d", "M6 18L18 6M6 6l12 12");
+        }
+      });
+
+      // Cerrar menú móvil al hacer clic en un enlace
+      document.querySelectorAll("#mobile-menu a").forEach((link) => {
+        link.addEventListener("click", function () {
+          const menu = document.getElementById("mobile-menu");
+          const button = document.getElementById("mobile-menu-button");
+          const icon = button.querySelector("svg path");
+
+          menu.classList.add("hidden");
+          icon.setAttribute("d", "M4 6h16M4 12h16M4 18h16");
         });
       });
     </script>
