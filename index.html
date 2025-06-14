@@ -349,6 +349,7 @@
             <div class="w-8 h-8 sm:w-10 sm:h-10 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
               <span class="text-lg sm:text-2xl font-bold">S</span>
             </div>
+            >
             <div>
               <h1 class="text-xl sm:text-2xl font-bold font-montserrat">ScopeJS</h1>
               <p class="text-purple-200 text-xs sm:text-sm font-inter">v2.0.4 - Framework JavaScript Moderno</p>
@@ -423,11 +424,11 @@
 
             <div class="bg-gray-900 rounded-lg p-3 sm:p-4 mb-4">
               <pre class="text-white font-mono text-xs sm:text-sm overflow-x-auto"><code>&lt;!-- En el &lt;head&gt; de tu HTML --&gt;
-&lt;script src="js/ScopeJS.js"&gt;&lt;/script&gt;
+&lt;script src="https://unpkg.com/@pablotheblink/scopejs@2.0.4/js/ScopeJS.js"&gt;&lt;/script&gt;
 
 &lt;script&gt;
   // Las funciones están disponibles globalmente
-  const MiComponente = Component({
+  const MiComponente = ScopeJSComponent({
     controller: class {
       constructor() {
         this.mensaje = "¡Hola Mundo!";
@@ -466,7 +467,7 @@
             <div class="bg-gray-900 rounded-lg p-3 sm:p-4 mb-4">
               <pre class="text-white font-mono text-xs sm:text-sm overflow-x-auto"><code>&lt;!-- En el &lt;head&gt; de tu HTML --&gt;
 &lt;script type="module"&gt;
-  import { Component, Modal, Router } from './js/ScopeJS.js';
+  import { Component, Modal, Router } from 'https://unpkg.com/@pablotheblink/scopejs@2.0.4/js/ScopeJS.js';
 
   const MiComponente = Component({
     controller: class {
@@ -504,7 +505,7 @@
             <div class="border border-gray-200 rounded-lg p-4">
               <h4 class="font-bold text-purple-800 mb-2 flex items-center gap-2"><span>🌐</span> CDN</h4>
               <p class="text-gray-600 text-sm mb-2">Incluye desde una CDN para máxima velocidad:</p>
-              <div class="bg-gray-100 p-2 rounded text-xs font-mono">&lt;script src="https://cdn.jsdelivr.net/npm/scopejs@2.0.4/dist/ScopeJS.min.js"&gt;&lt;/script&gt;</div>
+              <div class="bg-gray-100 p-2 rounded text-xs font-mono">&lt;script src="https://unpkg.com/@pablotheblink/scopejs@2.0.4/js/ScopeJS.js"&gt;&lt;/script&gt;</div>
             </div>
 
             <!-- NPM -->
