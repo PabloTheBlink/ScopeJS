@@ -686,23 +686,13 @@ const EventExample = Component({
 - ✅ **Navegadores móviles** modernos
 - ❌ **Internet Explorer** (porque ya es hora de dejarlo ir)
 
-## 🤝 Contribuir
+## Licencia 📄 (Lo legal y aburrido)
 
-¿Quieres hacer ScopeJS aún mejor? ¡Genial!
+MIT License - Básicamente puedes hacer lo que quieras, pero no nos culpes si te vuelves adicto.
 
-1. Fork el repositorio
-2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
-3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
-4. Push a la rama (`git push origin feature/AmazingFeature`)
-5. Abre un Pull Request
+## El Genio Detrás de la Locura 👨‍💻
 
-## 📄 Licencia
-
-Este proyecto está bajo la Licencia Apache 2.0. Consulta el archivo [LICENSE](LICENSE) para más detalles.
-
-## 👨‍💻 Autor
-
-**Pablo Martínez**
+Pablo Martínez - El tipo que pensó que el mundo necesitaba notificaciones más sexys.
 
 - [GitHub](https://github.com/PabloTheBlink)
 - [LinkedIn](https://www.linkedin.com/in/pablo-mart%C3%ADnez-san-jos%C3%A9-9bb24215a)
