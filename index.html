@@ -370,18 +370,18 @@ Counter.render(container);</code></pre>
               <div class="live-preview">
                 <div id="todo-demo" class="p-4 border-2 border-purple-500 rounded-lg bg-white">
                   <h3 class="text-xl font-bold text-purple-800 mb-4">Lista de Tareas</h3>
-                  
+
                   <div class="flex gap-2 mb-4">
                     <input type="text" id="new-todo-input" placeholder="Nueva tarea..." class="flex-1 px-3 py-2 border rounded" />
                     <button onclick="addTodoDemo()" class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700">Agregar</button>
                   </div>
-                  
+
                   <div class="flex gap-2 mb-4">
                     <button onclick="filterTodos('all')" id="filter-all" class="filter-btn bg-purple-600 text-white px-3 py-1 rounded text-sm">Todas</button>
                     <button onclick="filterTodos('active')" id="filter-active" class="filter-btn bg-gray-300 text-gray-700 px-3 py-1 rounded text-sm">Activas</button>
                     <button onclick="filterTodos('completed')" id="filter-completed" class="filter-btn bg-gray-300 text-gray-700 px-3 py-1 rounded text-sm">Completadas</button>
                   </div>
-                  
+
                   <ul id="todo-list" class="space-y-2"></ul>
                 </div>
               </div>
@@ -493,9 +493,7 @@ function openModal() {
               <h4 class="text-lg font-semibold mb-4">Demo Interactivo</h4>
               <div class="live-preview">
                 <div class="text-center">
-                  <button onclick="demoModal()" class="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition-colors">
-                    Abrir Modal de Ejemplo
-                  </button>
+                  <button onclick="demoModal()" class="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition-colors">Abrir Modal de Ejemplo</button>
                   <p class="text-sm text-gray-600 mt-2">Haz clic para ver el modal en acción</p>
                 </div>
               </div>
@@ -829,11 +827,8 @@ router.render(container);</code></pre>
           <div>
             <h3 class="text-xl font-bold text-gray-900 mb-4">Editor de Código</h3>
             <div class="bg-gray-900 rounded-lg p-4">
-              <textarea 
-                id="code-editor" 
-                class="w-full h-96 bg-transparent text-green-400 font-mono text-sm resize-none outline-none"
-                placeholder="Escribe tu código ScopeJS aquí..."
-              >const MiComponente = Component({
+              <textarea id="code-editor" class="w-full h-96 bg-transparent text-green-400 font-mono text-sm resize-none outline-none" placeholder="Escribe tu código ScopeJS aquí...">
+const MiComponente = Component({
     controller: class {
         constructor() {
             this.mensaje = "¡Hola ScopeJS!";
@@ -868,18 +863,13 @@ router.render(container);</code></pre>
 
 // Renderizar el componente
 const container = document.getElementById('preview');
-MiComponente.render(container);</textarea>
+MiComponente.render(container);</textarea
+              >
             </div>
             <div class="flex gap-2 mt-4">
-              <button onclick="ejecutarCodigo()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
-                ▶ Ejecutar
-              </button>
-              <button onclick="limpiarEditor()" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
-                🗑 Limpiar
-              </button>
-              <button onclick="cargarEjemplo()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-                📋 Ejemplo
-              </button>
+              <button onclick="ejecutarCodigo()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">▶ Ejecutar</button>
+              <button onclick="limpiarEditor()" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">🗑 Limpiar</button>
+              <button onclick="cargarEjemplo()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">📋 Ejemplo</button>
             </div>
           </div>
 
@@ -916,7 +906,7 @@ MiComponente.render(container);</textarea>
               <p class="text-purple-200">Framework JavaScript Moderno</p>
             </div>
           </div>
-          
+
           <div class="grid md:grid-cols-3 gap-8 mb-8">
             <div>
               <h4 class="font-bold mb-4">Características</h4>
@@ -946,7 +936,7 @@ MiComponente.render(container);</textarea>
               </ul>
             </div>
           </div>
-          
+
           <div class="border-t border-purple-400 pt-6">
             <p class="text-purple-200">&copy; 2025 ScopeJS. Framework JavaScript moderno y ligero.</p>
           </div>
@@ -959,43 +949,43 @@ MiComponente.render(container);</textarea>
       // Variables globales para demos
       let currentCount = 0;
       let todos = [];
-      let currentFilter = 'all';
+      let currentFilter = "all";
 
       // Demo del contador
       function incrementDemo() {
-        const step = parseInt(document.getElementById('step-input').value) || 1;
+        const step = parseInt(document.getElementById("step-input").value) || 1;
         currentCount += step;
-        document.getElementById('count-display').textContent = currentCount;
+        document.getElementById("count-display").textContent = currentCount;
       }
 
       function decrementDemo() {
-        const step = parseInt(document.getElementById('step-input').value) || 1;
+        const step = parseInt(document.getElementById("step-input").value) || 1;
         currentCount -= step;
-        document.getElementById('count-display').textContent = currentCount;
+        document.getElementById("count-display").textContent = currentCount;
       }
 
       function resetDemo() {
         currentCount = 0;
-        document.getElementById('count-display').textContent = currentCount;
+        document.getElementById("count-display").textContent = currentCount;
       }
 
       // Demo de la lista de tareas
       function addTodoDemo() {
-        const input = document.getElementById('new-todo-input');
+        const input = document.getElementById("new-todo-input");
         const text = input.value.trim();
         if (text) {
           todos.push({
             id: Date.now(),
             text: text,
-            completed: false
+            completed: false,
           });
-          input.value = '';
+          input.value = "";
           renderTodos();
         }
       }
 
       function toggleTodoDemo(id) {
-        const todo = todos.find(t => t.id === id);
+        const todo = todos.find((t) => t.id === id);
         if (todo) {
           todo.completed = !todo.completed;
           renderTodos();
@@ -1003,49 +993,53 @@ MiComponente.render(container);</textarea>
       }
 
       function deleteTodoDemo(id) {
-        todos = todos.filter(t => t.id !== id);
+        todos = todos.filter((t) => t.id !== id);
         renderTodos();
       }
 
       function filterTodos(filter) {
         currentFilter = filter;
-        
+
         // Actualizar botones de filtro
-        document.querySelectorAll('.filter-btn').forEach(btn => {
-          btn.className = 'filter-btn bg-gray-300 text-gray-700 px-3 py-1 rounded text-sm';
+        document.querySelectorAll(".filter-btn").forEach((btn) => {
+          btn.className = "filter-btn bg-gray-300 text-gray-700 px-3 py-1 rounded text-sm";
         });
-        document.getElementById(`filter-${filter}`).className = 'filter-btn bg-purple-600 text-white px-3 py-1 rounded text-sm';
-        
+        document.getElementById(`filter-${filter}`).className = "filter-btn bg-purple-600 text-white px-3 py-1 rounded text-sm";
+
         renderTodos();
       }
 
       function renderTodos() {
-        const todoList = document.getElementById('todo-list');
+        const todoList = document.getElementById("todo-list");
         let filteredTodos = todos;
-        
-        if (currentFilter === 'completed') {
-          filteredTodos = todos.filter(t => t.completed);
-        } else if (currentFilter === 'active') {
-          filteredTodos = todos.filter(t => !t.completed);
+
+        if (currentFilter === "completed") {
+          filteredTodos = todos.filter((t) => t.completed);
+        } else if (currentFilter === "active") {
+          filteredTodos = todos.filter((t) => !t.completed);
         }
 
-        todoList.innerHTML = filteredTodos.map(todo => `
-          <li class="flex items-center gap-2 p-2 bg-gray-50 rounded ${todo.completed ? 'opacity-60' : ''}">
-            <input type="checkbox" ${todo.completed ? 'checked' : ''} 
+        todoList.innerHTML = filteredTodos
+          .map(
+            (todo) => `
+          <li class="flex items-center gap-2 p-2 bg-gray-50 rounded ${todo.completed ? "opacity-60" : ""}">
+            <input type="checkbox" ${todo.completed ? "checked" : ""} 
                    onchange="toggleTodoDemo(${todo.id})" class="rounded">
-            <span class="${todo.completed ? 'line-through' : ''} flex-1">${todo.text}</span>
+            <span class="${todo.completed ? "line-through" : ""} flex-1">${todo.text}</span>
             <button onclick="deleteTodoDemo(${todo.id})" 
                     class="bg-red-500 text-white px-2 py-1 rounded text-xs hover:bg-red-600">
               Eliminar
             </button>
           </li>
-        `).join('');
+        `
+          )
+          .join("");
       }
 
       // Demo de modal
       function demoModal() {
         // Simular modal con alert por simplicidad
-        const userName = prompt('Ingresa tu nombre de usuario:');
+        const userName = prompt("Ingresa tu nombre de usuario:");
         if (userName) {
           alert(`¡Usuario guardado: ${userName}!`);
         }
@@ -1053,36 +1047,36 @@ MiComponente.render(container);</textarea>
 
       // Demo de navegación
       function demoNavigate(path) {
-        const routerDemo = document.getElementById('router-demo');
-        let content = '';
-        
-        switch(path) {
-          case '/':
+        const routerDemo = document.getElementById("router-demo");
+        let content = "";
+
+        switch (path) {
+          case "/":
             content = '<h3 class="text-lg font-bold text-purple-800">🏠 Página de Inicio</h3><p class="text-gray-600">Bienvenido a la aplicación</p>';
             break;
-          case '/usuario/123':
+          case "/usuario/123":
             content = '<h3 class="text-lg font-bold text-purple-800">👤 Usuario: 123</h3><p class="text-gray-600">Perfil del usuario con ID 123</p>';
             break;
-          case '/productos':
+          case "/productos":
             content = '<h3 class="text-lg font-bold text-purple-800">📦 Lista de Productos</h3><p class="text-gray-600">Catálogo completo de productos</p>';
             break;
         }
-        
+
         routerDemo.innerHTML = content;
       }
 
       // Configurador interactivo
       function ejecutarCodigo() {
-        const codigo = document.getElementById('code-editor').value;
-        const preview = document.getElementById('configurador-preview');
-        
+        const codigo = document.getElementById("code-editor").value;
+        const preview = document.getElementById("configurador-preview");
+
         try {
           // Limpiar preview
           preview.innerHTML = '<div id="preview"></div>';
-          
+
           // Crear contexto seguro para ejecutar el código
-          const script = document.createElement('script');
-          script.type = 'module';
+          const script = document.createElement("script");
+          script.type = "module";
           script.textContent = `
             import { Component, Modal, Router } from './js/ScopeJS.js';
             try {
@@ -1092,27 +1086,25 @@ MiComponente.render(container);</textarea>
                 '<div class="text-red-600 p-4"><strong>Error:</strong> ' + error.message + '</div>';
             }
           `;
-          
+
           document.head.appendChild(script);
-          
+
           // Remover script después de ejecutar
           setTimeout(() => {
             script.remove();
           }, 100);
-          
         } catch (error) {
           preview.innerHTML = `<div class="text-red-600 p-4"><strong>Error:</strong> ${error.message}</div>`;
         }
       }
 
       function limpiarEditor() {
-        document.getElementById('code-editor').value = '';
-        document.getElementById('configurador-preview').innerHTML = 
-          '<p class="text-gray-500 text-center">El resultado aparecerá aquí cuando ejecutes el código</p>';
+        document.getElementById("code-editor").value = "";
+        document.getElementById("configurador-preview").innerHTML = '<p class="text-gray-500 text-center">El resultado aparecerá aquí cuando ejecutes el código</p>';
       }
 
       function cargarEjemplo() {
-        document.getElementById('code-editor').value = `const MiComponente = Component({
+        document.getElementById("code-editor").value = `const MiComponente = Component({
     controller: class {
         constructor() {
             this.mensaje = "¡Hola ScopeJS!";
@@ -1154,27 +1146,27 @@ MiComponente.render(container);`;
       function toggleCode(id) {
         const codeSection = document.getElementById(id);
         const button = event.target;
-        
-        if (codeSection.classList.contains('expanded')) {
-          codeSection.classList.remove('expanded');
-          button.textContent = 'Mostrar Código';
+
+        if (codeSection.classList.contains("expanded")) {
+          codeSection.classList.remove("expanded");
+          button.textContent = "Mostrar Código";
         } else {
-          codeSection.classList.add('expanded');
-          button.textContent = 'Ocultar Código';
+          codeSection.classList.add("expanded");
+          button.textContent = "Ocultar Código";
         }
       }
 
       // Smooth scrolling para navegación
-      document.addEventListener('DOMContentLoaded', function() {
+      document.addEventListener("DOMContentLoaded", function () {
         // Manejar enlaces de navegación
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-          anchor.addEventListener('click', function (e) {
+        document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+          anchor.addEventListener("click", function (e) {
             e.preventDefault();
-            const target = document.querySelector(this.getAttribute('href'));
+            const target = document.querySelector(this.getAttribute("href"));
             if (target) {
               target.scrollIntoView({
-                behavior: 'smooth',
-                block: 'start'
+                behavior: "smooth",
+                block: "start",
               });
             }
           });
