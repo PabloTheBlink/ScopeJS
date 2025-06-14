@@ -851,3 +851,12 @@
   // Return for UMD wrapper
   return ScopeJSExports;
 });
+
+// ES6 Module exports for modern import syntax
+export const Component = ScopeJS?.Component || (typeof window !== "undefined" && window.Component);
+export const Modal = ScopeJS?.Modal || (typeof window !== "undefined" && window.Modal);
+export const Router = ScopeJS?.Router || (typeof window !== "undefined" && window.Router);
+export const enableDebugger = ScopeJS?.enableDebugger || (typeof window !== "undefined" && window.enableDebugger);
+
+// Default export
+export default typeof ScopeJS !== "undefined" ? ScopeJS : typeof window !== "undefined" ? window.ScopeJS : {};
