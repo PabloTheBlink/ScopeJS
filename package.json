@@ -1,0 +1,68 @@
+{
+  "name": "@pablotheblink/scopejs",
+  "version": "2.0.3",
+  "description": "A lightweight JavaScript framework for component-based development. Supports both ES6 modules and global script usage with reactive components, modals, and SPA routing.",
+  "main": "js/ScopeJS.js",
+  "module": "js/ScopeJS.js",
+  "types": "types/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./js/ScopeJS.js",
+      "require": "./js/ScopeJS.js",
+      "types": "./types/index.d.ts"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "js/",
+    "types/",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "echo \"No build step needed - vanilla JS\"",
+    "prepublishOnly": "echo \"Preparing for publish...\"",
+    "dev": "python3 -m http.server 8000 || python -m http.server 8000",
+    "serve": "npx serve ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PabloTheBlink/ScopeJS.git"
+  },
+  "keywords": [
+    "javascript",
+    "framework",
+    "components",
+    "reactive",
+    "spa",
+    "router",
+    "modal",
+    "vanilla-js",
+    "lightweight",
+    "frontend",
+    "ui",
+    "web-components",
+    "data-binding",
+    "mvvm",
+    "library"
+  ],
+  "author": {
+    "name": "Pablo Martínez",
+    "url": "https://github.com/PabloTheBlink",
+    "email": "pablo@example.com"
+  },
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/PabloTheBlink/ScopeJS/issues"
+  },
+  "homepage": "https://github.com/PabloTheBlink/ScopeJS#readme",
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not ie <= 11"
+  ]
+}
