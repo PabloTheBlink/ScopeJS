@@ -1,5 +1,5 @@
 /**
- * ScopeJS V2.0.5 - Optimized & Refactored
+ * ScopeJS V2.0.6 - Optimized & Refactored
  * A lightweight JavaScript framework for component-based development
  * Supports both ES6 modules and global script usage
  */
@@ -554,13 +554,20 @@
   }
 
   /**
-   * Modal configuration constants
+   * Modal configuration constants and management
    */
   const MODAL_STYLES = {
     OVERLAY: "position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 999999999",
     MODAL: "position: fixed; top: 50%; left: 50%; border-radius: 0.25rem; min-width: 20rem; max-width: calc(100% - 2rem); transform: translate(-50%, -50%); background-color: white; color: black; transition: opacity 0.3s, transform 0.3s; z-index: 999999999",
+    WINDOW_MODAL: "position: fixed; border-radius: 0.25rem; min-width: 20rem; max-width: calc(100% - 2rem); background-color: white; color: black; box-shadow: 0 10px 25px rgba(0,0,0,0.2); border: 1px solid #ddd",
+    TITLE_BAR: "background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 8px 12px; cursor: move; display: flex; justify-content: space-between; align-items: center; border-radius: 0.25rem 0.25rem 0 0; user-select: none; font-weight: 500; font-size: 14px",
+    CLOSE_BUTTON: "background: rgba(255,255,255,0.2); border: none; color: white; width: 20px; height: 20px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 12px; transition: background-color 0.2s",
     RESIZE_HANDLE: "position: absolute; bottom: 0; right: 0; width: 20px; height: 20px; cursor: nw-resize; background: linear-gradient(-45deg, transparent 0%, transparent 40%, #ccc 40%, #ccc 43%, transparent 43%, transparent 46%, #ccc 46%, #ccc 49%, transparent 49%, transparent 52%, #ccc 52%, #ccc 55%, transparent 55%); z-index: 1000000000",
   };
+
+  // Modal management system
+  let modalZIndex = 1000000000;
+  const activeModals = new Map();
 
   /**
    * Detects if the current device is mobile
@@ -570,6 +577,86 @@
     return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
            (typeof window.orientation !== "undefined") ||
            window.innerWidth <= 768;
+  }
+
+  /**
+   * Brings a modal to the front
+   * @param {HTMLElement} modal - Modal element
+   */
+  function bringModalToFront(modal) {
+    modalZIndex += 1;
+    modal.style.zIndex = modalZIndex;
+  }
+
+  /**
+   * Sets up drag functionality for a modal
+   * @param {HTMLElement} modal - Modal element
+   * @param {HTMLElement} titleBar - Title bar element (drag handle)
+   */
+  function setupModalDrag(modal, titleBar) {
+    let isDragging = false;
+    let startX, startY, initialLeft, initialTop;
+
+    function onMouseDown(e) {
+      // Only start dragging if clicking on title bar, not close button
+      if (e.target.classList.contains('modal-close-btn')) return;
+      
+      isDragging = true;
+      startX = e.clientX;
+      startY = e.clientY;
+      
+      const rect = modal.getBoundingClientRect();
+      initialLeft = rect.left;
+      initialTop = rect.top;
+      
+      // Bring to front when starting to drag
+      bringModalToFront(modal);
+      
+      // Prevent text selection during drag
+      document.body.style.userSelect = 'none';
+      
+      e.preventDefault();
+    }
+
+    function onMouseMove(e) {
+      if (!isDragging) return;
+      
+      const deltaX = e.clientX - startX;
+      const deltaY = e.clientY - startY;
+      
+      let newLeft = initialLeft + deltaX;
+      let newTop = initialTop + deltaY;
+      
+      // Keep modal within viewport bounds
+      const modalRect = modal.getBoundingClientRect();
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+      
+      newLeft = Math.max(0, Math.min(newLeft, viewportWidth - modalRect.width));
+      newTop = Math.max(0, Math.min(newTop, viewportHeight - modalRect.height));
+      
+      modal.style.left = newLeft + 'px';
+      modal.style.top = newTop + 'px';
+      modal.style.transform = 'none';
+    }
+
+    function onMouseUp() {
+      if (!isDragging) return;
+      
+      isDragging = false;
+      document.body.style.userSelect = '';
+    }
+
+    titleBar.addEventListener('mousedown', onMouseDown);
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+    
+    // Cleanup function
+    modal._dragCleanup = () => {
+      titleBar.removeEventListener('mousedown', onMouseDown);
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+    };
   }
 
   /**
@@ -640,14 +727,97 @@
    * @param {Object} events - Event handlers for the modal
    */
   function Modal(options, params = {}, events = {}) {
-    const { controller, render, hideWhenClickOverlay, className, referrer, resizable = false } = options;
+    const { 
+      controller, 
+      render, 
+      hideWhenClickOverlay, 
+      className, 
+      referrer, 
+      resizable = false,
+      draggable = false,
+      windowMode = false,
+      title = "",
+      position = null
+    } = options;
 
     const component = Component({ controller, render });
-    const modal = document.createElement("div");
+    const modalId = generateUUID();
+    let modal, titleBar, overlay = null;
 
-    // Setup modal styles
-    modal.setAttribute("style", MODAL_STYLES.MODAL);
-    modal.classList.add("modal");
+    // Create modal container
+    if (windowMode || draggable) {
+      // Window mode: no overlay, draggable by default
+      modal = document.createElement("div");
+      modal.setAttribute("style", MODAL_STYLES.WINDOW_MODAL);
+      modal.classList.add("modal-window");
+      
+      // Set initial z-index and register
+      modalZIndex += 1;
+      modal.style.zIndex = modalZIndex;
+      activeModals.set(modalId, modal);
+      
+      // Create title bar if title provided or draggable enabled
+      if (title || draggable) {
+        titleBar = document.createElement("div");
+        titleBar.setAttribute("style", MODAL_STYLES.TITLE_BAR);
+        titleBar.classList.add("modal-title-bar");
+        
+        const titleText = document.createElement("span");
+        titleText.textContent = title || "Ventana";
+        titleBar.appendChild(titleText);
+        
+        const closeButton = document.createElement("button");
+        closeButton.setAttribute("style", MODAL_STYLES.CLOSE_BUTTON);
+        closeButton.classList.add("modal-close-btn");
+        closeButton.innerHTML = "×";
+        closeButton.title = "Cerrar";
+        titleBar.appendChild(closeButton);
+        
+        modal.appendChild(titleBar);
+        
+        // Setup drag functionality
+        if (draggable || windowMode) {
+          setupModalDrag(modal, titleBar);
+        }
+      }
+      
+      // Position window modal
+      if (position) {
+        modal.style.left = position.x + "px";
+        modal.style.top = position.y + "px";
+        modal.style.transform = "none";
+      } else if (referrer) {
+        const pos = referrer.getBoundingClientRect();
+        modal.style.top = `${pos.top + pos.height + 1}px`;
+        modal.style.left = `${pos.left + pos.width + 1}px`;
+        modal.style.transform = "none";
+      } else {
+        // Center initially, but can be moved
+        const centerX = (window.innerWidth - 400) / 2 + (activeModals.size * 30);
+        const centerY = (window.innerHeight - 300) / 2 + (activeModals.size * 30);
+        modal.style.left = centerX + "px";
+        modal.style.top = centerY + "px";
+        modal.style.transform = "none";
+      }
+      
+    } else {
+      // Traditional modal mode
+      modal = document.createElement("div");
+      modal.setAttribute("style", MODAL_STYLES.MODAL);
+      modal.classList.add("modal");
+      
+      // Position modal relative to referrer or center
+      if (referrer) {
+        const pos = referrer.getBoundingClientRect();
+        modal.style.top = `${pos.top + pos.height + 1}px`;
+        modal.style.left = `${pos.left + pos.width + 1}px`;
+        modal.style.transform = "";
+      } else {
+        modal.style.opacity = 0;
+        modal.style.transform = "translate(-50%, 65%)";
+      }
+    }
+
     if (className) modal.classList.add(className);
 
     // Add resizable functionality if enabled and not on mobile
@@ -666,41 +836,50 @@
       setupModalResize(modal, resizeHandle);
     }
 
-    // Position modal relative to referrer or center
-    if (referrer) {
-      const pos = referrer.getBoundingClientRect();
-      modal.style.top = `${pos.top + pos.height + 1}px`;
-      modal.style.left = `${pos.left + pos.width + 1}px`;
-      modal.style.transform = "";
-    } else {
-      modal.style.opacity = 0;
-      modal.style.transform = "translate(-50%, 65%)";
-    }
-
     // Close function
     const close = (...args) => {
       events.onClose?.(...args);
 
-      // Cleanup resize event listeners if resizable
+      // Cleanup event listeners
       if (modal._resizeCleanup) {
         modal._resizeCleanup();
       }
+      if (modal._dragCleanup) {
+        modal._dragCleanup();
+      }
 
-      if (!referrer) {
-        modal.style.opacity = 0;
-        modal.style.transform = "translate(-50%, 65%)";
-        setTimeout(() => {
-          overlay.remove();
-          modal.remove();
-        }, 300);
-      } else {
-        overlay.remove();
+      // Remove from active modals registry
+      activeModals.delete(modalId);
+
+      if (windowMode || draggable) {
+        // Window mode: simple removal
         modal.remove();
+      } else {
+        // Traditional modal: animated removal
+        if (!referrer) {
+          modal.style.opacity = 0;
+          modal.style.transform = "translate(-50%, 65%)";
+          setTimeout(() => {
+            if (overlay) overlay.remove();
+            modal.remove();
+          }, 300);
+        } else {
+          if (overlay) overlay.remove();
+          modal.remove();
+        }
       }
     };
 
+    // Create content container for window mode
+    let contentContainer = modal;
+    if (windowMode || draggable) {
+      contentContainer = document.createElement("div");
+      contentContainer.style.padding = "16px";
+      modal.appendChild(contentContainer);
+    }
+
     // Render modal content
-    const componentInstance = component.render(modal);
+    const componentInstance = component.render(contentContainer);
     Object.assign(componentInstance, params);
     componentInstance.apply();
     componentInstance.close = close;
@@ -710,27 +889,47 @@
       modal.appendChild(resizeHandle);
     }
 
-    // Create overlay
-    const overlay = document.createElement("div");
-    overlay.setAttribute("style", MODAL_STYLES.OVERLAY);
-    overlay.classList.add("overlay");
-    if (referrer) overlay.style.opacity = 0;
-
-    // Add to DOM
-    document.body.appendChild(overlay);
-    document.body.appendChild(modal);
-
-    // Show modal with animation
-    if (!referrer) {
-      setTimeout(() => {
-        modal.style.opacity = 1;
-        modal.style.transform = "translate(-50%, -50%)";
-      }, 50);
+    // Setup close button click handler for window mode
+    if (titleBar) {
+      const closeButton = titleBar.querySelector('.modal-close-btn');
+      if (closeButton) {
+        closeButton.onclick = close;
+        closeButton.onmouseover = () => closeButton.style.backgroundColor = 'rgba(255,255,255,0.3)';
+        closeButton.onmouseout = () => closeButton.style.backgroundColor = 'rgba(255,255,255,0.2)';
+      }
     }
 
-    // Close on overlay click if enabled
-    if (hideWhenClickOverlay) {
-      overlay.onclick = close;
+    // Handle overlay and DOM insertion
+    if (windowMode || draggable) {
+      // Window mode: no overlay, direct append
+      document.body.appendChild(modal);
+      
+      // Bring to front when clicked
+      modal.onclick = () => bringModalToFront(modal);
+      
+    } else {
+      // Traditional modal mode: with overlay
+      overlay = document.createElement("div");
+      overlay.setAttribute("style", MODAL_STYLES.OVERLAY);
+      overlay.classList.add("overlay");
+      if (referrer) overlay.style.opacity = 0;
+
+      // Add to DOM
+      document.body.appendChild(overlay);
+      document.body.appendChild(modal);
+
+      // Show modal with animation
+      if (!referrer) {
+        setTimeout(() => {
+          modal.style.opacity = 1;
+          modal.style.transform = "translate(-50%, -50%)";
+        }, 50);
+      }
+
+      // Close on overlay click if enabled
+      if (hideWhenClickOverlay) {
+        overlay.onclick = close;
+      }
     }
   }
 

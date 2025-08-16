@@ -26,6 +26,10 @@ export interface ModalOptions {
   className?: string;
   referrer?: HTMLElement;
   resizable?: boolean;
+  draggable?: boolean;
+  windowMode?: boolean;
+  title?: string;
+  position?: { x: number; y: number };
 }
 
 export interface RouteConfig {

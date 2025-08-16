@@ -361,7 +361,7 @@
             </div>
             <div>
               <h1 class="text-xl sm:text-2xl font-bold font-montserrat">ScopeJS</h1>
-              <p class="text-purple-200 text-xs sm:text-sm font-inter">v2.0.5</p>
+              <p class="text-purple-200 text-xs sm:text-sm font-inter">v2.0.6</p>
             </div>
           </div>
 
@@ -435,7 +435,7 @@
 
             <div class="bg-gray-900 rounded-lg p-3 sm:p-4 mb-4">
               <pre class="text-white font-mono text-xs sm:text-sm overflow-x-auto"><code>&lt;!-- En el &lt;head&gt; de tu HTML --&gt;
-&lt;script src="https://unpkg.com/@pablotheblink/scopejs@2.0.5/js/ScopeJS.js"&gt;&lt;/script&gt;
+&lt;script src="https://unpkg.com/@pablotheblink/scopejs@2.0.6/js/ScopeJS.js"&gt;&lt;/script&gt;
 
 &lt;script&gt;
   // Las funciones están disponibles globalmente
@@ -478,7 +478,7 @@
             <div class="bg-gray-900 rounded-lg p-3 sm:p-4 mb-4">
               <pre class="text-white font-mono text-xs sm:text-sm overflow-x-auto"><code>&lt;!-- En el &lt;head&gt; de tu HTML --&gt;
 &lt;script type="module"&gt;
-  import { Component, Modal, Router } from 'https://unpkg.com/@pablotheblink/scopejs@2.0.5/js/ScopeJS.js';
+  import { Component, Modal, Router } from 'https://unpkg.com/@pablotheblink/scopejs@2.0.6/js/ScopeJS.js';
 
   const MiComponente = Component({
     controller: class {
@@ -516,7 +516,7 @@
             <div class="border border-gray-200 rounded-lg p-4">
               <h4 class="font-bold text-purple-800 mb-2 flex items-center gap-2"><span>🌐</span> CDN (El Rápido)</h4>
               <p class="text-gray-600 text-sm mb-2">Directo desde la nube, más rápido que tu café matutino:</p>
-              <div class="bg-gray-100 p-2 rounded text-xs font-mono">&lt;script src="https://unpkg.com/@pablotheblink/scopejs@2.0.5/js/ScopeJS.js"&gt;&lt;/script&gt;</div>
+              <div class="bg-gray-100 p-2 rounded text-xs font-mono">&lt;script src="https://unpkg.com/@pablotheblink/scopejs@2.0.6/js/ScopeJS.js"&gt;&lt;/script&gt;</div>
             </div>
 
             <!-- NPM -->
@@ -1009,11 +1009,13 @@ function openModal() {
               <h4 class="text-base sm:text-lg font-semibold font-montserrat mb-4">Demo Interactivo</h4>
               <div class="live-preview">
                 <div class="text-center space-y-4">
-                  <div>
-                    <button onclick="demoModal()" class="bg-purple-600 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg hover:bg-purple-700 transition-colors text-sm sm:text-base mr-2">Abrir Modal Normal</button>
-                    <button onclick="demoResizableModal()" class="bg-orange-600 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg hover:bg-orange-700 transition-colors text-sm sm:text-base">Modal Redimensionable</button>
+                  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
+                    <button onclick="demoModal()" class="bg-purple-600 text-white px-3 py-2 rounded-lg hover:bg-purple-700 transition-colors text-sm">Modal Normal</button>
+                    <button onclick="demoResizableModal()" class="bg-orange-600 text-white px-3 py-2 rounded-lg hover:bg-orange-700 transition-colors text-sm">Redimensionable</button>
+                    <button onclick="demoDraggableModal()" class="bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm">Ventana Arrastrable</button>
+                    <button onclick="demoMultipleWindows()" class="bg-green-600 text-white px-3 py-2 rounded-lg hover:bg-green-700 transition-colors text-sm">Múltiples Ventanas</button>
                   </div>
-                  <p class="text-xs sm:text-sm text-gray-600">Haz clic para ver los modales en acción. El modal redimensionable permite cambiar su tamaño arrastrando desde la esquina inferior derecha (solo en desktop)</p>
+                  <p class="text-xs sm:text-sm text-gray-600">Prueba los diferentes tipos de modales: normal (con overlay), redimensionable, ventanas arrastrables y múltiples ventanas simultáneas</p>
                 </div>
               </div>
             </div>
@@ -1023,7 +1025,7 @@ function openModal() {
         <!-- Características del Modal -->
         <div class="mb-12 sm:mb-16">
           <h3 class="text-xl sm:text-2xl font-bold font-montserrat text-gray-900 mb-4 sm:mb-6 text-center sm:text-left">Por Qué Nuestros Modales Son Especiales</h3>
-          <div class="grid gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-4">
+          <div class="grid gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
             <div class="bg-white p-4 sm:p-6 rounded-lg shadow-sm text-center">
               <div class="text-purple-600 text-2xl mb-3 sm:mb-4">🎭</div>
               <h4 class="font-bold font-montserrat text-purple-800 mb-2 text-sm sm:text-base">Animaciones Sexys</h4>
@@ -1043,6 +1045,16 @@ function openModal() {
               <div class="text-orange-600 text-2xl mb-3 sm:mb-4">↗️</div>
               <h4 class="font-bold font-montserrat text-orange-800 mb-2 text-sm sm:text-base">Redimensionables</h4>
               <p class="text-gray-700 text-xs sm:text-sm font-inter">Arrastra desde la esquina para ajustar el tamaño (solo desktop)</p>
+            </div>
+            <div class="bg-white p-4 sm:p-6 rounded-lg shadow-sm text-center">
+              <div class="text-blue-600 text-2xl mb-3 sm:mb-4">🚀</div>
+              <h4 class="font-bold font-montserrat text-blue-800 mb-2 text-sm sm:text-base">Arrastrables</h4>
+              <p class="text-gray-700 text-xs sm:text-sm font-inter">Muévelos por la pantalla como ventanas reales</p>
+            </div>
+            <div class="bg-white p-4 sm:p-6 rounded-lg shadow-sm text-center">
+              <div class="text-green-600 text-2xl mb-3 sm:mb-4">🪟</div>
+              <h4 class="font-bold font-montserrat text-green-800 mb-2 text-sm sm:text-base">Múltiples Ventanas</h4>
+              <p class="text-gray-700 text-xs sm:text-sm font-inter">Abre varias ventanas simultáneamente como un escritorio</p>
             </div>
           </div>
         </div>
@@ -1242,7 +1254,7 @@ AppRouter.listen((route, params) => {
       <div class="container mx-auto px-4 sm:px-6">
         <div class="text-center mb-8 sm:mb-12">
           <div class="inline-flex items-center bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-medium mb-4">
-            🆕 Nuevo en v2.0.5
+            🆕 Nuevo en v2.0.6
           </div>
           <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold font-montserrat text-gray-900 mb-3 sm:mb-4">Rutas Anidadas 🏗️</h2>
           <p class="text-base sm:text-lg lg:text-xl text-gray-600 max-w-3xl mx-auto px-4 font-inter">Crea aplicaciones complejas con layouts compartidos y navegación jerárquica. Las rutas hijas heredan automáticamente el path del padre.</p>
@@ -1502,6 +1514,26 @@ AppRouter.render(document.getElementById('app'));</code></pre>
                     <td class="py-2 font-mono text-purple-600 text-xs">resizable</td>
                     <td class="py-2">Boolean</td>
                     <td class="py-2">Permite redimensionar arrastrando (solo desktop)</td>
+                  </tr>
+                  <tr class="border-b">
+                    <td class="py-2 font-mono text-purple-600 text-xs">draggable</td>
+                    <td class="py-2">Boolean</td>
+                    <td class="py-2">Permite mover el modal arrastrando desde título</td>
+                  </tr>
+                  <tr class="border-b">
+                    <td class="py-2 font-mono text-purple-600 text-xs">windowMode</td>
+                    <td class="py-2">Boolean</td>
+                    <td class="py-2">Modo ventana: sin overlay, múltiples permitidos</td>
+                  </tr>
+                  <tr class="border-b">
+                    <td class="py-2 font-mono text-purple-600 text-xs">title</td>
+                    <td class="py-2">String</td>
+                    <td class="py-2">Título mostrado en la barra superior (windowMode)</td>
+                  </tr>
+                  <tr class="border-b">
+                    <td class="py-2 font-mono text-purple-600 text-xs">position</td>
+                    <td class="py-2">Object</td>
+                    <td class="py-2">Posición inicial {x, y} para windowMode</td>
                   </tr>
                 </tbody>
               </table>
@@ -1791,7 +1823,7 @@ MiComponente.render(container);</textarea
             <div>
               <h4 class="font-bold font-montserrat mb-4">Los Números</h4>
               <ul class="space-y-2 text-purple-200 font-inter">
-                <li>Versión 2.0.5 (la buena)</li>
+                <li>Versión 2.0.6 (la buena)</li>
                 <li>Solo ~15KB (ligero como una pluma)</li>
                 <li>ES6+ Compatible (modernito)</li>
                 <li>Zero Dependencies (independiente)</li>
@@ -1960,6 +1992,102 @@ MiComponente.render(container);</textarea
           },
           hideWhenClickOverlay: true,
           resizable: true,
+        });
+      }
+
+      // Demo de modal arrastrable
+      function demoDraggableModal() {
+        ScopeJS.Modal({
+          controller: class {
+            constructor() {
+              this.title = "Ventana Arrastrable";
+              this.content = "Esta ventana se puede mover arrastrando desde la barra de título. No tiene overlay, así que puedes interactuar con el fondo.";
+
+              this.closeModal = () => {
+                this.close();
+              };
+            }
+          },
+          render() {
+            return `
+              <div>
+                <p class="mb-4">${this.content}</p>
+                <div class="bg-blue-50 border border-blue-200 rounded p-4 mb-4">
+                  <p class="text-sm text-blue-800">
+                    💡 <strong>Tip:</strong> Arrastra desde la barra de título para mover la ventana. 
+                    Haz clic en cualquier parte para traerla al frente.
+                  </p>
+                </div>
+                <button onclick="closeModal()" 
+                        class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                  Cerrar
+                </button>
+              </div>
+            `;
+          },
+          windowMode: true,
+          title: "Mi Ventana Arrastrable",
+          draggable: true,
+        });
+      }
+
+      // Demo de múltiples ventanas
+      let windowCounter = 1;
+      function demoMultipleWindows() {
+        const colors = ['bg-red-600', 'bg-green-600', 'bg-blue-600', 'bg-purple-600', 'bg-pink-600'];
+        const colorClasses = ['red', 'green', 'blue', 'purple', 'pink'];
+        const randomColor = Math.floor(Math.random() * colors.length);
+        
+        ScopeJS.Modal({
+          controller: class {
+            constructor() {
+              this.windowNumber = windowCounter++;
+              this.title = `Ventana #${this.windowNumber}`;
+              this.content = `Esta es la ventana número ${this.windowNumber}. Puedes abrir múltiples ventanas y moverlas independientemente.`;
+
+              this.closeModal = () => {
+                this.close();
+              };
+
+              this.openAnother = () => {
+                demoMultipleWindows();
+              };
+            }
+          },
+          render() {
+            return `
+              <div>
+                <p class="mb-4">${this.content}</p>
+                <div class="bg-gray-50 border border-gray-200 rounded p-4 mb-4">
+                  <p class="text-sm text-gray-700">
+                    🪟 <strong>Funcionalidades:</strong><br>
+                    • Arrastra desde el título para mover<br>
+                    • Redimensiona desde la esquina<br>
+                    • Clic para traer al frente<br>
+                    • Sin límite de ventanas abiertas
+                  </p>
+                </div>
+                <div class="flex gap-2">
+                  <button onclick="openAnother()" 
+                          class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 text-sm">
+                    Abrir Otra
+                  </button>
+                  <button onclick="closeModal()" 
+                          class="${colors[randomColor]} text-white px-4 py-2 rounded hover:${colors[randomColor].replace('600', '700')} text-sm">
+                    Cerrar Esta
+                  </button>
+                </div>
+              </div>
+            `;
+          },
+          windowMode: true,
+          title: `Ventana #${windowCounter - 1}`,
+          draggable: true,
+          resizable: true,
+          position: { 
+            x: 100 + (windowCounter - 1) * 30, 
+            y: 100 + (windowCounter - 1) * 30 
+          }
         });
       }
 
