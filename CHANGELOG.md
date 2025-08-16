@@ -5,9 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.0.6] - 2025-01-16
+## [2.0.7] - 2025-01-16
 
 ### Added
+
 - **Modales Arrastrables**: Sistema completo de ventanas movibles con barra de título
   - Parámetro `draggable: true` para hacer modales arrastrables desde la barra de título
   - Restricciones automáticas de viewport (no se salen de pantalla)
@@ -30,6 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Botón de cerrar integrado con efectos hover
 
 ### Enhanced
+
 - Modal system mejorado con compatibilidad total hacia atrás
 - Gestión inteligente de overlays (tradicional vs modo ventana)
 - Sistema de cleanup automático para event listeners de drag
@@ -37,11 +39,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Documentación interactiva con 4 tipos diferentes de demos
 
 ### Fixed
+
 - Compatibilidad mejorada entre `hideWhenClickOverlay` y modo ventana
 - Cleanup adecuado de event listeners al cerrar ventanas arrastrables
 - Gestión correcta de memoria para múltiples modales simultáneos
 
 ### Technical
+
 - Funciones `setupModalDrag()` y `bringModalToFront()` para gestión de movimiento
 - Map global `activeModals` para tracking de ventanas abiertas
 - Sistema de z-index incremental con `modalZIndex` global
@@ -49,6 +53,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Event handlers optimizados para prevenir interferencias entre funcionalidades
 
 ### Browser Compatibility
+
 - Funcionalidad de arrastre compatible con todos los navegadores modernos
 - Restricciones de viewport que respetan diferentes tamaños de pantalla
 - Detección automática de mobile para deshabilitar drag en dispositivos táctiles
@@ -56,6 +61,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.0.5] - 2025-01-16
 
 ### Added
+
 - **Rutas Anidadas**: Sistema completo de rutas jerárquicas para aplicaciones complejas
   - Herencia automática de paths padre a hijos (`/admin` + `/usuarios` = `/admin/usuarios`)
   - Soporte para `<router-outlet></router-outlet>` en componentes padre
@@ -69,17 +75,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Sección dedicada en index.html con demostración funcional
 
 ### Enhanced
+
 - Router mejorado con soporte para estructuras jerárquicas complejas
 - Renderizado inteligente que detecta automáticamente layouts padre/hijo
 - Mejor manejo de la destrucción de componentes anidados
 - Documentación actualizada con ejemplos prácticos de uso
 
 ### Fixed
+
 - Compatibilidad mejorada entre instancias de componentes y configuraciones
 - Mejor manejo de rutas padre accedidas directamente
 - Limpieza adecuada de componentes padre e hijos al navegar
 
 ### Technical
+
 - Función `flattenRoutes()` para aplanar rutas jerárquicas
 - Lógica de renderizado padre/hijo con detección de `<router-outlet>`
 - Sistema de cleanup automático para componentes anidados
@@ -88,6 +97,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.0.4] - 2025-01-15
 
 ### Added
+
 - Framework JavaScript ligero para desarrollo basado en componentes
 - Sistema de componentes reactivos con renderizado quirúrgico
 - Router SPA con soporte para rutas dinámicas
@@ -100,6 +110,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - TypeScript definitions incluidas
 
 ### Features
+
 - Componentes encapsulados con estado reactivo
 - CSS scoped por componente
 - Sistema de eventos inteligente con parsing de parámetros
@@ -110,6 +121,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Ejemplos interactivos en index.html
 
 ### Browser Support
+
 - Chrome 60+
 - Firefox 55+
 - Safari 11+
@@ -117,6 +129,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Navegadores móviles modernos
 
 ### Package
+
 - Tamaño: ~15KB sin minificar
 - Licencia: Apache-2.0
 - Disponible en NPM como `@pablotheblink/scopejs`

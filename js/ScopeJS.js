@@ -1,5 +1,5 @@
 /**
- * ScopeJS V2.0.6 - Optimized & Refactored
+ * ScopeJS V2.0.7 - Optimized & Refactored
  * A lightweight JavaScript framework for component-based development
  * Supports both ES6 modules and global script usage
  */
@@ -574,9 +574,7 @@
    * @returns {boolean} - True if mobile device
    */
   function isMobileDevice() {
-    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
-           (typeof window.orientation !== "undefined") ||
-           window.innerWidth <= 768;
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || typeof window.orientation !== "undefined" || window.innerWidth <= 768;
   }
 
   /**
@@ -599,63 +597,63 @@
 
     function onMouseDown(e) {
       // Only start dragging if clicking on title bar, not close button
-      if (e.target.classList.contains('modal-close-btn')) return;
-      
+      if (e.target.classList.contains("modal-close-btn")) return;
+
       isDragging = true;
       startX = e.clientX;
       startY = e.clientY;
-      
+
       const rect = modal.getBoundingClientRect();
       initialLeft = rect.left;
       initialTop = rect.top;
-      
+
       // Bring to front when starting to drag
       bringModalToFront(modal);
-      
+
       // Prevent text selection during drag
-      document.body.style.userSelect = 'none';
-      
+      document.body.style.userSelect = "none";
+
       e.preventDefault();
     }
 
     function onMouseMove(e) {
       if (!isDragging) return;
-      
+
       const deltaX = e.clientX - startX;
       const deltaY = e.clientY - startY;
-      
+
       let newLeft = initialLeft + deltaX;
       let newTop = initialTop + deltaY;
-      
+
       // Keep modal within viewport bounds
       const modalRect = modal.getBoundingClientRect();
       const viewportWidth = window.innerWidth;
       const viewportHeight = window.innerHeight;
-      
+
       newLeft = Math.max(0, Math.min(newLeft, viewportWidth - modalRect.width));
       newTop = Math.max(0, Math.min(newTop, viewportHeight - modalRect.height));
-      
-      modal.style.left = newLeft + 'px';
-      modal.style.top = newTop + 'px';
-      modal.style.transform = 'none';
+
+      modal.style.left = newLeft + "px";
+      modal.style.top = newTop + "px";
+      modal.style.transform = "none";
     }
 
     function onMouseUp() {
       if (!isDragging) return;
-      
+
       isDragging = false;
-      document.body.style.userSelect = '';
+      document.body.style.userSelect = "";
     }
 
-    titleBar.addEventListener('mousedown', onMouseDown);
-    document.addEventListener('mousemove', onMouseMove);
-    document.addEventListener('mouseup', onMouseUp);
-    
+    titleBar.addEventListener("mousedown", onMouseDown);
+    document.addEventListener("mousemove", onMouseMove);
+    document.addEventListener("mouseup", onMouseUp);
+
     // Cleanup function
     modal._dragCleanup = () => {
-      titleBar.removeEventListener('mousedown', onMouseDown);
-      document.removeEventListener('mousemove', onMouseMove);
-      document.removeEventListener('mouseup', onMouseUp);
+      titleBar.removeEventListener("mousedown", onMouseDown);
+      document.removeEventListener("mousemove", onMouseMove);
+      document.removeEventListener("mouseup", onMouseUp);
     };
   }
 
@@ -672,51 +670,51 @@
       isResizing = true;
       startX = e.clientX;
       startY = e.clientY;
-      startWidth = parseInt(window.getComputedStyle(modal, null).getPropertyValue('width'), 10);
-      startHeight = parseInt(window.getComputedStyle(modal, null).getPropertyValue('height'), 10);
-      
+      startWidth = parseInt(window.getComputedStyle(modal, null).getPropertyValue("width"), 10);
+      startHeight = parseInt(window.getComputedStyle(modal, null).getPropertyValue("height"), 10);
+
       // Prevent text selection during resize
-      document.body.style.userSelect = 'none';
-      document.body.style.cursor = 'nw-resize';
-      
+      document.body.style.userSelect = "none";
+      document.body.style.cursor = "nw-resize";
+
       e.preventDefault();
     }
 
     function onMouseMove(e) {
       if (!isResizing) return;
-      
+
       const width = startWidth + (e.clientX - startX);
       const height = startHeight + (e.clientY - startY);
-      
+
       // Apply minimum size constraints
       const minWidth = 300;
       const minHeight = 200;
-      
+
       if (width > minWidth) {
-        modal.style.width = width + 'px';
+        modal.style.width = width + "px";
       }
       if (height > minHeight) {
-        modal.style.height = height + 'px';
+        modal.style.height = height + "px";
       }
     }
 
     function onMouseUp() {
       if (!isResizing) return;
-      
+
       isResizing = false;
-      document.body.style.userSelect = '';
-      document.body.style.cursor = '';
+      document.body.style.userSelect = "";
+      document.body.style.cursor = "";
     }
 
-    resizeHandle.addEventListener('mousedown', onMouseDown);
-    document.addEventListener('mousemove', onMouseMove);
-    document.addEventListener('mouseup', onMouseUp);
-    
+    resizeHandle.addEventListener("mousedown", onMouseDown);
+    document.addEventListener("mousemove", onMouseMove);
+    document.addEventListener("mouseup", onMouseUp);
+
     // Cleanup function for when modal is destroyed
     modal._resizeCleanup = () => {
-      resizeHandle.removeEventListener('mousedown', onMouseDown);
-      document.removeEventListener('mousemove', onMouseMove);
-      document.removeEventListener('mouseup', onMouseUp);
+      resizeHandle.removeEventListener("mousedown", onMouseDown);
+      document.removeEventListener("mousemove", onMouseMove);
+      document.removeEventListener("mouseup", onMouseUp);
     };
   }
 
@@ -727,22 +725,13 @@
    * @param {Object} events - Event handlers for the modal
    */
   function Modal(options, params = {}, events = {}) {
-    const { 
-      controller, 
-      render, 
-      hideWhenClickOverlay, 
-      className, 
-      referrer, 
-      resizable = false,
-      draggable = false,
-      windowMode = false,
-      title = "",
-      position = null
-    } = options;
+    const { controller, render, hideWhenClickOverlay, className, referrer, resizable = false, draggable = false, windowMode = false, title = "", position = null } = options;
 
     const component = Component({ controller, render });
     const modalId = generateUUID();
-    let modal, titleBar, overlay = null;
+    let modal,
+      titleBar,
+      overlay = null;
 
     // Create modal container
     if (windowMode || draggable) {
@@ -750,37 +739,37 @@
       modal = document.createElement("div");
       modal.setAttribute("style", MODAL_STYLES.WINDOW_MODAL);
       modal.classList.add("modal-window");
-      
+
       // Set initial z-index and register
       modalZIndex += 1;
       modal.style.zIndex = modalZIndex;
       activeModals.set(modalId, modal);
-      
+
       // Create title bar if title provided or draggable enabled
       if (title || draggable) {
         titleBar = document.createElement("div");
         titleBar.setAttribute("style", MODAL_STYLES.TITLE_BAR);
         titleBar.classList.add("modal-title-bar");
-        
+
         const titleText = document.createElement("span");
         titleText.textContent = title || "Ventana";
         titleBar.appendChild(titleText);
-        
+
         const closeButton = document.createElement("button");
         closeButton.setAttribute("style", MODAL_STYLES.CLOSE_BUTTON);
         closeButton.classList.add("modal-close-btn");
         closeButton.innerHTML = "×";
         closeButton.title = "Cerrar";
         titleBar.appendChild(closeButton);
-        
+
         modal.appendChild(titleBar);
-        
+
         // Setup drag functionality
         if (draggable || windowMode) {
           setupModalDrag(modal, titleBar);
         }
       }
-      
+
       // Position window modal
       if (position) {
         modal.style.left = position.x + "px";
@@ -793,19 +782,18 @@
         modal.style.transform = "none";
       } else {
         // Center initially, but can be moved
-        const centerX = (window.innerWidth - 400) / 2 + (activeModals.size * 30);
-        const centerY = (window.innerHeight - 300) / 2 + (activeModals.size * 30);
+        const centerX = (window.innerWidth - 400) / 2 + activeModals.size * 30;
+        const centerY = (window.innerHeight - 300) / 2 + activeModals.size * 30;
         modal.style.left = centerX + "px";
         modal.style.top = centerY + "px";
         modal.style.transform = "none";
       }
-      
     } else {
       // Traditional modal mode
       modal = document.createElement("div");
       modal.setAttribute("style", MODAL_STYLES.MODAL);
       modal.classList.add("modal");
-      
+
       // Position modal relative to referrer or center
       if (referrer) {
         const pos = referrer.getBoundingClientRect();
@@ -826,12 +814,12 @@
       modal.style.resize = "none"; // Disable default browser resize
       modal.style.minWidth = "300px";
       modal.style.minHeight = "200px";
-      
+
       // Create resize handle
       resizeHandle = document.createElement("div");
       resizeHandle.setAttribute("style", MODAL_STYLES.RESIZE_HANDLE);
       resizeHandle.classList.add("modal-resize-handle");
-      
+
       // Add resize functionality
       setupModalResize(modal, resizeHandle);
     }
@@ -891,11 +879,11 @@
 
     // Setup close button click handler for window mode
     if (titleBar) {
-      const closeButton = titleBar.querySelector('.modal-close-btn');
+      const closeButton = titleBar.querySelector(".modal-close-btn");
       if (closeButton) {
         closeButton.onclick = close;
-        closeButton.onmouseover = () => closeButton.style.backgroundColor = 'rgba(255,255,255,0.3)';
-        closeButton.onmouseout = () => closeButton.style.backgroundColor = 'rgba(255,255,255,0.2)';
+        closeButton.onmouseover = () => (closeButton.style.backgroundColor = "rgba(255,255,255,0.3)");
+        closeButton.onmouseout = () => (closeButton.style.backgroundColor = "rgba(255,255,255,0.2)");
       }
     }
 
@@ -903,10 +891,9 @@
     if (windowMode || draggable) {
       // Window mode: no overlay, direct append
       document.body.appendChild(modal);
-      
+
       // Bring to front when clicked
       modal.onclick = () => bringModalToFront(modal);
-      
     } else {
       // Traditional modal mode: with overlay
       overlay = document.createElement("div");
@@ -992,27 +979,27 @@
      */
     flattenRoutes(routes, parentPath = "") {
       const flattened = [];
-      
-      routes.forEach(route => {
+
+      routes.forEach((route) => {
         const fullPath = parentPath + route.path;
         const flatRoute = {
           ...route,
           path: fullPath,
           originalPath: route.path,
           parentPath: parentPath,
-          hasChildren: !!(route.children && route.children.length > 0)
+          hasChildren: !!(route.children && route.children.length > 0),
         };
-        
+
         // Add the parent route
         flattened.push(flatRoute);
-        
+
         // Recursively flatten children
         if (route.children) {
           const childRoutes = this.flattenRoutes(route.children, fullPath);
           flattened.push(...childRoutes);
         }
       });
-      
+
       return flattened;
     }
 
@@ -1110,10 +1097,8 @@
      */
     findParentRoute(route) {
       if (!route.parentPath) return null;
-      
-      return this.flatRoutes.find(r => 
-        r.path === route.parentPath && r.hasChildren
-      );
+
+      return this.flatRoutes.find((r) => r.path === route.parentPath && r.hasChildren);
     }
 
     renderRoute(route) {
@@ -1126,25 +1111,25 @@
 
       const renderComponent = () => {
         this.alias = this.resolveAlias(route.alias);
-        
+
         const parentRoute = this.findParentRoute(route);
-        
+
         if (parentRoute) {
           // Render parent component first
-          if (parentRoute.controller && typeof parentRoute.controller.render === 'function') {
-            this.current_parent_component = parentRoute.controller.render(this.container);
+          if (parentRoute.controller && typeof parentRoute.controller.render === "function") {
+            this.current_parent_component = Component(parentRoute.controller).render(this.container);
           } else {
             this.current_parent_component = Component({
               ...parentRoute.controller,
               router: this,
             }).render(this.container);
           }
-          
+
           // Find router-outlet in parent component
-          const outlet = this.container.querySelector('router-outlet');
+          const outlet = this.container.querySelector("router-outlet");
           if (outlet) {
             // Render child component in outlet
-            if (route.controller && typeof route.controller.render === 'function') {
+            if (route.controller && typeof route.controller.render === "function") {
               this.current_component = route.controller.render(outlet);
             } else {
               this.current_component = Component({
@@ -1153,10 +1138,10 @@
               }).render(outlet);
             }
           } else {
-            console.warn('Parent component must include <router-outlet></router-outlet> to render child routes');
+            console.warn("Parent component must include <router-outlet></router-outlet> to render child routes");
             // Fallback: render child in main container
-            if (route.controller && typeof route.controller.render === 'function') {
-              this.current_component = route.controller.render(this.container);
+            if (route.controller && typeof route.controller.render === "function") {
+              this.current_component = Component(route.controller).render(this.container);
             } else {
               this.current_component = Component({
                 ...route.controller,
@@ -1166,25 +1151,25 @@
           }
         } else if (route.hasChildren) {
           // This is a parent route accessed directly - render with empty outlet
-          if (route.controller && typeof route.controller.render === 'function') {
-            this.current_component = route.controller.render(this.container);
+          if (route.controller && typeof route.controller.render === "function") {
+            this.current_component = Component(route.controller).render(this.container);
           } else {
             this.current_component = Component({
               ...route.controller,
               router: this,
             }).render(this.container);
           }
-          
+
           // Find router-outlet and show default message
-          const outlet = this.container.querySelector('router-outlet');
+          const outlet = this.container.querySelector("router-outlet");
           if (outlet) {
             outlet.innerHTML = '<div style="padding: 20px; text-align: center; color: #666;">Select an option from the navigation</div>';
           }
         } else {
           // Render standalone component
-          if (route.controller && typeof route.controller.render === 'function') {
+          if (route.controller && typeof route.controller.render === "function") {
             // It's already a component instance
-            this.current_component = route.controller.render(this.container);
+            this.current_component = Component(route.controller).render(this.container);
           } else {
             // It's a component configuration
             this.current_component = Component({
@@ -1233,7 +1218,7 @@
      * @returns {Array} - Child routes
      */
     getChildRoutes(parentPath) {
-      return this.flatRoutes.filter(route => route.parentPath === parentPath);
+      return this.flatRoutes.filter((route) => route.parentPath === parentPath);
     }
 
     notifyListeners() {

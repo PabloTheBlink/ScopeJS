@@ -31,26 +31,29 @@ const router = Router(
 );
 
 // 3b. Router con rutas anidadas (NUEVO EN v2.0.5)
-const nestedRouter = Router([
-  {
-    path: "/admin",
-    controller: AdminLayoutController, // Layout padre con <router-outlet>
-    children: [
-      {
-        path: "/dashboard",    // Se convierte en "/admin/dashboard"
-        controller: DashboardController
-      },
-      {
-        path: "/users",       // Se convierte en "/admin/users"
-        controller: UsersController
-      },
-      {
-        path: "/users/:id",   // Se convierte en "/admin/users/:id"
-        controller: UserDetailController
-      }
-    ]
-  }
-], { useHash: true });
+const nestedRouter = Router(
+  [
+    {
+      path: "/admin",
+      controller: AdminLayoutController, // Layout padre con <router-outlet>
+      children: [
+        {
+          path: "/dashboard", // Se convierte en "/admin/dashboard"
+          controller: DashboardController,
+        },
+        {
+          path: "/users", // Se convierte en "/admin/users"
+          controller: UsersController,
+        },
+        {
+          path: "/users/:id", // Se convierte en "/admin/users/:id"
+          controller: UserDetailController,
+        },
+      ],
+    },
+  ],
+  { useHash: true }
+);
 
 // 4. Navegación
 router.navigate("/projects/123");
@@ -282,7 +285,7 @@ function Router(routes = [], config = {}) {
     },
 
     getChildRoutes: function (parentPath) {
-      return this.flatRoutes.filter(route => route.parentPath === parentPath);
+      return this.flatRoutes.filter((route) => route.parentPath === parentPath);
     },
 
     render: function (container) {
@@ -338,8 +341,8 @@ function Router(routes = [], config = {}) {
 
       if (parentRoute) {
         // Renderizar componente padre primero
-        if (parentRoute.controller && typeof parentRoute.controller.render === 'function') {
-          this.current_parent_component = parentRoute.controller.render(this.container);
+        if (parentRoute.controller && typeof parentRoute.controller.render === "function") {
+          this.current_parent_component = Component(parentRoute.controller).render(this.container);
         } else {
           this.current_parent_component = Component({
             ...parentRoute.controller,
@@ -348,10 +351,10 @@ function Router(routes = [], config = {}) {
         }
 
         // Buscar router-outlet en el componente padre
-        const outlet = this.container.querySelector('router-outlet');
+        const outlet = this.container.querySelector("router-outlet");
         if (outlet) {
           // Renderizar componente hijo en el outlet
-          if (route.controller && typeof route.controller.render === 'function') {
+          if (route.controller && typeof route.controller.render === "function") {
             this.current_component = route.controller.render(outlet);
           } else {
             this.current_component = Component({
@@ -362,8 +365,8 @@ function Router(routes = [], config = {}) {
         }
       } else if (route.hasChildren) {
         // Es una ruta padre accedida directamente
-        if (route.controller && typeof route.controller.render === 'function') {
-          this.current_component = route.controller.render(this.container);
+        if (route.controller && typeof route.controller.render === "function") {
+          this.current_component = Component(route.controller).render(this.container);
         } else {
           this.current_component = Component({
             ...route.controller,
@@ -372,8 +375,8 @@ function Router(routes = [], config = {}) {
         }
       } else {
         // Renderizar componente independiente
-        if (route.controller && typeof route.controller.render === 'function') {
-          this.current_component = route.controller.render(this.container);
+        if (route.controller && typeof route.controller.render === "function") {
+          this.current_component = Component(route.controller).render(this.container);
         } else {
           this.current_component = Component({
             ...route.controller,
@@ -385,7 +388,7 @@ function Router(routes = [], config = {}) {
 
     findParentRoute: function (route) {
       if (!route.parentPath) return null;
-      return this.flatRoutes.find(r => r.path === route.parentPath && r.hasChildren);
+      return this.flatRoutes.find((r) => r.path === route.parentPath && r.hasChildren);
     },
 
     destroyComponent: function (component) {
@@ -396,7 +399,7 @@ function Router(routes = [], config = {}) {
     renderErrorPage: function () {
       const errorConfig = this.config.error;
       this.current_component = Component(errorConfig ? { ...errorConfig.controller, router: this } : { render: () => "404" }).render(this.container);
-    }
+    },
   };
 
   // Event listener para popstate
@@ -408,27 +411,27 @@ function Router(routes = [], config = {}) {
 // Función para aplanar rutas anidadas
 function flattenRoutes(routes, parentPath = "") {
   const flattened = [];
-  
-  routes.forEach(route => {
+
+  routes.forEach((route) => {
     const fullPath = parentPath + route.path;
     const flatRoute = {
       ...route,
       path: fullPath,
       originalPath: route.path,
       parentPath: parentPath,
-      hasChildren: !!(route.children && route.children.length > 0)
+      hasChildren: !!(route.children && route.children.length > 0),
     };
-    
+
     // Agregar la ruta padre
     flattened.push(flatRoute);
-    
+
     // Aplanar recursivamente las rutas hijas
     if (route.children) {
       const childRoutes = flattenRoutes(route.children, fullPath);
       flattened.push(...childRoutes);
     }
   });
-  
+
   return flattened;
 }
 
@@ -559,21 +562,21 @@ const nestedRouter = Router([
   {
     path: "/admin",
     controller: {
-      render: function() {
+      render: function () {
         return `<div><h1>Admin</h1><router-outlet></router-outlet></div>`;
-      }
+      },
     },
     children: [
       {
         path: "/users",
-        controller: { render: () => "Users List" }
+        controller: { render: () => "Users List" },
       },
       {
         path: "/users/:id",
-        controller: { render: () => "User Detail" }
-      }
-    ]
-  }
+        controller: { render: () => "User Detail" },
+      },
+    ],
+  },
 ]);
 
 nestedRouter.navigate("/admin/users/456");
@@ -603,35 +606,39 @@ Modal(
 ## NUEVAS FUNCIONALIDADES (v2.0.5)
 
 ### RUTAS ANIDADAS
+
 - **Herencia de paths**: Las rutas hijas heredan automáticamente el path del padre
 - **Router Outlet**: Usa `<router-outlet></router-outlet>` en componentes padre
 - **Layouts compartidos**: Mantén navegación y estilos consistentes
 - **Métodos adicionales**: `getAllRoutes()` y `getChildRoutes(parentPath)`
 
 ### ESTRUCTURA DE RUTAS ANIDADAS
+
 ```javascript
 const routes = [
   {
-    path: "/admin",           // Ruta padre
-    controller: AdminLayout,  // Debe contener <router-outlet>
-    children: [               // Rutas hijas
+    path: "/admin", // Ruta padre
+    controller: AdminLayout, // Debe contener <router-outlet>
+    children: [
+      // Rutas hijas
       {
-        path: "/dashboard",   // = "/admin/dashboard"
-        controller: Dashboard
+        path: "/dashboard", // = "/admin/dashboard"
+        controller: Dashboard,
       },
       {
-        path: "/users/:id",   // = "/admin/users/:id"
-        controller: UserDetail
-      }
-    ]
-  }
+        path: "/users/:id", // = "/admin/users/:id"
+        controller: UserDetail,
+      },
+    ],
+  },
 ];
 ```
 
 ### COMPONENTE PADRE CON ROUTER-OUTLET
+
 ```javascript
 const AdminLayout = {
-  render: function() {
+  render: function () {
     return `
       <div class="admin-layout">
         <nav>...</nav>
@@ -640,7 +647,7 @@ const AdminLayout = {
         </main>
       </div>
     `;
-  }
+  },
 };
 ```
 

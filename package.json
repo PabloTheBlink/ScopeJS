@@ -1,6 +1,6 @@
 {
   "name": "@pablotheblink/scopejs",
-  "version": "2.0.6",
+  "version": "2.0.7",
   "description": "A lightweight JavaScript framework for component-based development. Supports both ES6 modules and global script usage with reactive components, modals, and SPA routing.",
   "main": "js/ScopeJS.js",
   "module": "js/ScopeJS.js",
