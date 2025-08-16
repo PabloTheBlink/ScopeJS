@@ -1,9 +1,9 @@
-# ScopeJS v2.0.4 - El Framework que te va a enamorar 💜
+# ScopeJS v2.0.5 - El Framework que te va a enamorar 💜
 
 > Un framework JavaScript ligero y moderno para desarrollo basado en componentes. Diseñado para ser simple, eficiente y poderoso.
 
-[![Versión](https://img.shields.io/badge/versión-2.0.4-purple)](https://github.com/pablotheblink/ScopeJS)
-[![Tamaño](https://img.shields.io/badge/tamaño-~15KB-green)](https://unpkg.com/@pablotheblink/scopejs@2.0.4/js/ScopeJS.js)
+[![Versión](https://img.shields.io/badge/versión-2.0.5-purple)](https://github.com/pablotheblink/ScopeJS)
+[![Tamaño](https://img.shields.io/badge/tamaño-~15KB-green)](https://unpkg.com/@pablotheblink/scopejs@2.0.5/js/ScopeJS.js)
 [![Licencia](https://img.shields.io/badge/licencia-Apache-blue)](LICENSE)
 
 ## 🚀 Características Principales
@@ -24,7 +24,7 @@
 
 ```html
 <!-- En el <head> de tu HTML -->
-<script src="https://unpkg.com/@pablotheblink/scopejs@2.0.4/js/ScopeJS.js"></script>
+<script src="https://unpkg.com/@pablotheblink/scopejs@2.0.5/js/ScopeJS.js"></script>
 
 <script>
   // Las funciones están disponibles globalmente
@@ -52,7 +52,7 @@
 ```html
 <!-- En el <head> de tu HTML -->
 <script type="module">
-  import { Component, Modal, Router } from "https://unpkg.com/@pablotheblink/scopejs@2.0.4/js/ScopeJS.js";
+  import { Component, Modal, Router } from "https://unpkg.com/@pablotheblink/scopejs@2.0.5/js/ScopeJS.js";
 
   const MiComponente = Component({
     controller: class {
@@ -309,7 +309,9 @@ function openUserModal() {
 
 ## 🛣️ Router para SPAs
 
-Sistema de navegación que funciona como debe:
+Sistema de navegación que funciona como debe, con soporte para **rutas anidadas**:
+
+### Rutas Básicas
 
 ```javascript
 import { Router, Component } from "@pablotheblink/scopejs";
@@ -372,16 +374,16 @@ const UserProfile = Component({
 const AppRouter = Router([
   {
     path: "/",
-    component: HomePage,
+    controller: HomePage,
     alias: "inicio",
   },
   {
     path: "/usuario/:id",
-    component: UserProfile,
+    controller: UserProfile,
     alias: "perfil-usuario",
-    middleware: (params, next) => {
+    middleware: (next) => {
       // Validar que el ID sea un número
-      if (isNaN(params.id)) {
+      if (isNaN(this.params.id)) {
         alert("ID de usuario inválido");
         return false;
       }
@@ -398,9 +400,209 @@ AppRouter.render(container);
 AppRouter.navigate("/usuario/123");
 
 // Escuchar cambios de ruta
-AppRouter.listen((route, params) => {
-  console.log("Navegando a:", route, "Parámetros:", params);
+AppRouter.listen((params) => {
+  console.log("Navegando a:", this.path, "Parámetros:", params);
 });
+```
+
+### 🏗️ Rutas Anidadas (Nuevo en v2.0.5)
+
+Crea rutas jerárquicas donde las rutas hijas heredan el path del padre:
+
+```javascript
+import { Router, Component } from "@pablotheblink/scopejs";
+
+// Componente Layout Principal
+const AdminLayout = Component({
+  controller: class {
+    constructor() {
+      this.title = "Panel de Administración";
+    }
+  },
+  
+  render() {
+    return `
+      <div class="admin-layout">
+        <nav class="navbar">
+          <h2>🛡️ ${this.title}</h2>
+          <div class="nav-links">
+            <a href="#/admin/dashboard">📊 Dashboard</a>
+            <a href="#/admin/usuarios">👥 Usuarios</a>
+            <a href="#/admin/productos">📦 Productos</a>
+            <a href="#/admin/configuracion">⚙️ Config</a>
+          </div>
+        </nav>
+        
+        <main class="content">
+          <!-- Aquí se renderizan las rutas hijas -->
+          <router-outlet></router-outlet>
+        </main>
+      </div>
+    `;
+  }
+});
+
+// Componentes Hijos
+const Dashboard = Component({
+  controller: class {
+    constructor() {
+      this.stats = { users: 150, products: 45, orders: 89 };
+    }
+  },
+  render() {
+    return `
+      <div>
+        <h3>📊 Dashboard</h3>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <h4>👥 Usuarios</h4>
+            <p>${this.stats.users}</p>
+          </div>
+          <div class="stat-card">
+            <h4>📦 Productos</h4>
+            <p>${this.stats.products}</p>
+          </div>
+          <div class="stat-card">
+            <h4>🛒 Pedidos</h4>
+            <p>${this.stats.orders}</p>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+});
+
+const UsersList = Component({
+  controller: class {
+    constructor() {
+      this.users = [
+        { id: 1, name: "Juan Pérez", email: "juan@example.com" },
+        { id: 2, name: "María García", email: "maria@example.com" }
+      ];
+    }
+    
+    viewUser(userId) {
+      this.router.navigate(`/admin/usuarios/${userId}`);
+    }
+  },
+  
+  render() {
+    return `
+      <div>
+        <h3>👥 Gestión de Usuarios</h3>
+        <div class="users-list">
+          ${this.users.map(user => `
+            <div class="user-card">
+              <h4>${user.name}</h4>
+              <p>📧 ${user.email}</p>
+              <button onclick="viewUser(${user.id})">👁️ Ver</button>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }
+});
+
+const UserDetail = Component({
+  controller: class {
+    constructor() {
+      this.user = null;
+    }
+    
+    loadUser() {
+      const userId = this.router.params.id;
+      // Simular carga de datos
+      this.user = {
+        id: userId,
+        name: `Usuario ${userId}`,
+        email: `user${userId}@example.com`
+      };
+      this.apply();
+    }
+    
+    goBack() {
+      this.router.navigate('/admin/usuarios');
+    }
+  },
+  
+  postRender() {
+    this.loadUser();
+  },
+  
+  render() {
+    if (!this.user) return '<div>⏳ Cargando...</div>';
+    
+    return `
+      <div>
+        <h3>👤 Detalle del Usuario</h3>
+        <div class="user-detail">
+          <h4>${this.user.name}</h4>
+          <p><strong>📧 Email:</strong> ${this.user.email}</p>
+          <p><strong>🆔 ID:</strong> ${this.user.id}</p>
+        </div>
+        <button onclick="goBack()">⬅️ Volver</button>
+      </div>
+    `;
+  }
+});
+
+// Configuración del Router con Rutas Anidadas
+const routes = [
+  {
+    path: "/",
+    controller: HomePage
+  },
+  {
+    path: "/admin",           // Ruta padre
+    controller: AdminLayout,  // Layout que contiene <router-outlet>
+    children: [               // Rutas hijas que heredan el path padre
+      {
+        path: "/dashboard",   // Se convierte en "/admin/dashboard"
+        controller: Dashboard
+      },
+      {
+        path: "/usuarios",    // Se convierte en "/admin/usuarios"
+        controller: UsersList
+      },
+      {
+        path: "/usuarios/:id", // Se convierte en "/admin/usuarios/:id"
+        controller: UserDetail
+      },
+      {
+        path: "/productos",   // Se convierte en "/admin/productos"
+        controller: ProductsList
+      },
+      {
+        path: "/configuracion", // Se convierte en "/admin/configuracion"
+        controller: Settings
+      }
+    ]
+  }
+];
+
+// Inicializar Router
+const AppRouter = Router(routes, { useHash: true });
+const container = document.getElementById('app');
+AppRouter.render(container);
+```
+
+### 📋 Características de las Rutas Anidadas
+
+- **🔗 Herencia de Paths**: Las rutas hijas heredan automáticamente el path del padre
+- **🎯 Router Outlet**: Usa `<router-outlet></router-outlet>` en el componente padre
+- **📊 Layouts Compartidos**: Mantén navegación y estilos consistentes
+- **🔄 Navegación Fluida**: Cambia solo el contenido del outlet, no todo el layout
+- **📁 Estructura Jerárquica**: Organiza rutas de forma lógica y escalable
+
+### 🔧 Métodos Nuevos del Router
+
+```javascript
+// Obtener todas las rutas (incluidas las anidadas)
+const allRoutes = AppRouter.getAllRoutes();
+
+// Obtener rutas hijas de un padre específico
+const adminChildRoutes = AppRouter.getChildRoutes('/admin');
 ```
 
 ## ⚡ Renderizado Quirúrgico
@@ -592,7 +794,7 @@ const EventExample = Component({
     <title>Mi App con ScopeJS</title>
 
     <!-- Cargar ScopeJS -->
-    <script src="https://unpkg.com/@pablotheblink/scopejs@2.0.4/js/ScopeJS.js"></script>
+    <script src="https://unpkg.com/@pablotheblink/scopejs@2.0.5/js/ScopeJS.js"></script>
   </head>
   <body>
     <div id="app">
@@ -702,7 +904,7 @@ Pablo Martínez - El tipo que pensó que el mundo necesitaba notificaciones más
 
 <div align="center">
 
-**ScopeJS v2.0.4** - El framework JavaScript que no te va a dar dolores de cabeza 😎
+**ScopeJS v2.0.5** - El framework JavaScript que no te va a dar dolores de cabeza 😎
 
 [⬆ Volver arriba](#scopejs-v204---el-framework-que-te-va-a-enamorar-)
 

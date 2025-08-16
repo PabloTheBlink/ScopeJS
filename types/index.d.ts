@@ -32,6 +32,7 @@ export interface RouteConfig {
   controller?: ComponentOptions;
   alias?: string;
   middleware?: (next: () => void) => void;
+  children?: RouteConfig[];
 }
 
 export interface RouterConfig {
@@ -44,17 +45,21 @@ export interface RouterConfig {
 
 export interface RouterInstance {
   routes: RouteConfig[];
+  flatRoutes: RouteConfig[];
   config: RouterConfig;
   params: Record<string, string>;
   alias?: string;
   path?: string;
   body?: any;
   current_component?: ComponentInstance;
+  current_parent_component?: ComponentInstance;
   
   navigate(path: string, body?: any): void;
   listen(callback: (params: Record<string, string>) => void): string;
   unlisten(uuid: string): void;
   render(container?: HTMLElement): void;
+  getAllRoutes(): RouteConfig[];
+  getChildRoutes(parentPath: string): RouteConfig[];
 }
 
 declare global {
@@ -87,9 +92,11 @@ export declare function Router(
 
 export declare function enableDebugger(enabled: boolean): void;
 
-export default {
-  Component,
-  Modal,
-  Router,
-  enableDebugger
+declare const _default: {
+  Component: typeof Component;
+  Modal: typeof Modal;
+  Router: typeof Router;
+  enableDebugger: typeof enableDebugger;
 };
+
+export default _default;

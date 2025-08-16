@@ -1,5 +1,5 @@
 /**
- * ScopeJS V2.0.4 - Optimized & Refactored
+ * ScopeJS V2.0.5 - Optimized & Refactored
  * A lightweight JavaScript framework for component-based development
  * Supports both ES6 modules and global script usage
  */
@@ -669,12 +669,14 @@
   class RouterInstance {
     constructor(routes, config) {
       this.routes = routes;
+      this.flatRoutes = this.flattenRoutes(routes);
       this.config = { useHash: true, ...config };
       this.params = {};
       this.alias = undefined;
       this.path = undefined;
       this.body = undefined;
       this.current_component = undefined;
+      this.current_parent_component = undefined;
       this.listeners = new Map();
       this.container = undefined;
 
@@ -683,6 +685,38 @@
 
     setupEventListeners() {
       window.addEventListener("popstate", () => this.render());
+    }
+
+    /**
+     * Flattens nested routes into a single array with inherited paths
+     * @param {Array} routes - Array of route configurations
+     * @param {string} parentPath - Parent route path
+     * @returns {Array} - Flattened routes array
+     */
+    flattenRoutes(routes, parentPath = "") {
+      const flattened = [];
+      
+      routes.forEach(route => {
+        const fullPath = parentPath + route.path;
+        const flatRoute = {
+          ...route,
+          path: fullPath,
+          originalPath: route.path,
+          parentPath: parentPath,
+          hasChildren: !!(route.children && route.children.length > 0)
+        };
+        
+        // Add the parent route
+        flattened.push(flatRoute);
+        
+        // Recursively flatten children
+        if (route.children) {
+          const childRoutes = this.flattenRoutes(route.children, fullPath);
+          flattened.push(...childRoutes);
+        }
+      });
+      
+      return flattened;
     }
 
     navigate(path, body = null) {
@@ -754,12 +788,12 @@
     findMatchingRoute() {
       this.params = {};
 
-      // Try exact match first
-      let route = this.routes.find((r) => r.path === this.path);
+      // Try exact match first in flattened routes
+      let route = this.flatRoutes.find((r) => r.path === this.path);
 
       // Try dynamic match
       if (!route) {
-        for (const r of this.routes) {
+        for (const r of this.flatRoutes) {
           const match = RouteMatcher.match(r.path, this.path);
           if (match) {
             this.params = match.params;
@@ -772,17 +806,96 @@
       return route;
     }
 
+    /**
+     * Finds the parent route for a given route
+     * @param {Object} route - Current route
+     * @returns {Object|null} - Parent route or null
+     */
+    findParentRoute(route) {
+      if (!route.parentPath) return null;
+      
+      return this.flatRoutes.find(r => 
+        r.path === route.parentPath && r.hasChildren
+      );
+    }
+
     renderRoute(route) {
       if (this.current_component) {
         this.destroyComponent(this.current_component);
       }
+      if (this.current_parent_component) {
+        this.destroyComponent(this.current_parent_component);
+      }
 
       const renderComponent = () => {
         this.alias = this.resolveAlias(route.alias);
-        this.current_component = Component({
-          ...route.controller,
-          router: this,
-        }).render(this.container);
+        
+        const parentRoute = this.findParentRoute(route);
+        
+        if (parentRoute) {
+          // Render parent component first
+          if (parentRoute.controller && typeof parentRoute.controller.render === 'function') {
+            this.current_parent_component = parentRoute.controller.render(this.container);
+          } else {
+            this.current_parent_component = Component({
+              ...parentRoute.controller,
+              router: this,
+            }).render(this.container);
+          }
+          
+          // Find router-outlet in parent component
+          const outlet = this.container.querySelector('router-outlet');
+          if (outlet) {
+            // Render child component in outlet
+            if (route.controller && typeof route.controller.render === 'function') {
+              this.current_component = route.controller.render(outlet);
+            } else {
+              this.current_component = Component({
+                ...route.controller,
+                router: this,
+              }).render(outlet);
+            }
+          } else {
+            console.warn('Parent component must include <router-outlet></router-outlet> to render child routes');
+            // Fallback: render child in main container
+            if (route.controller && typeof route.controller.render === 'function') {
+              this.current_component = route.controller.render(this.container);
+            } else {
+              this.current_component = Component({
+                ...route.controller,
+                router: this,
+              }).render(this.container);
+            }
+          }
+        } else if (route.hasChildren) {
+          // This is a parent route accessed directly - render with empty outlet
+          if (route.controller && typeof route.controller.render === 'function') {
+            this.current_component = route.controller.render(this.container);
+          } else {
+            this.current_component = Component({
+              ...route.controller,
+              router: this,
+            }).render(this.container);
+          }
+          
+          // Find router-outlet and show default message
+          const outlet = this.container.querySelector('router-outlet');
+          if (outlet) {
+            outlet.innerHTML = '<div style="padding: 20px; text-align: center; color: #666;">Select an option from the navigation</div>';
+          }
+        } else {
+          // Render standalone component
+          if (route.controller && typeof route.controller.render === 'function') {
+            // It's already a component instance
+            this.current_component = route.controller.render(this.container);
+          } else {
+            // It's a component configuration
+            this.current_component = Component({
+              ...route.controller,
+              router: this,
+            }).render(this.container);
+          }
+        }
       };
 
       if (route.middleware) {
@@ -807,6 +920,23 @@
     destroyComponent(component) {
       component.onDestroy?.();
       component.children?.forEach((child) => this.destroyComponent(child));
+    }
+
+    /**
+     * Gets all routes including nested ones
+     * @returns {Array} - All routes flattened
+     */
+    getAllRoutes() {
+      return this.flatRoutes;
+    }
+
+    /**
+     * Gets routes by parent path
+     * @param {string} parentPath - Parent route path
+     * @returns {Array} - Child routes
+     */
+    getChildRoutes(parentPath) {
+      return this.flatRoutes.filter(route => route.parentPath === parentPath);
     }
 
     notifyListeners() {
@@ -848,15 +978,16 @@
     enableDebugger,
   };
 
+  // ES6 Module exports for modern import syntax (only when used as module)
+  if (typeof module !== "undefined" && module.exports) {
+    // CommonJS
+    ScopeJSExports.Component = Component;
+    ScopeJSExports.Modal = Modal;
+    ScopeJSExports.Router = Router;
+    ScopeJSExports.enableDebugger = enableDebugger;
+    ScopeJSExports.default = ScopeJSExports;
+  }
+
   // Return for UMD wrapper
   return ScopeJSExports;
 });
-
-// ES6 Module exports for modern import syntax
-export const Component = ScopeJS?.Component || (typeof window !== "undefined" && window.Component);
-export const Modal = ScopeJS?.Modal || (typeof window !== "undefined" && window.Modal);
-export const Router = ScopeJS?.Router || (typeof window !== "undefined" && window.Router);
-export const enableDebugger = ScopeJS?.enableDebugger || (typeof window !== "undefined" && window.enableDebugger);
-
-// Default export
-export default typeof ScopeJS !== "undefined" ? ScopeJS : typeof window !== "undefined" ? window.ScopeJS : {};
