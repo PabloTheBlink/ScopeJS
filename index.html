@@ -1008,9 +1008,12 @@ function openModal() {
             <div>
               <h4 class="text-base sm:text-lg font-semibold font-montserrat mb-4">Demo Interactivo</h4>
               <div class="live-preview">
-                <div class="text-center">
-                  <button onclick="demoModal()" class="bg-purple-600 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg hover:bg-purple-700 transition-colors text-sm sm:text-base">Abrir Modal de Ejemplo</button>
-                  <p class="text-xs sm:text-sm text-gray-600 mt-2">Haz clic para ver el modal en acción</p>
+                <div class="text-center space-y-4">
+                  <div>
+                    <button onclick="demoModal()" class="bg-purple-600 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg hover:bg-purple-700 transition-colors text-sm sm:text-base mr-2">Abrir Modal Normal</button>
+                    <button onclick="demoResizableModal()" class="bg-orange-600 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg hover:bg-orange-700 transition-colors text-sm sm:text-base">Modal Redimensionable</button>
+                  </div>
+                  <p class="text-xs sm:text-sm text-gray-600">Haz clic para ver los modales en acción. El modal redimensionable permite cambiar su tamaño arrastrando desde la esquina inferior derecha (solo en desktop)</p>
                 </div>
               </div>
             </div>
@@ -1020,7 +1023,7 @@ function openModal() {
         <!-- Características del Modal -->
         <div class="mb-12 sm:mb-16">
           <h3 class="text-xl sm:text-2xl font-bold font-montserrat text-gray-900 mb-4 sm:mb-6 text-center sm:text-left">Por Qué Nuestros Modales Son Especiales</h3>
-          <div class="grid gap-4 sm:gap-6 md:grid-cols-3">
+          <div class="grid gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-4">
             <div class="bg-white p-4 sm:p-6 rounded-lg shadow-sm text-center">
               <div class="text-purple-600 text-2xl mb-3 sm:mb-4">🎭</div>
               <h4 class="font-bold font-montserrat text-purple-800 mb-2 text-sm sm:text-base">Animaciones Sexys</h4>
@@ -1035,6 +1038,11 @@ function openModal() {
               <div class="text-purple-600 text-2xl mb-3 sm:mb-4">📱</div>
               <h4 class="font-bold font-montserrat text-purple-800 mb-2 text-sm sm:text-base">Mobile-First</h4>
               <p class="text-gray-700 text-xs sm:text-sm font-inter">Se adaptan a cualquier pantalla como un camaleón digital</p>
+            </div>
+            <div class="bg-white p-4 sm:p-6 rounded-lg shadow-sm text-center">
+              <div class="text-orange-600 text-2xl mb-3 sm:mb-4">↗️</div>
+              <h4 class="font-bold font-montserrat text-orange-800 mb-2 text-sm sm:text-base">Redimensionables</h4>
+              <p class="text-gray-700 text-xs sm:text-sm font-inter">Arrastra desde la esquina para ajustar el tamaño (solo desktop)</p>
             </div>
           </div>
         </div>
@@ -1490,6 +1498,11 @@ AppRouter.render(document.getElementById('app'));</code></pre>
                     <td class="py-2">Element</td>
                     <td class="py-2">Elemento de referencia para posición</td>
                   </tr>
+                  <tr class="border-b">
+                    <td class="py-2 font-mono text-purple-600 text-xs">resizable</td>
+                    <td class="py-2">Boolean</td>
+                    <td class="py-2">Permite redimensionar arrastrando (solo desktop)</td>
+                  </tr>
                 </tbody>
               </table>
             </div>
@@ -1911,6 +1924,42 @@ MiComponente.render(container);</textarea
             `;
           },
           hideWhenClickOverlay: true,
+        });
+      }
+
+      // Demo de modal redimensionable
+      function demoResizableModal() {
+        ScopeJS.Modal({
+          controller: class {
+            constructor() {
+              this.title = "Modal Redimensionable";
+              this.content = "Este modal se puede redimensionar arrastrando desde la esquina inferior derecha. Funciona solo en dispositivos de escritorio.";
+
+              this.closeModal = () => {
+                this.close();
+              };
+            }
+          },
+          render() {
+            return `
+              <div class="p-6">
+                <h2 class="text-xl font-bold mb-4">${this.title}</h2>
+                <p class="mb-4">${this.content}</p>
+                <div class="bg-orange-50 border border-orange-200 rounded p-4 mb-4">
+                  <p class="text-sm text-orange-800">
+                    💡 <strong>Tip:</strong> Arrastra desde la esquina inferior derecha para cambiar el tamaño. 
+                    En dispositivos móviles esta funcionalidad se desactiva automáticamente.
+                  </p>
+                </div>
+                <button onclick="closeModal()" 
+                        class="bg-orange-600 text-white px-4 py-2 rounded hover:bg-orange-700">
+                  Cerrar
+                </button>
+              </div>
+            `;
+          },
+          hideWhenClickOverlay: true,
+          resizable: true,
         });
       }
 

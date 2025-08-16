@@ -25,6 +25,7 @@ export interface ModalOptions {
   hideWhenClickOverlay?: boolean;
   className?: string;
   referrer?: HTMLElement;
+  resizable?: boolean;
 }
 
 export interface RouteConfig {

@@ -559,7 +559,79 @@
   const MODAL_STYLES = {
     OVERLAY: "position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 999999999",
     MODAL: "position: fixed; top: 50%; left: 50%; border-radius: 0.25rem; min-width: 20rem; max-width: calc(100% - 2rem); transform: translate(-50%, -50%); background-color: white; color: black; transition: opacity 0.3s, transform 0.3s; z-index: 999999999",
+    RESIZE_HANDLE: "position: absolute; bottom: 0; right: 0; width: 20px; height: 20px; cursor: nw-resize; background: linear-gradient(-45deg, transparent 0%, transparent 40%, #ccc 40%, #ccc 43%, transparent 43%, transparent 46%, #ccc 46%, #ccc 49%, transparent 49%, transparent 52%, #ccc 52%, #ccc 55%, transparent 55%); z-index: 1000000000",
   };
+
+  /**
+   * Detects if the current device is mobile
+   * @returns {boolean} - True if mobile device
+   */
+  function isMobileDevice() {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
+           (typeof window.orientation !== "undefined") ||
+           window.innerWidth <= 768;
+  }
+
+  /**
+   * Sets up resize functionality for a modal
+   * @param {HTMLElement} modal - Modal element
+   * @param {HTMLElement} resizeHandle - Resize handle element
+   */
+  function setupModalResize(modal, resizeHandle) {
+    let isResizing = false;
+    let startX, startY, startWidth, startHeight;
+
+    function onMouseDown(e) {
+      isResizing = true;
+      startX = e.clientX;
+      startY = e.clientY;
+      startWidth = parseInt(window.getComputedStyle(modal, null).getPropertyValue('width'), 10);
+      startHeight = parseInt(window.getComputedStyle(modal, null).getPropertyValue('height'), 10);
+      
+      // Prevent text selection during resize
+      document.body.style.userSelect = 'none';
+      document.body.style.cursor = 'nw-resize';
+      
+      e.preventDefault();
+    }
+
+    function onMouseMove(e) {
+      if (!isResizing) return;
+      
+      const width = startWidth + (e.clientX - startX);
+      const height = startHeight + (e.clientY - startY);
+      
+      // Apply minimum size constraints
+      const minWidth = 300;
+      const minHeight = 200;
+      
+      if (width > minWidth) {
+        modal.style.width = width + 'px';
+      }
+      if (height > minHeight) {
+        modal.style.height = height + 'px';
+      }
+    }
+
+    function onMouseUp() {
+      if (!isResizing) return;
+      
+      isResizing = false;
+      document.body.style.userSelect = '';
+      document.body.style.cursor = '';
+    }
+
+    resizeHandle.addEventListener('mousedown', onMouseDown);
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+    
+    // Cleanup function for when modal is destroyed
+    modal._resizeCleanup = () => {
+      resizeHandle.removeEventListener('mousedown', onMouseDown);
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+    };
+  }
 
   /**
    * Creates and displays a modal in the user interface
@@ -568,7 +640,7 @@
    * @param {Object} events - Event handlers for the modal
    */
   function Modal(options, params = {}, events = {}) {
-    const { controller, render, hideWhenClickOverlay, className, referrer } = options;
+    const { controller, render, hideWhenClickOverlay, className, referrer, resizable = false } = options;
 
     const component = Component({ controller, render });
     const modal = document.createElement("div");
@@ -577,6 +649,22 @@
     modal.setAttribute("style", MODAL_STYLES.MODAL);
     modal.classList.add("modal");
     if (className) modal.classList.add(className);
+
+    // Add resizable functionality if enabled and not on mobile
+    let resizeHandle = null;
+    if (resizable && !isMobileDevice()) {
+      modal.style.resize = "none"; // Disable default browser resize
+      modal.style.minWidth = "300px";
+      modal.style.minHeight = "200px";
+      
+      // Create resize handle
+      resizeHandle = document.createElement("div");
+      resizeHandle.setAttribute("style", MODAL_STYLES.RESIZE_HANDLE);
+      resizeHandle.classList.add("modal-resize-handle");
+      
+      // Add resize functionality
+      setupModalResize(modal, resizeHandle);
+    }
 
     // Position modal relative to referrer or center
     if (referrer) {
@@ -592,6 +680,11 @@
     // Close function
     const close = (...args) => {
       events.onClose?.(...args);
+
+      // Cleanup resize event listeners if resizable
+      if (modal._resizeCleanup) {
+        modal._resizeCleanup();
+      }
 
       if (!referrer) {
         modal.style.opacity = 0;
@@ -611,6 +704,11 @@
     Object.assign(componentInstance, params);
     componentInstance.apply();
     componentInstance.close = close;
+
+    // Add resize handle to modal if resizable
+    if (resizeHandle) {
+      modal.appendChild(resizeHandle);
+    }
 
     // Create overlay
     const overlay = document.createElement("div");
