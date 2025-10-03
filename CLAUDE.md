@@ -55,7 +55,7 @@ const MyComponent = Component({
 ```
 
 **Modal System:**
-- Supports draggable and resizable modals (v2.0.7+)
+- Supports draggable and resizable modals (v2.0.8+)
 - Window mode with title bars
 - Automatic z-index stacking and overlay management
 
