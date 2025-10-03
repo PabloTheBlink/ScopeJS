@@ -3,14 +3,21 @@
  * Modern import/export syntax for ES6 modules
  */
 
-// Import the UMD version
-import ScopeJSUMD from './ScopeJS.js';
+// Load the UMD script and access global exports
+const script = document.createElement('script');
+script.src = './ScopeJS.js';
+document.head.appendChild(script);
 
-// Re-export individual functions
-export const Component = ScopeJSUMD.Component;
-export const Modal = ScopeJSUMD.Modal;
-export const Router = ScopeJSUMD.Router;
-export const enableDebugger = ScopeJSUMD.enableDebugger;
+// Wait for script to load then export
+await new Promise(resolve => {
+  script.onload = resolve;
+});
+
+// Re-export from global scope
+export const Component = window.Component;
+export const Modal = window.Modal;
+export const Router = window.Router;
+export const enableDebugger = window.enableDebugger;
 
 // Default export
-export default ScopeJSUMD;
+export default window.ScopeJS;
